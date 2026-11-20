@@ -28,7 +28,17 @@
   .steer { pointer-events: auto; position: absolute; left: 12px; bottom: 18px; width: 178px; height: 84px; border-radius: 42px; background: linear-gradient(180deg, rgba(20,26,44,.62), rgba(8,11,22,.72)); border: 1.5px solid rgba(255,255,255,.22);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px rgba(0,0,0,.35); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-sizing: border-box; font-size: 20px; color: rgba(255,255,255,.55); touch-action: none; }
   .knob { position: absolute; left: 50%; top: 50%; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #c9d2e6 70%); box-shadow: 0 4px 14px rgba(0,0,0,.45), inset 0 -3px 6px rgba(0,0,0,.18); pointer-events: none; }
-  body.kbd .gasbtn, body.kbd .driftbtn, body.kbd .steer { display: none; }      /* keyboard players do not need the touch controls */
+  body.kbd .gasbtn, body.kbd .driftbtn, body.kbd .steer, body.kbd .tiltbar { display: none; }
+  /* phone: throttle is automatic, so no gas pedal; with tilt steering the brake takes the left thumb */
+  body.mob .gasbtn { display: none; } body.mob .driftbtn { right: 12px; bottom: 18px; width: 84px; height: 84px; font-size: 13px; }
+  body.mob .fire { right: 104px; bottom: 22px; } body.mob .fireback { right: 116px; bottom: 102px; } body.mob .slots { right: 8px; bottom: 114px; width: 94px; } body.mob .firename { right: 12px; bottom: 156px; }
+  body.mob.tilt .steer { display: none; } body.mob.tilt .driftbtn { right: auto; left: 14px; width: 96px; height: 96px; font-size: 14px; }
+  body.mob.tilt .fire { right: 16px; bottom: 22px; width: 84px; height: 84px; } body.mob.tilt .fire svg { width: 44px; height: 44px; } body.mob.tilt .fireback { right: 110px; bottom: 30px; } body.mob.tilt .slots { right: 12px; bottom: 118px; width: 94px; } body.mob.tilt .firename { right: 12px; bottom: 158px; }
+  body.mob.tilt .bottom { left: 0; right: 0; bottom: 128px; align-items: center; }
+  .tiltbar { display: none; position: absolute; left: 50%; bottom: 96px; width: 110px; height: 8px; margin-left: -55px; border-radius: 4px; background: rgba(10,13,24,.55); border: 1px solid rgba(255,255,255,.2); }
+  .tiltbar::after { content: ''; position: absolute; left: 50%; top: -3px; width: 2px; height: 14px; margin-left: -1px; background: rgba(255,255,255,.5); }
+  .tiltbar i { position: absolute; left: 50%; top: -4px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: #ffd23f; box-shadow: 0 0 8px rgba(255,210,63,.8); }
+  body.mob.tilt .tiltbar { display: block; }      /* keyboard players do not need the touch controls */
   .gasbtn { pointer-events: auto; position: absolute; right: 12px; bottom: 18px; width: 88px; height: 88px; border-radius: 50%; border: 2px solid rgba(160,255,190,.9); background: radial-gradient(circle at 35% 28%, rgba(96,230,140,.95), rgba(22,130,66,.92)); color: #fff; font-size: 16px; font-weight: 900; letter-spacing: .06em; padding: 0; touch-action: none; box-shadow: 0 6px 18px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.35); }
   .gasbtn.on { filter: brightness(1.25); transform: scale(.95); }
   .driftbtn { pointer-events: auto; position: absolute; right: 110px; bottom: 18px; width: 72px; height: 72px; border-radius: 50%; border: 2px solid rgba(255,140,120,.85); background: radial-gradient(circle at 35% 28%, rgba(90,34,34,.9), rgba(28,10,14,.9)); color: #ffd9d2; font-size: 11px; font-weight: 900; letter-spacing: .04em; padding: 0; touch-action: none; box-shadow: 0 6px 16px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.18); }
@@ -103,6 +113,7 @@
   .lv { flex: 1; border: 0; border-radius: 12px; padding: 9px 2px; font-size: 13px; font-weight: 800; color: #fff; background: rgba(255,255,255,.14); }
   .lv.on { background: #ffd23f; color: #1a2140; }
   .medals { display: inline-flex; gap: 3px; margin-left: 8px; vertical-align: middle; } .medals u { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.25); } .medals u.on { background: #ffd23f; }
+  .ctlsw::before { content: 'Руль' !important; } body.kbd .ctlsw { display: none; }
   .uisw .lv { font-size: 12px; padding: 7px 2px; } .uisw::before { content: 'Интерфейс'; align-self: center; font-size: 12px; opacity: .8; margin-right: 4px; white-space: nowrap; }
   kbd { display: inline-block; min-width: 20px; padding: 2px 6px; margin: 0 2px; border-radius: 6px; border: 1px solid rgba(255,255,255,.35); border-bottom-width: 2.5px; background: rgba(10,13,24,.6); font: 700 11px/1.4 sans-serif; text-align: center; color: #fff; }
   .kb { display: inline-block; margin: 0 10px 6px 0; white-space: nowrap; }
@@ -156,6 +167,7 @@
   <button class="fireback" id="fireback" aria-label="Выстрелить назад" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21.500 4.500 13h4.700V2.500h5.600V13h4.700z"/></svg><em>Shift+␣</em></button>
   <button class="driftbtn" id="drift">ТОРМОЗ<small>дрифт</small></button>
   <button class="gasbtn" id="gas">ГАЗ</button>
+  <div class="tiltbar" id="tiltbar"><i id="tiltdot"></i></div>
   <div class="status" id="status"></div>
   <div class="keys" id="keysbar"><span class="kb"><kbd>↑</kbd> газ</span><span class="kb"><kbd>↓</kbd> тормоз / занос</span><span class="kb"><kbd>←</kbd><kbd>→</kbd> руль</span><span class="kb"><kbd>Q</kbd><kbd>E</kbd> бонус</span><span class="kb"><kbd>Пробел</kbd> применить</span><span class="kb"><kbd>Shift</kbd>+<kbd>Пробел</kbd> выстрел назад</span><span class="kb"><kbd>Esc</kbd> пауза</span></div>
   <div class="bottom">
@@ -175,6 +187,7 @@
   <div class="swatches" id="swatches"></div>
   <div class="levels" id="levels"></div>
   <div class="levels uisw" id="uisw"></div>
+  <div class="levels uisw ctlsw for-mob" id="ctlsw"></div>
   <div class="challenge" id="challenge" style="display:none"></div>
   <div class="seclabel">Одиночная гонка — нажми на трассу</div>
   <div class="tracks" id="tracks"></div>
@@ -182,18 +195,19 @@
   <button class="main mpbtn" id="mpopen">Играть вместе</button>
   <div class="hints">
     <div class="for-mob">
-      <b>ГАЗ</b> — держи справа, без него машина катится и замедляется<br>
-      <b>Руль</b> — полоса слева: чем дальше палец от центра, тем круче поворот<br>
+      <b>Газ</b> — автоматический, машина разгоняется сама<br>
+      <b>Руль</b> — наклоняй телефон влево и вправо, как руль; положение на старте считается «прямо»<br>
       <b>ТОРМОЗ</b> — коротко нажми в повороте, чтобы пустить машину в занос; на месте — задний ход<br>
-      <b>Бонусы</b> — до трёх; маленькие плитки выбирают, круглая кнопка над газом применяет, кнопка со стрелкой вниз стреляет назад
+      <b>Бонусы</b> — до трёх; маленькие плитки выбирают, круглая кнопка применяет, стрелка вниз стреляет назад
     </div>
+
     <div class="for-pc">
       <span class="kb"><kbd>↑</kbd> газ</span><span class="kb"><kbd>↓</kbd> тормоз, в повороте — занос, на месте — назад</span><span class="kb"><kbd>←</kbd><kbd>→</kbd> руль</span><br>
       <span class="kb"><kbd>Пробел</kbd> применить бонус</span><span class="kb"><kbd>Shift</kbd>+<kbd>Пробел</kbd> ракета или залп назад</span><span class="kb"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> или <kbd>Q</kbd><kbd>E</kbd> выбрать</span><span class="kb"><kbd>Esc</kbd> пауза</span><br>
       Работают и <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
     </div>
     <div style="margin-top:6px"><b>Долгий занос</b> заряжает турбо, оно сработает на выходе</div>
-    <div style="opacity:.5;margin-top:8px">версия 21</div>
+    <div style="opacity:.5;margin-top:8px">версия 22</div>
   </div>
 </div></div>
 
@@ -1353,6 +1367,7 @@ function startRace(trackId, useChallenge) {
   audio(); setupRace(trackId, useChallenge); beginCountdown();
 }
 function beginCountdown() {
+  TILT.zero = Math.abs(TILT.roll) < 30 ? TILT.roll : 0; document.body.classList.toggle('tilt', TILT.mode === 'tilt' && document.body.classList.contains('mob'));
   { const kb = document.getElementById('keysbar'); kb.classList.remove('gone'); clearTimeout(beginCountdown.t); beginCountdown.t = setTimeout(function () { kb.classList.add('gone'); }, 14000); }
   state = 'countdown'; countT = 3.2; lastShown = '';
   for (const id of ['menu','finish','paused','mp']) document.getElementById(id).classList.add('hidden');
@@ -1561,9 +1576,35 @@ function selectItem(k) { if (!player || !player.items.length) return; sel = ((k 
 // ---------------------------------------------------------------------------
 const keys = {}; const touches = {};
 let stripSteer = 0, stripOn = false, brakeBtn = false, gasBtn = false;
+// Tilt steering. Gravity as the phone feels it gives the roll of the screen; how the player holds
+// the phone when the race starts counts as "straight ahead".
+const TILT = { mode: 'tilt', g: null, t: 0, zero: 0, roll: 0, val: 0, asked: false, tgOn: false };
+try { const m = localStorage.getItem('td_ctl'); if (m === 'tilt' || m === 'strip') TILT.mode = m; } catch (e) {}
+function tiltRoll() {                                  // degrees, positive = right side down
+  const g = TILT.g; if (!g) return 0; let ang = 0; try { ang = (screen.orientation && screen.orientation.angle) || window.orientation || 0; } catch (e) {}
+  let up = g[1], right = g[0]; if (ang === 90) { up = g[0]; right = -g[1]; } else if (ang === 270 || ang === -90) { up = -g[0]; right = g[1]; } else if (ang === 180) { up = -g[1]; right = -g[0]; }
+  const sgn = (Math.abs(up) > Math.abs(g[2]) ? up : g[2]) < 0 ? -1 : 1;                    // platforms disagree on the sign of gravity; this cancels it
+  return Math.atan2(-right*sgn, Math.hypot(up, g[2]))*57.2958;
+}
+function tiltStart() {                                 // must run from a tap: iOS asks the player for permission
+  if (TILT.asked) return; TILT.asked = true;
+  const onMotion = function (e) { const a = e.accelerationIncludingGravity; if (a && a.x !== null && a.x !== undefined) { TILT.g = [a.x, a.y, a.z || 0]; TILT.t = performance.now(); } };
+  try { if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') DeviceMotionEvent.requestPermission().then(function (r) { if (r === 'granted') window.addEventListener('devicemotion', onMotion); }, function () {});
+    else window.addEventListener('devicemotion', onMotion); } catch (e) {}
+  try { if (tg && tg.Accelerometer && tg.Accelerometer.start) { tg.Accelerometer.start({ refresh_rate: 20 }, function (ok) { TILT.tgOn = !!ok; }); if (tg.lockOrientation) tg.lockOrientation(); } } catch (e) {}
+}
+function tiltLive() { return TILT.mode === 'tilt' && document.body.classList.contains('mob') && TILT.g && performance.now() - TILT.t < 1500; }
+function tiltFrame(dt) {
+  try { if (TILT.tgOn && tg.Accelerometer.isStarted && (!TILT.g || performance.now() - TILT.t > 400 || TILT.fromTg)) { const A = tg.Accelerometer; if (A.x || A.y || A.z) { TILT.g = [A.x, A.y, A.z]; TILT.t = performance.now(); TILT.fromTg = true; } } } catch (e) {}
+  if (!TILT.g) return; const r = tiltRoll(); TILT.roll += (r - TILT.roll)*Math.min(1, dt*14);
+  let d = TILT.roll - TILT.zero; d = Math.abs(d) < 1.5 ? 0 : d - (d > 0 ? 1.5 : -1.5); const k = Math.max(-1, Math.min(1, d/24));       // 1.5° dead zone, full lock at about 25°
+  TILT.val = (k < 0 ? -1 : 1)*Math.pow(Math.abs(k), 1.15);
+  const dot = document.getElementById('tiltdot'); if (dot) dot.style.transform = 'translateX(' + (TILT.val*46) + 'px)';
+}
 function readInput() {
-  const kb = (keys.left ? 1 : 0) - (keys.right ? 1 : 0);
-  return { steer: kb !== 0 ? kb : (stripOn ? -stripSteer : 0), brake: !!keys.brake || brakeBtn, gas: !!keys.gas || gasBtn };      // heading grows to the left on screen
+  const kb = (keys.left ? 1 : 0) - (keys.right ? 1 : 0), mob = document.body.classList.contains('mob'), brake = !!keys.brake || brakeBtn;
+  const steer = kb !== 0 ? kb : (stripOn ? -stripSteer : (tiltLive() ? -TILT.val : 0));                 // heading grows to the left on screen
+  return { steer: steer, brake: brake, gas: mob ? (state === 'race' && !brake) || !!keys.gas : !!keys.gas || gasBtn };      // on a phone the throttle is automatic
 }
 canvas.addEventListener('pointerdown', function () { audio(); });
 // Two interfaces: 'pc' (keyboard, wide layout, no touch controls) and 'mobile' (touch controls, compact layout).
@@ -1659,6 +1700,7 @@ function update(dt) {
     document.getElementById('warn').style.display = danger ? 'block' : 'none';
     if (danger && Math.floor(raceT*6) !== Math.floor((raceT - dt)*6)) beep(1500, 0.05, 'square', 0.04);
   }
+  tiltFrame(dt); if (state === 'race' && document.body.classList.contains('tilt') !== (tiltLive() || (TILT.mode === 'tilt' && document.body.classList.contains('mob') && raceT < 3))) document.body.classList.toggle('tilt');      // no sensor: the on-screen wheel comes back
   soundFrame(dt);
 }
 
@@ -1908,6 +1950,7 @@ function pause(on) {
   if (on && (state === 'race' || state === 'countdown')) { prevState = state; state = 'paused'; engine(0, false); document.getElementById('paused').classList.remove('hidden'); }
   else if (!on && state === 'paused') { state = prevState; last = 0; document.getElementById('paused').classList.add('hidden'); }
 }
+document.addEventListener('click', function () { if (document.body.classList.contains('mob') && TILT.mode === 'tilt') tiltStart(); });
 document.addEventListener('visibilitychange', function () { if (document.hidden && !NET.racing) pause(true); });
 function toMenu() {
   if (NET.on) netLeave();
@@ -1933,8 +1976,13 @@ function buildUISwitch() {
   [['auto','Авто'], ['mobile','Телефон'], ['pc','ПК']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (uiMode === o[0] ? ' on' : ''); b.textContent = o[1];
     b.addEventListener('click', function () { uiMode = o[0]; try { localStorage.setItem('td_ui', uiMode); } catch (e) {} applyUI(detectUI()); buildUISwitch(); }); el.appendChild(b); });
 }
+function buildCtlSwitch() {
+  const el = document.getElementById('ctlsw'); el.innerHTML = '';
+  [['tilt','Наклон телефона'], ['strip','Полоса на экране']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (TILT.mode === o[0] ? ' on' : ''); b.textContent = o[1];
+    b.addEventListener('click', function () { TILT.mode = o[0]; try { localStorage.setItem('td_ctl', TILT.mode); } catch (e) {} if (o[0] === 'tilt') tiltStart(); buildCtlSwitch(); }); el.appendChild(b); });
+}
 function buildMenu() {
-  buildGarage(); buildLevels(); buildUISwitch();
+  buildGarage(); buildLevels(); buildUISwitch(); buildCtlSwitch();
   const el = document.getElementById('tracks'); el.innerHTML = '';
   TRACKS.forEach(function (tr, i) {
     const b = document.createElement('button'); b.className = 'track';
