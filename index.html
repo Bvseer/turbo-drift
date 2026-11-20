@@ -142,7 +142,12 @@
   .sw.taken { opacity: .22; pointer-events: none; }
   /* showroom: the chosen car stands in the middle, in the clear; choices sit either side of it */
   .mcol { display: flex; flex-direction: column; align-items: center; min-width: 0; width: 100%; }
-  .stage { display: flex; align-items: center; justify-content: space-between; width: min(420px, 100%); height: 34vh; }
+  .stage { display: flex; align-items: center; justify-content: space-between; width: min(420px, 100%); height: 34vh; flex-shrink: 0; }
+  .mhead { display: flex; flex-direction: column; align-items: center; min-width: 0; width: 100%; }
+  body.wide .msheet { display: contents; }
+  body.wide #menu { grid-template-rows: 1fr auto auto 1fr; } body.wide #menu .mhead { grid-column: 1; grid-row: 2; } body.wide #menu .mleft { grid-column: 1; grid-row: 3; }
+  body.wide #menu .mcenter { grid-column: 2; grid-row: 1 / 5; } body.wide #menu .mright { grid-column: 3; grid-row: 1 / 5; }
+  body.wide #mplobby .mleft { grid-column: 1; grid-row: 1; } body.wide #mplobby .mcenter { grid-column: 2; grid-row: 1; } body.wide #mplobby .mright { grid-column: 3; grid-row: 1; }
   .stagehole { flex: 1; align-self: stretch; }
   .stage .arrow { width: 46px; height: 46px; font-size: 26px; border-radius: 50%; background: rgba(10,13,24,.55); border: 1.5px solid rgba(255,255,255,.3); }
   .mcenter .carname { text-align: center; font-size: 24px; text-shadow: 0 2px 10px rgba(0,0,0,.7); } .mcenter .carname small { font-size: 12px; }
@@ -154,18 +159,53 @@
   body.wide #mp { justify-content: flex-start; padding: 6px 16px; background: linear-gradient(90deg, rgba(14,22,48,.95) 0, rgba(14,22,48,.84) 27%, rgba(14,22,48,0) 37%, rgba(14,22,48,0) 63%, rgba(14,22,48,.84) 73%, rgba(14,22,48,.95) 100%); }
   body.wide #mplobby { width: 100%; flex: 1; min-height: 0; } body.wide #mp.inroom > h1 { display: none; }
   body.wide .mcenter { align-self: stretch; justify-content: space-between; padding: 4px 0; } body.wide .stage { width: 100%; height: auto; flex: 1; min-height: 110px; }
-  body.wide #menu h1 { font-size: 30px; margin: 0; } body.kbd.wide #menu h1 { font-size: 42px; } body.wide #menu .sub { margin-bottom: 6px; font-size: 13px; }
+  body.wide #menu h1 { font-size: 30px; margin: 0; } body.kbd.wide:not(.tiny) #menu h1 { font-size: 42px; } body.wide #menu .sub { margin-bottom: 6px; font-size: 13px; }
   body.wide .mleft .seclabel, body.wide .mright .seclabel { margin: 8px 0 5px; } body.wide .levels { margin-bottom: 6px; } body.wide .tracks { gap: 7px; } body.wide .track { padding: 9px 14px; }
   body.wide .mpbtn { padding: 12px; margin-bottom: 0; }
   body.wide #mp > h1 { font-size: 22px !important; margin: 0; } body.wide #mp .roomcode { font-size: 34px; margin: 0 0 4px; } body.wide #mp .sub { margin-bottom: 4px; font-size: 13px; }
   body.wide #mplobby .plist { margin-top: 8px; } body.wide #mplobby .plist div { padding: 6px 12px; font-size: 14px; } body.wide #mplobby button.ghost { padding: 8px 20px; font-size: 14px; } body.wide #mp > .btns button { padding: 7px 22px; font-size: 14px; }
-  body.kbd.wide #menu, body.kbd.wide #mplobby { grid-template-columns: minmax(0, 340px) minmax(260px, 1fr) minmax(0, 400px); column-gap: 24px; } body.kbd.wide #menu { padding: 20px 4vw; }
+  body.kbd.wide:not(.tiny) #menu, body.kbd.wide:not(.tiny) #mplobby { grid-template-columns: minmax(0, 340px) minmax(260px, 1fr) minmax(0, 400px); column-gap: 24px; } body.kbd.wide:not(.tiny) #menu { padding: 20px 4vw; }
+  body.kbd button { cursor: pointer; transition: filter .12s, transform .12s; } body.kbd button:hover { filter: brightness(1.14); } body.kbd button:active { transform: scale(.97); } body.kbd .sw:hover { transform: scale(1.14); }
   body.tiny .lv { font-size: 11px; padding: 8px 1px; } body.tiny .uisw .lv { font-size: 10.5px; padding: 6px 1px; } body.tiny #menu h1 { font-size: 24px; } body.tiny .track { padding: 7px 10px; font-size: 14px; } body.tiny .track small { font-size: 11px; } body.tiny .track b { font-size: 12px; }
+  body.land .mcenter .swatches { gap: 5px; padding: 6px 9px; } body.land .sw { width: 24px; height: 24px; }
+  body.tiny .mcenter .swatches { flex-wrap: wrap; max-width: 116px; gap: 6px; padding: 6px 10px; border-radius: 16px; } body.tiny .sw { width: 24px !important; height: 24px !important; }
   body.tiny .mcenter .carname { font-size: 19px; } body.tiny .stage .arrow { width: 38px; height: 38px; font-size: 22px; } body.tiny .sw { width: 22px; height: 22px; }
   body.kbd.wide .tracks, body.kbd.wide .mpbtn, body.kbd.wide .levels, body.kbd.wide .seclabel { width: 100%; }
-  /* narrow window: one column, car first */
-  body:not(.wide) #menu .mcol { display: contents; } body:not(.wide) #menu .mleft > * { order: 3; } body:not(.wide) #menu .mcenter > * { order: 2; } body:not(.wide) #menu .mright > * { order: 4; }
-  body:not(.wide) #menu h1, body:not(.wide) #menu #hello { order: 1; } body:not(.wide) #menu { justify-content: flex-start; }
+  /* narrow window (a PC window as tall as it is wide, or taller): the car in the clear on top, the choices on a sheet below that scrolls on its own */
+  body:not(.wide) #menu, body:not(.wide) #mp.inroom { justify-content: flex-start; overflow: hidden; padding: 0; background: linear-gradient(180deg, rgba(14,22,48,.82) 0, rgba(14,22,48,.45) 70px, rgba(14,22,48,0) 150px); }
+  body:not(.wide) .mhead { flex: 0 0 auto; padding: 12px 12px 0; } body:not(.wide) #menu h1 { font-size: 30px; margin: 0; } body:not(.wide) #menu #hello { font-size: 12.5px; margin: 0; opacity: .8; }
+  body:not(.wide) .mcenter { flex: 0 0 auto; padding-top: 6px; } body:not(.wide) .mcenter .carname { font-size: 21px; }
+  body:not(.wide) .stage { width: min(480px, calc(100% - 20px)); height: clamp(120px, 31vh, 300px); }
+  body:not(.wide) .mcenter .swatches { margin: 2px 0 10px; }
+  body:not(.wide) .msheet { flex: 1 1 0; min-height: 0; width: 100%; box-sizing: border-box; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 14px 16px 22px;
+    background: rgba(14,22,48,.93); border-radius: 22px 22px 0 0; border-top: 1px solid rgba(255,255,255,.14); box-shadow: 0 -12px 30px rgba(0,0,0,.35); }
+  body:not(.wide) #menu .msheet .mcol { display: contents; } body:not(.wide) .o1 { order: 1; } body:not(.wide) .o2 { order: 2; } body:not(.wide) .o3 { order: 3; } body:not(.wide) .o4 { order: 4; }
+  body:not(.wide) .msheet > *, body:not(.wide) .msheet .mcol > * { flex-shrink: 0; }
+  body:not(.wide) .msheet .seclabel, body:not(.wide) .msheet .levels, body:not(.wide) .msheet .tracks, body:not(.wide) .msheet .mpbtn, body:not(.wide) .msheet .plist { width: min(440px, 100%); }
+  body:not(.wide) .msheet .seclabel.o2, body:not(.wide) .msheet .seclabel.o3, body:not(.wide) .msheet .seclabel.o4 { margin-top: 14px; } body:not(.wide) .msheet .levels { margin-bottom: 6px; } body:not(.wide) .msheet .tracks { gap: 8px; } body:not(.wide) .msheet .track { padding: 11px 16px; }
+  body:not(.wide) #mp.inroom > h1 { display: none; } body:not(.wide) #mp.inroom #mplobby { flex: 1 1 0; min-height: 0; width: 100%; display: flex !important; flex-direction: column; align-items: center; }
+  body:not(.wide) #mp.inroom .msheet { padding-bottom: 10px; } body:not(.wide) #mp.inroom .roomcode { font-size: 34px; margin: 0 0 6px; } body:not(.wide) #mp.inroom .msheet .sub { margin-bottom: 4px; font-size: 13px; }
+  body:not(.wide) #mp.inroom .mright { margin-top: 14px; } body:not(.wide) #mp.inroom #mpmsg, body:not(.wide) #mp.inroom > .btns, body:not(.wide) #mp.inroom #mplink { flex: 0 0 auto; background: rgba(14,22,48,.93); width: 100%; margin: 0; padding: 0 0 8px; align-items: center; }
+  body:not(.wide) #mp.inroom #mpmsg { min-height: 0 !important; padding: 0; } body:not(.wide) #mp.inroom > .btns button { padding: 9px 30px; font-size: 14px; } body:not(.wide) #mp.inroom #mplink { box-sizing: border-box; border-radius: 0; }
+  /* results, pause, help: centred while they fit, scrolled from the top when they do not */
+  #finish, #paused, #help { justify-content: flex-start; } #finish::before, #finish::after, #paused::before, #paused::after, #help::before, #help::after { content: ''; flex: 1 0 0px; }
+  #finish > *, #paused > *, #help > * { flex-shrink: 0; }
+  /* a wide screen shows the result and its buttons on the left, the table on the right, so nothing hides below the fold */
+  body.wide #finish { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 360px); grid-template-rows: 1fr auto auto auto auto 1fr; column-gap: 26px; justify-content: center; justify-items: center; align-items: center; }
+  body.wide #finish::before, body.wide #finish::after { display: none; }
+  body.wide #finish .card { grid-column: 1; grid-row: 2; width: 100%; box-sizing: border-box; min-width: 0; } body.wide #finish .verdict { grid-column: 1; grid-row: 3; } body.wide #finish .btns { grid-column: 1; grid-row: 4; width: 100%; margin: 0; } body.wide #finish .linkbox { grid-column: 1; grid-row: 5; width: 100%; }
+  body.wide #finish .plist { grid-column: 2; grid-row: 1 / 7; width: 100%; margin: 0; }
+  body.land #finish { padding: 8px 14px; } body.land #finish .card { padding: 9px 18px; margin-bottom: 8px; } body.land #finish .card .place { font-size: 34px; } body.land #finish .card .row { margin-top: 4px; font-size: 13.5px; }
+  body.land #finish .verdict { font-size: 14px; margin-bottom: 7px; } body.land #finish .btns { gap: 6px; } body.land #finish .btns button { padding: 9px 14px; font-size: 14.5px; border-radius: 13px; } body.land #finish .plist div { padding: 7px 12px; font-size: 14px; }
+  /* watching the others after the finish */
+  .specbar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); display: none; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 20px; background: rgba(10,13,24,.66); border: 1px solid rgba(255,255,255,.14); max-width: calc(100% - 16px); box-sizing: border-box; }
+  body.spec .specbar { display: flex; } body.spec .hud > *:not(#tags):not(#map) { display: none !important; }
+  .specbar .arrow { width: 42px; height: 42px; flex: 0 0 auto; border-radius: 50%; background: rgba(255,255,255,.16); }
+  .specinfo { min-width: 150px; text-align: center; line-height: 1.25; overflow: hidden; } .specinfo small { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .65; }
+  .specinfo b { display: block; font-size: 17px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .specinfo b i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 7px; vertical-align: -1px; border: 1.5px solid rgba(255,255,255,.7); }
+  .specinfo em { display: block; font-style: normal; font-size: 12.5px; font-weight: 700; color: #ffd23f; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .specbar .ghost { flex: 0 0 auto; padding: 10px 16px; font-size: 14px; border-radius: 14px; margin-left: 4px; }
+  body.land .specbar { bottom: 10px; }
   .hints { margin-top: 16px; font-size: 13px; opacity: .85; line-height: 1.65; } .hints b { color: #ffd23f; }
   .card { background: rgba(255,255,255,.12); border-radius: 18px; padding: 16px 22px; margin-bottom: 14px; min-width: 240px; }
   .card .place { font-size: 54px; font-weight: 900; line-height: 1; } .card .row { display: flex; justify-content: space-between; gap: 24px; font-size: 15px; margin-top: 8px; }
@@ -205,33 +245,43 @@
     <div class="speed"><b class="gear" id="gear">N</b><span id="speed">0</span><small>км/ч</small></div>
   </div>
 </div>
+<div class="specbar" id="spec">
+  <button class="arrow" id="specprev" aria-label="Предыдущий гонщик">‹</button>
+  <div class="specinfo"><small>Наблюдаешь</small><b><i id="specdot"></i><span id="specname"></span></b><em id="specstat"></em></div>
+  <button class="arrow" id="specnext" aria-label="Следующий гонщик">›</button>
+  <button class="ghost" id="specback">Результаты</button>
+</div>
 <div id="flash"></div>
 <div class="big" id="big"></div>
 <div class="note" id="note"></div>
 
 <div class="screen" id="menu">
-  <div class="mcol mleft">
+  <div class="mhead">
     <h1>TURBO <span>DRIFT</span></h1>
     <div class="sub" id="hello">Выбери машину и трассу</div>
-    <div class="seclabel">Соперники</div>
-    <div class="levels" id="levels"></div>
-    <div class="seclabel">Настройки</div>
-    <div class="levels uisw" id="uisw"></div>
-    <div class="levels uisw ctlsw for-mob" id="ctlsw"></div>
-    <div class="levels uisw fpssw" id="fpssw"></div>
-    <button class="ghost helpbtn" id="helpopen">Как играть</button>
   </div>
   <div class="mcol mcenter">
     <div class="carname"><span id="carname"></span><small id="careng"></small></div>
     <div class="stage"><button class="arrow" id="carprev" aria-label="Предыдущая машина">‹</button><div class="stagehole" id="stage"></div><button class="arrow" id="carnext" aria-label="Следующая машина">›</button></div>
     <div class="swatches" id="swatches"></div>
   </div>
-  <div class="mcol mright">
-    <div class="challenge" id="challenge" style="display:none"></div>
-    <div class="seclabel sl1">Одиночная гонка — нажми на трассу</div>
-    <div class="tracks" id="tracks"></div>
-    <div class="seclabel sl2">С друзьями</div>
-    <button class="main mpbtn" id="mpopen">Играть вместе</button>
+  <div class="msheet">
+    <div class="mcol mleft">
+      <div class="seclabel o1">Соперники</div>
+      <div class="levels o1" id="levels"></div>
+      <div class="seclabel o4">Настройки</div>
+      <div class="levels uisw o4" id="uisw"></div>
+      <div class="levels uisw ctlsw for-mob o4" id="ctlsw"></div>
+      <div class="levels uisw fpssw o4" id="fpssw"></div>
+      <button class="ghost helpbtn o4" id="helpopen">Как играть</button>
+    </div>
+    <div class="mcol mright">
+      <div class="challenge o2" id="challenge" style="display:none"></div>
+      <div class="seclabel sl1 o2">Одиночная гонка — нажми на трассу</div>
+      <div class="tracks o2" id="tracks"></div>
+      <div class="seclabel sl2 o3">С друзьями</div>
+      <button class="main mpbtn o3" id="mpopen">Играть вместе</button>
+    </div>
   </div>
 </div>
 
@@ -244,6 +294,7 @@
       <b>ТОРМОЗ</b> — коротко нажми в повороте, чтобы пустить машину в занос; на месте — задний ход<br>
       <b>Бонусы</b> — до трёх; маленькие плитки выбирают, круглая кнопка применяет, стрелка вниз стреляет назад
     </div>
+    <div style="margin-top:6px"><b>После финиша</b> можно смотреть, как доезжают остальные: кнопка «Наблюдать за гонкой»</div>
 
     <div class="for-pc">
       <span class="kb"><kbd>↑</kbd> газ</span><span class="kb"><kbd>↓</kbd> тормоз, в повороте — занос, на месте — назад</span><span class="kb"><kbd>←</kbd><kbd>→</kbd> руль</span><br>
@@ -251,7 +302,7 @@
       Работают и <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
     </div>
     <div style="margin-top:6px"><b>Долгий занос</b> заряжает турбо, оно сработает на выходе</div>
-    <div style="opacity:.5;margin-top:8px">версия 28</div>
+    <div style="opacity:.5;margin-top:8px">версия 30</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -264,20 +315,22 @@
     <div class="joinrow"><input id="mpcode" maxlength="5" placeholder="КОД" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Код комнаты"><button class="ghost" id="mpjoin">Войти</button></div>
   </div>
   <div id="mplobby" style="display:none">
+    <div class="mcol mcenter">
+      <div class="carname"><span id="mpcarname"></span><small id="mpcareng"></small></div>
+      <div class="stage"><button class="arrow" id="mpcarprev" aria-label="Предыдущая машина">‹</button><div class="stagehole" id="mpstage"></div><button class="arrow" id="mpcarnext" aria-label="Следующая машина">›</button></div>
+      <div class="swatches" id="mpswatches"></div>
+    </div>
+    <div class="msheet">
     <div class="mcol mleft">
       <div class="sub">Код комнаты</div>
       <div class="roomcode" id="mproom"></div>
       <div class="btns"><button class="ghost" id="mpshare">Позвать друзей</button></div>
       <div class="plist" id="mplist"></div>
     </div>
-    <div class="mcol mcenter">
-      <div class="carname"><span id="mpcarname"></span><small id="mpcareng"></small></div>
-      <div class="stage"><button class="arrow" id="mpcarprev" aria-label="Предыдущая машина">‹</button><div class="stagehole" id="mpstage"></div><button class="arrow" id="mpcarnext" aria-label="Следующая машина">›</button></div>
-      <div class="swatches" id="mpswatches"></div>
-    </div>
     <div class="mcol mright">
       <div id="mphostbox"><div class="tracks" id="mptracks"></div><div class="btns"><button class="main" id="mpgo">Старт</button></div><div class="sub" style="margin-top:8px">С друзьями гонка идёт без ботов; если ты в комнате один, поедут боты</div></div>
       <div class="sub" id="mpwait" style="display:none">Ждём, когда хозяин комнаты начнёт заезд…</div>
+    </div>
     </div>
   </div>
   <div class="sub" id="mpmsg" style="min-height:20px;color:#ffd23f"></div>
@@ -296,9 +349,10 @@
   <div class="verdict" id="verdict"></div>
   <div class="btns">
     <button class="main" id="share">Бросить вызов друзьям</button>
+    <button class="main" id="tolobby" style="display:none">В комнату</button>
+    <button class="ghost" id="watch" style="display:none">Наблюдать за гонкой</button>
     <button class="ghost" id="again">Ещё раз</button>
     <button class="ghost" id="tomenu">Выбрать трассу</button>
-    <button class="main" id="tolobby" style="display:none">В комнату</button>
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="linkbox" id="linkbox"></div>
@@ -510,9 +564,11 @@ function soundFrame(dt) {
     S.acc = (S.acc || 0) + dt; if (S.acc < 1/31 && !S.force) return; dt = S.acc; S.acc = 0;                 // 30 updates a second are plenty for the ear
     const t = actx.currentTime; S.master.gain.setTargetAtTime(0.85, t, 0.12);
     const inp = racing ? readInput() : (state === 'countdown' ? readInput() : { gas: false, brake: false });
-    const u = Math.max(0, player.vf), onRoad = player.off < ROAD_W/2 + 0.9, boost = player.boost > 0;
-    let thr = (inp.gas && !inp.brake) || boost ? 1 : 0; if (player.wreck > 0 || state === 'finished') thr = 0;
-    const e = engOf(player); S.tune(S.me, e);
+    const me = (state === 'finished' && spec) || player, own = me === player;                                        // while watching, the ear rides with the watched car
+    const u = Math.max(0, me.vf || 0), onRoad = (me.off || 0) < ROAD_W/2 + 0.9, boost = me.boost > 0 || (!own && me.nitro > 0);
+    let thr = (inp.gas && !inp.brake) || boost ? 1 : 0; if (me.wreck > 0 || (own && state === 'finished')) thr = 0;
+    if (!own) { thr = me.done || me.wreck > 0 ? 0 : (u - (S.specU === undefined ? u : S.specU) > -0.12 ? 1 : 0); S.specU = u; } else S.specU = undefined;
+    const e = engOf(me); S.tune(S.me, e);
     gearbox(G, u, thr, dt, state === 'countdown', e);
     if (G.shifted) { sfx('clunk', G.shifted > 0 ? 1 : 0.6); if (G.shifted < 0 && e.pops > 0.7 && Math.random() < 0.5) sfx('pop', 0.4); G.shifted = 0; }
     const thrS = G.shift > 0 && state !== 'countdown' ? 0.05 : thr; G.thr += (thrS - G.thr)*Math.min(1, dt*18);
@@ -531,16 +587,16 @@ function soundFrame(dt) {
     S.windF.frequency.setTargetAtTime(500 + 1500*sn, t, 0.1); S.windG.gain.setTargetAtTime(0.13*sn*sn, t, 0.1);
     S.grG.gain.setTargetAtTime(onRoad ? 0 : 0.5*Math.min(1, u/14), t, 0.08);
     // tyres: sliding sideways, or braking hard
-    const beta = Math.abs(Math.atan2(player.vl || 0, Math.max(4, u))), slip = Math.max(0, Math.min(1, (beta - 0.07)*4.5))*Math.min(1, u/12) + (inp.brake && u > 12 && racing ? 0.25 : 0) + (player.drifting ? 0.25 : 0);
+    const beta = Math.abs(Math.atan2(me.vl || 0, Math.max(4, u))), slip = Math.max(0, Math.min(1, (beta - 0.07)*4.5))*Math.min(1, u/12) + (inp.brake && u > 12 && racing ? 0.25 : 0) + (me.drifting ? 0.25 : 0);
     const wob = 1 + 0.035*Math.sin(t*23) + 0.02*Math.sin(t*57);
     S.sqA.frequency.setTargetAtTime((900 + 260*sn)*wob, t, 0.03); S.sqB.frequency.setTargetAtTime((1250 + 330*sn)/wob, t, 0.03); S.sqG.gain.setTargetAtTime(onRoad && racing ? Math.min(1, slip)*1.5 : 0, t, 0.05);
-    S.scG.gain.setTargetAtTime(player.scrape > 0 && u > 4 ? 0.45*Math.min(1, u/20) : 0, t, 0.03); S.scF.frequency.setTargetAtTime(1500 + 1400*Math.random(), t, 0.05);
+    S.scG.gain.setTargetAtTime(me.scrape > 0 && u > 4 ? 0.45*Math.min(1, u/20) : 0, t, 0.03); S.scF.frequency.setTargetAtTime(1500 + 1400*Math.random(), t, 0.05);
     // the nearest other car: its engine, quieter with distance, shifted by relative speed, on its side of the stereo field
-    let near = null, nd = 70; for (const c of cars) { if (c === player || c.wreck > 0) continue; const d = Math.hypot(c.x - player.x, c.z - player.z); if (d < nd) { nd = d; near = c; } }
+    let near = null, nd = 70; for (const c of cars) { if (c === me || c.wreck > 0) continue; const d = Math.hypot(c.x - me.x, c.z - me.z); if (d < nd) { nd = d; near = c; } }
     if (near && state !== 'countdown') { const O = S.other; if (near !== S.nearCar) { S.nearCar = near; near.G = near.G || { rpm: 3000, gear: 3, shift: 0 }; }
       const oe = engOf(near); S.tune(O, oe);
-      const ov = Math.max(0, near.vf || 0), dx = (near.x - player.x)/(nd || 1), dz = (near.z - player.z)/(nd || 1), nvx = near.vx !== undefined && !near.bot ? near.vx : Math.sin(near.h)*ov, nvz = near.vz !== undefined && !near.bot ? near.vz : Math.cos(near.h)*ov;
-      const closing = (player.vx*dx + player.vz*dz) - (nvx*dx + nvz*dz), dop = Math.max(0.8, Math.min(1.25, 1 + closing/199));                 // sound travels ~199 units/s
+      const ov = Math.max(0, near.vf || 0), dx = (near.x - me.x)/(nd || 1), dz = (near.z - me.z)/(nd || 1), nvx = near.vx !== undefined && !near.bot ? near.vx : Math.sin(near.h)*ov, nvz = near.vz !== undefined && !near.bot ? near.vz : Math.cos(near.h)*ov;
+      const mvx = own ? me.vx : Math.sin(me.h)*u, mvz = own ? me.vz : Math.cos(me.h)*u, closing = (mvx*dx + mvz*dz) - (nvx*dx + nvz*dz), dop = Math.max(0.8, Math.min(1.25, 1 + closing/199));                 // sound travels ~199 units/s
       gearbox(near.G, ov, 1, dt, false, oe); const othr = near.bot ? (near.gasOn ? 0.9 : 0.25) : 0.8;
       S.setEngine(O, near.G.rpm, othr, 0.55/(1 + Math.pow(nd/11, 2)), dop, t);
       if (O.pan.pan) O.pan.pan.setTargetAtTime(Math.max(-0.85, Math.min(0.85, -(dx*Math.cos(camH) - dz*Math.sin(camH))*1.2)), t, 0.08); }
@@ -822,8 +878,8 @@ const CAR_TYPES = [
   { name: 'Вектор GT', len: 4.45, wid: 1.86, hgt: 1.27, clr: 0.13, r: 0.335, tw: 0.25, zF: 1.36, zR: -1.30, tum: 0.76,
     belt: [[-1,0.66],[-0.90,0.93],[-0.72,0.94],[-0.2,0.92],[0.35,0.86],[0.8,0.74],[1,0.52]], cab: [-0.74,-0.16,0.10,0.44], extra: 'lip',
     eng: { id: 'i6t', label: 'Рядная шестёрка, турбо · 7200 об/мин', cyl: 6, sub: [], rough: 0.12, red: 7200, idle: 850, f: [150, 460, 1300], bright: 1.0, rasp: 0.8, turbo: 1.0, sc: 0, pops: 0.6, gears: [58,92,126,158,190,250] } },
-  { name: 'Аурум V10', len: 4.55, wid: 2.02, hgt: 1.13, clr: 0.10, r: 0.345, tw: 0.30, zF: 1.40, zR: -1.28, tum: 0.70,
-    belt: [[-1,0.72],[-0.8,0.88],[-0.3,0.88],[0.3,0.76],[0.75,0.60],[1,0.42]], cab: [-0.52,-0.08,0.14,0.60], extra: 'wing',
+  { name: 'Аурум V10', len: 4.55, wid: 2.02, hgt: 1.13, clr: 0.10, r: 0.335, tw: 0.30, zF: 1.40, zR: -1.28, tum: 0.70,
+    belt: [[-1,0.72],[-0.8,0.88],[-0.3,0.88],[0.3,0.80],[0.75,0.68],[1,0.46]], cab: [-0.52,-0.08,0.14,0.60], extra: 'wing',
     eng: { id: 'v10', label: 'V10 атмосферный · 8700 об/мин', cyl: 10, sub: [[5, 0.34]], rough: 0.10, red: 8700, idle: 1000, f: [210, 640, 1900], bright: 1.45, rasp: 1.1, turbo: 0, sc: 0, pops: 0.8, gears: [62,96,128,158,188,220,250] } },
   { name: 'Гром 427', len: 4.85, wid: 1.93, hgt: 1.35, clr: 0.16, r: 0.35, tw: 0.27, zF: 1.52, zR: -1.42, tum: 0.80,
     belt: [[-1,0.80],[-0.88,0.94],[-0.3,0.96],[0.3,0.97],[0.86,0.93],[1,0.76]], cab: [-0.66,-0.32,-0.02,0.22], extra: 'scoop', stripe: true,
@@ -854,7 +910,7 @@ function curve(K, t) {                                         // smooth curve t
   return (2*u3-3*u2+1)*p1[1] + (u3-2*u2+u)*m1 + (-2*u3+3*u2)*p2[1] + (u3-u2)*m2;
 }
 function buildCar(S) {
-  const mb = new MB(), NS = 72, half = S.len/2, DARK = [0.035,0.036,0.04], SILL = [0.07,0.07,0.08], WHITE = [1,1,1];
+  const mb = new MB(), NS = 72, half = S.len/2, DARK = [0.035,0.036,0.04], SILL = [0.07,0.07,0.08], WHITE = [1,1,1], RA = S.r*1.16, NA = 30, CY = S.r;      // RA: radius of the wheel arch
   const belt = function (t) { return curve(S.belt, t); };
   const cabT = function (t) { const c = S.cab; return t < c[0] || t > c[3] ? 0 : (t < c[1] ? sstep(c[0],c[1],t) : (t <= c[2] ? 1 : 1 - sstep(c[2],c[3],t))); };
   const plan = function (t) { const a = Math.abs(t); return 1 - 0.05*t*t - (t > 0 ? 0.30 : 0.24)*Math.pow(sstep(0.78,1,a), 1.6); };
@@ -862,12 +918,13 @@ function buildCar(S) {
   for (let i = 0; i < NS; i++) {
     const t = -Math.cos(Math.PI*i/(NS-1)), z = t*half, w = S.wid/2*plan(t), a = Math.abs(t);
     const yb = S.clr + 0.10*sstep(0.80,1,a), hb = belt(t), ct = cabT(t), mid = (S.cab[1]+S.cab[2])/2, hw = (S.cab[2]-S.cab[1])/2 + 0.2;
+    let hs = hb; for (const zw of [S.zF, S.zR]) { const need = S.r + RA + 0.10, d = Math.abs(z - zw); if (need > hb) hs = Math.max(hs, hb + (need - hb)*(1 - sstep(RA*0.55, RA + 0.42, d))); }      // fender: the side stands clear of the tyre even where the bonnet is lower
     const top = S.hgt - 0.05*Math.min(1, Math.pow((t-mid)/hw, 2)), hr = hb + (top-hb)*ct;
     const pts = [[0,yb],[0.80*w,yb],[0.975*w,yb+0.10]];
-    for (let k = 1; k <= 4; k++) { const f = k/5; pts.push([w*(0.975 + 0.025*Math.sin(Math.PI*f)), yb + 0.10 + (hb - 0.10 - yb - 0.10)*f]); }
-    pts.push([0.985*w, hb-0.10], [0.94*w, hb-0.015]);
+    for (let k = 1; k <= 4; k++) { const f = k/5; pts.push([w*(0.975 + 0.025*Math.sin(Math.PI*f)), yb + 0.10 + (hs - 0.10 - yb - 0.10)*f]); }
+    pts.push([0.985*w, hs-0.10], [0.94*w, hs-0.015]);
     const mixp = function (hx, hy, cx, cy) { return [hx + (cx-hx)*ct, hy + (cy-hy)*ct]; }, tw = w*S.tum;
-    pts.push(mixp(0.80*w, hb+0.022, tw, hr-0.07), mixp(0.50*w, hb+0.045, tw*0.76, hr-0.008), mixp(0.20*w, hb+0.056, 0.20*w, hr+0.010), mixp(0, hb+0.058, 0, hr+0.013));
+    pts.push(mixp(0.80*w, hs+0.022, tw, hr-0.07), mixp(0.50*w, hb+0.045 + (hs-hb)*0.30, tw*0.76, hr-0.008), mixp(0.20*w, hb+0.056, 0.20*w, hr+0.010), mixp(0, hb+0.058, 0, hr+0.013));
     const ring = pts.map(function (p) { return [p[0], p[1], z]; });
     for (let k = pts.length-2; k >= 1; k--) ring.push([-pts[k][0], pts[k][1], z]);
     rings.push(ring); st.push({ t: t, z: z, w: w, yb: yb, hb: hb, ct: ct, hr: hr });
@@ -889,13 +946,31 @@ function buildCar(S) {
     else if (band === 8) { if (full || ramp) mat = 4; }
     else if (ramp) mat = 4;
     else if (band === 11 && S.stripe) { col = [0.96,0.96,0.97]; mat = 11; }
-    for (const q of [[A,nA],[B,nB],[C,nC],[A,nA],[C,nC],[D,nD]]) mb.sv(q[0], q[1], col, mat);
+    let cut = 0; if (band >= 1 && band <= 8) for (const zw of [S.zF, S.zR]) if (Math.min(A[2], D[2]) < zw + RA && Math.max(A[2], D[2]) > zw - RA && Math.min(A[1], B[1], C[1], D[1]) < CY + RA) cut = zw;
+    if (!cut) { for (const q of [[A,nA],[B,nB],[C,nC],[A,nA],[C,nC],[D,nD]]) mb.sv(q[0], q[1], col, mat); continue; }
+    for (const tri of [[[A,nA],[B,nB],[C,nC]], [[A,nA],[C,nC],[D,nD]]]) {                 // what lies outside the arch stays, piece by piece
+      let rem = tri;
+      for (let k = 0; k < NA && rem.length > 2; k++) { const am = (k + 0.5)/NA*6.2832, sy = Math.sin(am), cz = Math.cos(am), lim = RA*Math.cos(3.1416/NA), outp = [], inp = [];
+        for (let e = 0; e < rem.length; e++) { const P = rem[e], Q = rem[(e+1) % rem.length], dp = (P[0][1]-CY)*sy + (P[0][2]-cut)*cz - lim, dq = (Q[0][1]-CY)*sy + (Q[0][2]-cut)*cz - lim;
+          if (dp > 0) outp.push(P); else inp.push(P);
+          if ((dp > 0) !== (dq > 0)) { const f = dp/(dp - dq), M = [[0,1,2].map(function (c) { return P[0][c] + (Q[0][c]-P[0][c])*f; }), [0,1,2].map(function (c) { return P[1][c] + (Q[1][c]-P[1][c])*f; })]; outp.push(M); inp.push(M); } }
+        for (let e = 1; e + 1 < outp.length; e++) for (const q of [outp[0], outp[e], outp[e+1]]) mb.sv(q[0], q[1], col, mat);
+        rem = inp; }
+    }
   }
-  // wheel arches: dark discs lying on the body side, cut off at the sill
+  // the side of the body at a given height and station: where the arch meets the paint
+  const sideX = function (y, z) { let i = 0; while (i < NS-2 && st[i+1].z < z) i++; const f = Math.max(0, Math.min(1, (z - st[i].z)/(st[i+1].z - st[i].z)));
+    const at = function (ring) { if (y <= ring[1][1]) return ring[1][0]; for (let j = 1; j < 8; j++) if (y <= ring[j+1][1]) return ring[j][0] + (ring[j+1][0]-ring[j][0])*(y - ring[j][1])/Math.max(1e-6, ring[j+1][1]-ring[j][1]); return ring[8][0]; };
+    return at(rings[i])*(1-f) + at(rings[i+1])*f; };
+  const WX = Math.min(sideX(S.r, S.zF), sideX(S.r, S.zR)) - S.tw/2 - 0.012;             // the tyres sit just inside the body sides
+  // wheel wells: a dark tunnel from the opening inwards, closed by a wall behind the wheel
+  const WELL = [0.016,0.016,0.019];
   for (const zw of [S.zF, S.zR]) for (const sd of [-1, 1]) {
-    const ax = sd*(S.wid/2*plan(zw/half)*0.992 + 0.006), ra = S.r*1.2, yb = S.clr + 0.02, cen = [ax, Math.max(yb, S.r), zw], NA = 26;
-    for (let k = 0; k < NA; k++) { const a0 = k/NA*6.2832, a1 = (k+1)/NA*6.2832;
-      mb.tri(cen, [ax, Math.max(yb, S.r + Math.sin(a0)*ra), zw + Math.cos(a0)*ra], [ax, Math.max(yb, S.r + Math.sin(a1)*ra), zw + Math.cos(a1)*ra], DARK, 0, [0, S.r, zw]); }
+    const xin = sd*(WX - S.tw/2 - 0.17), ring = [];
+    for (let k = 0; k <= NA; k++) { const a = k/NA*6.2832, z = zw + Math.cos(a)*RA; let i = 0; while (i < NS-2 && st[i+1].z < z) i++; const y = Math.max(st[i].yb, CY + Math.sin(a)*RA); ring.push([sd*(sideX(y, z) - 0.004), y, z]); }
+    for (let k = 0; k < NA; k++) { const P = ring[k], Q = ring[k+1]; if (Math.abs(P[1]-Q[1]) < 1e-5 && P[1] < CY - RA*0.5) continue;                 // the open bottom
+      mb.quad(P, Q, [xin, Q[1], Q[2]], [xin, P[1], P[2]], WELL, 0, [P[0], CY + (P[1]-CY)*3, zw + (P[2]-zw)*3]);
+      mb.tri([xin, CY, zw], [xin, P[1], P[2]], [xin, Q[1], Q[2]], WELL, 0, [0, CY, zw]); }
   }
   // nose and tail faces
   for (const e of [0, NS-1]) { const ring = rings[e], s = st[e], dir = e ? 1 : -1, cen = [0, (s.yb + s.hb)/2 + 0.02, s.z + dir*0.05];
@@ -939,7 +1014,7 @@ function buildCar(S) {
     wm.quad([hw,ri*c0,ri*s0],[hw,ri*c1,ri*s1],[x,ri*c1,ri*s1],[x,ri*c0,ri*s0], RIM, 6, [0,0,0]);                   // rim lip
     wm.tri([-hw,r*c0,r*s0],[-hw,r*c1,r*s1],[-hw,0,0], RIMD, 0, [1,0,0]);                                           // inner face
   }
-  return { spec: S, body: upload(mb), wheel: upload(wm), r: r, wx: (S.wid/2 - S.tw/2 + 0.015)*U, zF: S.zF*U, zR: S.zR*U, len: S.len*U, half: S.len*U/2 };
+  return { spec: S, body: upload(mb), wheel: upload(wm), r: r, wx: WX*U, zF: S.zF*U, zR: S.zR*U, len: S.len*U, half: S.len*U/2 };
 }
 let CARS = [];
 
@@ -1204,7 +1279,7 @@ function carParts(c) {            // body matrix, shadow matrix and the four whe
 const TAGS = [], SHIFT = new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]); let LASTVP = null;
 function nameTags() {
   const host = document.getElementById('tags'); if (!host) return; let n = 0;
-  if (LASTVP && NET.racing && (state === 'race' || state === 'countdown' || state === 'finished')) for (const c of cars) { if (!c.net || !c.name || c.nid >= 100) continue;
+  if (LASTVP && (NET.racing || spec) && (state === 'race' || state === 'countdown' || state === 'finished')) for (const c of cars) { if (spec ? (c === spec || !c.name) : (!c.net || !c.name || c.nid >= 100)) continue;       // while watching, every other car is named, the player's own too
     const m = LASTVP, y = 1.9, cw = m[3]*c.x + m[7]*y + m[11]*c.z + m[15]; if (cw < 1 || cw > 150) continue;
     const sx = ((m[0]*c.x + m[4]*y + m[8]*c.z + m[12])/cw*0.5 + 0.5)*viewW(), sy = (0.5 - (m[1]*c.x + m[5]*y + m[9]*c.z + m[13])/cw*0.5)*viewH();
     let t = TAGS[n]; if (!t) { t = TAGS[n] = { el: document.createElement('div'), name: '' }; t.el.className = 'tag'; host.appendChild(t.el); }
@@ -1217,7 +1292,7 @@ function render() {
   gl.viewport(0, 0, w, hgt); gl.clearStencil(0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
   if (!T || !W || !player) return;
   let vp = mul(perspective(camFov*Math.PI/180, aspect, 0.5, 1900), lookAt(camEye, camLook));
-  if (state === 'menu') { const sb = stageBox(); if (sb) { const vw2 = viewW(), vh2 = viewH(), k = Math.max(0.3, Math.min(2.2, Math.min(0.66*(sb[2] + 90)/(0.40*vh2), 0.7*sb[3]/(0.19*vh2))));       // the picture is shrunk and shifted so the car lands in the box
+  if (state === 'menu') { const sb = STAGE; if (sb) { const vw2 = viewW(), vh2 = viewH(), k = Math.max(0.3, Math.min(2.2, WIDE ? Math.min(0.66*(sb[2] + 90)/(0.40*vh2), 0.9*sb[3]/(0.31*vh2)) : Math.min(sb[2]/(0.80*vh2), 1.05*sb[3]/(0.43*vh2))));     // between side panels the car may reach under their faded edges; in the one-column showroom it stays inside the box at every angle       // the picture is shrunk and shifted so the car lands in the box
       SHIFT[0] = k; SHIFT[5] = k; SHIFT[12] = sb[0]/vw2*2 - 1; SHIFT[13] = 1 - sb[1]/vh2*2; vp = mul(SHIFT, vp); } }
   LASTVP = vp;
   const planes = frustum(vp), tm = (performance.now()/1000) % 1000; STATS.chunks = 0; STATS.tris = 0;
@@ -1496,7 +1571,7 @@ const LEVELS = [
 let level = 1, wins = {};
 try { const l = parseInt(localStorage.getItem('td_level') || '1', 10); if (l >= 0 && l < 4) level = l; wins = JSON.parse(localStorage.getItem('td_wins') || '{}') || {}; } catch (e) {}
 let menuT = 0, garage = { type: 0, color: 0 };
-try { const g = JSON.parse(localStorage.getItem('td_car') || 'null'); if (g && g.type >= 0 && g.type < 5 && g.color >= 0 && g.color < 8) garage = g; } catch (e) {}
+try { const g = JSON.parse(localStorage.getItem('td_car') || 'null'); if (g && g.type >= 0 && g.type < CAR_TYPES.length && g.color >= 0 && g.color < 8) garage = { type: g.type | 0, color: g.color | 0 }; } catch (e) {}
 let challenge = null, rivalBot = null, camH = 0, camX = 0, camZ = 0, lastShown = '', demo = null, prevState = 'race';
 function gridPlace(c, slot) {      // slot 0 is pole position, just behind the line
   const N = T.N, i = ((N - 5 - slot*4.4) % N + N) % N | 0, side = (slot % 2 ? 1 : -1)*2.4;
@@ -1521,7 +1596,7 @@ function setupRace(trackId, useChallenge) {
   if (rivalBot) { r.style.display = 'block'; r.textContent = 'Соперник: ' + challenge.name + ' — ' + fmt(challenge.ms); } else r.style.display = 'none';
 }
 function resetRaceState() {
-  hudReset();
+  specStop(false); hudReset();
   NET.results = {}; NET.firstFin = 0; raceClock = 0; if (!NET.racing) { player.nid = 0; bots.forEach(function (b, k) { b.nid = 100 + k; }); }
   raceT = 0; bestLap = 0; lapStart = 0; finishMs = 0; particles = []; skids = []; setupPickups(); hudItems(); camH = player.h; camX = player.x; camZ = player.z; demo = null;
   document.getElementById('speed').textContent = '0'; document.getElementById('boost').style.width = '0%'; document.getElementById('status').innerHTML = ''; keys.gas = keys.brake = keys.left = keys.right = false; gasBtn = brakeBtn = false;
@@ -1538,6 +1613,32 @@ function beginCountdown() {
   document.getElementById('hud').style.display = 'block'; document.getElementById('linkbox').style.display = 'none';
 }
 function progress(c) { return c.bot ? c.s - c.s0 + T.N : c.lap*T.N + c.idx; }
+// After the finish the player may ride along with whoever is still racing: the camera, the sound and the map follow that car.
+let spec = null, specAuto = false, specHold = 0, specTick = 0;
+function ranking() { const rows = cars.slice(); rows.sort(function (a, b) { const ta = NET.results[a.nid], tb = NET.results[b.nid]; return ta || tb ? (ta || 1e12) - (tb || 1e12) : progress(b) - progress(a); }); return rows; }      // finished by time, the rest by how far they are
+function specSet(c) { spec = c; specAuto = !c.done; specHold = 0; camH = c.h; camX = c.x; camZ = c.z; specBar(); }
+function specBar() {
+  if (!spec) return; const r = ranking(), ms = NET.results[spec.nid], c = spec.color;
+  hset('specname', spec.name || CAR_TYPES[spec.type || 0].name); hstyle('specdot', 'background', 'rgb(' + c.map(function (v) { return Math.round(Math.pow(v, 0.8)*255); }).join(',') + ')');
+  hset('specstat', (r.indexOf(spec) + 1) + ' место · ' + (ms ? 'финиш ' + fmt(ms) : 'круг ' + Math.max(1, Math.min(LAPS, spec.lap || 1)) + '/' + LAPS));
+}
+function specStart() {
+  if (state !== 'finished') return; const others = ranking().filter(function (c) { return c !== player; }); if (!others.length) return;
+  document.getElementById('finish').classList.add('hidden'); document.body.classList.add('spec'); document.getElementById('hud').style.display = '';
+  specSet(others.filter(function (c) { return !c.done; })[0] || others[0]);
+}
+function specStop(results) {
+  const was = !!spec; spec = null; document.body.classList.remove('spec'); if (!was) return;
+  if (player) { camH = player.h; camX = player.x; camZ = player.z; }
+  if (results && state === 'finished') { document.getElementById('finish').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; netResults(); }
+}
+function specStep(d) { if (!spec) return; const list = ranking().filter(function (c) { return c !== player; }); if (!list.length) { specStop(true); return; } specSet(list[(Math.max(0, list.indexOf(spec)) + d + list.length) % list.length]); }
+function specFrame(dt) {                              // called while the race goes on behind the results
+  if (!spec) return;
+  if (cars.indexOf(spec) < 0) { const live = ranking().filter(function (c) { return c !== player; }); if (live.length) specSet(live.filter(function (c) { return !c.done; })[0] || live[0]); else { specStop(true); return; } }
+  if (spec.done && specAuto) { specHold += dt; if (specHold > 3) { const next = ranking().filter(function (c) { return c !== player && !c.done; })[0]; if (next) specSet(next); else { specStop(true); return; } } }      // the watched car is home: on to the next one still out there
+  if (!(specTick++ % 8)) specBar();
+}
 function showBig(text, ms) { const el = document.getElementById('big'); el.textContent = text; el.classList.add('show'); setTimeout(function () { el.classList.remove('show'); }, ms || 700); }
 let raceClock = 0;
 let noteTimer = 0;
@@ -1561,7 +1662,7 @@ function finishRace() {
   document.getElementById('verdict').textContent = v;
   const mpOn = NET.racing; for (const pr of [['share', !mpOn], ['again', !mpOn], ['tomenu', !mpOn], ['tolobby', mpOn && NET.host], ['mpleave', mpOn], ['fresults', true]]) document.getElementById(pr[0]).style.display = pr[1] ? '' : 'none';
   netResults();
-  setTimeout(function () { if (state === 'finished') { document.getElementById('finish').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; if (!mpOn) buildMenu(); } }, 1600);
+  setTimeout(function () { if (state === 'finished' && !spec) { document.getElementById('finish').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; if (!mpOn) buildMenu(); } }, 1600);
 }
 
 // ---------------------------------------------------------------------------
@@ -1778,7 +1879,7 @@ let uiMode = 'auto'; try { const u = localStorage.getItem('td_ui'); if (u === 'p
 function applyUI(kind) { document.body.classList.toggle('kbd', kind === 'pc'); document.body.classList.toggle('mob', kind !== 'pc'); try { layout(); } catch (e) {} }      // before the renderer exists this quietly does nothing
 function detectUI() { if (uiMode !== 'auto') return uiMode; let touch = false; try { touch = (navigator.maxTouchPoints || 0) > 0 && window.matchMedia('(pointer: coarse)').matches; } catch (e) {} return touch ? 'mobile' : 'pc'; }
 applyUI(detectUI());
-window.addEventListener('touchstart', function () { if (uiMode === 'auto') applyUI('mobile'); }, { passive: true });
+window.addEventListener('touchstart', function () { if (uiMode === 'auto' && !document.body.classList.contains('mob')) applyUI('mobile'); }, { passive: true });
 (function () {                                        // the strip is a slider: where the thumb rests is how far the wheel is turned
   const el = document.getElementById('steer'), knob = document.getElementById('knob');
   const set = function (e) { const r = el.getBoundingClientRect(), k = Math.max(-1, Math.min(1, ROT ? (e.clientY - (r.top + r.height/2))/(r.height*0.40) : (e.clientX - (r.left + r.width/2))/(r.width*0.40)));
@@ -1797,6 +1898,7 @@ window.addEventListener('touchstart', function () { if (uiMode === 'auto') apply
 function key(e, down) {
   if (e.target && e.target.tagName === 'INPUT') { if (down && e.key === 'Enter') netJoin(e.target.value); return; }      // typing a room code
   const k = (e.key || '').toLowerCase();
+  if (spec) { if (down && !e.repeat) { if (k === 'arrowleft' || k === 'a' || k === 'ф') specStep(-1); else if (k === 'arrowright' || k === 'd' || k === 'в') specStep(1); else if (k === 'escape' || k === 'enter' || k === ' ') specStop(true); } if (k.indexOf('arrow') === 0 || k === ' ') e.preventDefault(); return; }
   if (down && uiMode === 'auto' && (k.indexOf('arrow') === 0 || 'wasdцфыв'.indexOf(k) >= 0)) applyUI('pc');
   if (k === 'arrowleft' || k === 'a' || k === 'ф') keys.left = down; else if (k === 'arrowright' || k === 'd' || k === 'в') keys.right = down;
   else if (k === 'arrowdown' || k === 's' || k === 'ы') { keys.brake = down; e.preventDefault(); }
@@ -1826,8 +1928,8 @@ function hudReset() { for (const k in HUDC) { HUDC[k].v = null; HUDC[k].s = {}; 
 let hudTick = 0;
 function update(dt) {
   if (state === 'menu') {                       // background: a car on autopilot
-    if (!demo || demo.type !== garage.type || demo.color !== PAINTS[garage.color]) {     // the chosen car on the grid
-      demo = newCar(PAINTS[garage.color], garage.type); const i = T.N - 6; demo.x = T.x[i]; demo.z = T.z[i]; demo.h = T.h[i]; demo.idx = i; player = demo; cars = [demo]; bots = []; }
+    if (!demo) { demo = newCar(PAINTS[garage.color], garage.type); const i = T.N - 6; demo.x = T.x[i]; demo.z = T.z[i]; demo.h = T.h[i]; demo.idx = i; player = demo; cars = [demo]; bots = []; }     // the chosen car on the grid
+    if (demo.type !== garage.type || demo.color !== PAINTS[garage.color]) { demo.type = garage.type; demo.color = PAINTS[garage.color]; demo.css = null; }
     menuT += dt;
   } else if (state === 'countdown') {
     countT -= dt; const n = Math.ceil(countT - 0.2), label = n >= 1 ? String(n) : 'GO!';
@@ -1852,7 +1954,7 @@ function update(dt) {
       if (player.lap > LAPS) finishRace(); else { note(player.lap === LAPS ? 'Последний круг!' : 'Круг ' + fmt(lapMs)); beep(700, 0.2, 'triangle', 0.06); }
     } else if (state === 'race' && player.lap > lapBefore && lapBefore === 0) lapStart = raceT;
     for (const b of bots) { stepBot(b, dt); if (!b.done && b.s - b.s0 >= LAPS*T.N) { b.done = true; netFinished(b.nid, Math.round((raceClock - (b.v > 1 ? (b.s - b.s0 - LAPS*T.N)/b.v : 0))*1000)); } if (b.sliding && particles.length < 50) smoke(b, [0.93,0.93,0.95], dt); else if (b.nitro > 0) smoke(b, [1,0.62,0.18], dt, true); }
-    if (state === 'race') collide(dt);
+    if (state === 'race') collide(dt); else specFrame(dt);
     updatePowerups(dt);
   }
   if (NET.racing && state !== 'menu') netTick(dt);
@@ -1949,7 +2051,7 @@ function mpMsg(t) { document.getElementById('mpmsg').textContent = t || ''; }
 function netError(e) { return ({ 'peer-unavailable': 'Комната с таким кодом не найдена', 'unavailable-id': 'Такой код уже занят, попробуй ещё раз', load: 'Не удалось загрузить модуль связи. Игра должна быть открыта с хостинга или из Telegram, нужен интернет', network: 'Нет связи с сервером, который сводит игроков', blocked: 'Нет связи с сервером, который сводит игроков. Если игра открыта в Claude — открой сам артефакт Turbo Drift, а не предпросмотр файла', denied: 'Нет прав на игру вместе в этом артефакте: владелец должен дать тебе доступ на участие', room: 'Не удалось открыть комнату, попробуй ещё раз', timeout: 'Не удалось соединиться: сеть одного из игроков не пропускает прямое соединение', browser: 'Этот браузер не поддерживает прямое соединение', connect: 'Не удалось соединиться с комнатой' })[e] || ('Ошибка соединения: ' + e); }
 function netOpen() {
   for (const id of ['menu','finish','paused']) document.getElementById(id).classList.add('hidden');
-  document.getElementById('mp').classList.remove('hidden'); document.getElementById('mp').classList.toggle('inroom', NET.on); STAGE = null; document.getElementById('mpstart').style.display = NET.on ? 'none' : ''; document.getElementById('mplobby').style.display = NET.on ? '' : 'none'; mpMsg('');
+  document.getElementById('mp').classList.remove('hidden'); document.getElementById('mp').classList.toggle('inroom', NET.on); stageTick = 0; document.getElementById('mpstart').style.display = NET.on ? 'none' : ''; document.getElementById('mplobby').style.display = NET.on ? '' : 'none'; mpMsg('');
 }
 function netHost() {
   const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for (let k = 0; k < 5; k++) code += A[Math.floor(Math.random()*A.length)];
@@ -1970,7 +2072,7 @@ function netLeave() {
   const tr = NET.tr; NET.on = false; NET.racing = false; NET.tr = null; NET.roster = []; setTimeout(function () { if (tr) tr.close(); }, 200);
 }
 function netLobby() {
-  NET.racing = false; if (state !== 'menu') { state = 'menu'; demo = null; particles = []; skids = []; engine(0, false); document.getElementById('hud').style.display = 'none'; }
+  specStop(false); NET.racing = false; if (state !== 'menu') { state = 'menu'; demo = null; particles = []; skids = []; engine(0, false); document.getElementById('hud').style.display = 'none'; }
   netOpen(); document.getElementById('mproom').textContent = NET.code;
   document.getElementById('mphostbox').style.display = NET.host ? '' : 'none'; document.getElementById('mpwait').style.display = NET.host ? 'none' : '';
   const el = document.getElementById('mplist'); el.innerHTML = '';
@@ -2035,6 +2137,7 @@ function netResults() {
   const el = document.getElementById('fresults'); el.innerHTML = ''; const rows = [];
   for (const c of cars) rows.push({ c: c, ms: NET.results[c.nid] }); rows.sort(function (a, b) { return a.ms || b.ms ? (a.ms || 1e12) - (b.ms || 1e12) : progress(b.c) - progress(a.c); });      // finished by time, the rest by how far they are
   rows.forEach(function (r, i) { const d = document.createElement('div'); if (r.c === player) d.className = 'me'; const sp = document.createElement('span'); sp.textContent = (r.ms ? (i + 1) + '. ' : '— ') + (r.c.name || 'Игрок'); const b = document.createElement('b'); b.textContent = r.ms ? fmt(r.ms) : 'едет…'; d.appendChild(sp); d.appendChild(b); el.appendChild(d); });
+  document.getElementById('watch').style.display = cars.some(function (c) { return c !== player && !c.done; }) ? '' : 'none';
   const my = rows.findIndex(function (r) { return r.c === player; }); if (NET.results[NET.me]) document.getElementById('fplace').textContent = (my + 1) + ' место';
 }
 function netMsg(from, m) {
@@ -2096,8 +2199,8 @@ function drawMap() {
     for (let i = 0; i <= T.N; i += 3) { const j = i % T.N; if (i === 0) g.moveTo(mx(T.x[j]), mz(T.z[j])); else g.lineTo(mx(T.x[j]), mz(T.z[j])); }
     g.closePath(); g.stroke(); T.mapImg = im; }
   mctx.clearRect(0, 0, S, S); mctx.drawImage(T.mapImg, 0, 0);
-  for (const c of cars) { if (!c.css) c.css = 'rgb(' + c.color.map(function (v) { return Math.round(v*255); }).join(',') + ')'; mctx.fillStyle = c.css; mctx.strokeStyle = '#fff'; mctx.lineWidth = c === player ? 4 : 2;
-    mctx.beginPath(); mctx.arc(mx(c.x), mz(c.z), c === player ? 10 : 7, 0, 7); mctx.fill(); mctx.stroke(); }
+  for (const c of cars) { if (!c.css) c.css = 'rgb(' + c.color.map(function (v) { return Math.round(v*255); }).join(',') + ')'; mctx.fillStyle = c.css; mctx.strokeStyle = '#fff'; mctx.lineWidth = c === (spec || player) ? 4 : 2;
+    mctx.beginPath(); mctx.arc(mx(c.x), mz(c.z), c === (spec || player) ? 10 : 7, 0, 7); mctx.fill(); mctx.stroke(); }
 }
 
 // ---------------------------------------------------------------------------
@@ -2128,35 +2231,41 @@ function camera(dt) {
   const portrait = canvas.width < canvas.height;
   if (state === 'menu') {                       // slow orbit around the chosen car
     const a = player.h + 2.5 + menuT*0.35, D = portrait ? 5.4 : 4.6;
-    if (STAGE) { camEye = [player.x + Math.sin(a)*4.6, 1.25 + Math.sin(menuT*0.5)*0.25, player.z + Math.cos(a)*4.6]; camLook = [player.x, 0.45, player.z]; camFov = 44; return; }
+    if (stageBox(dt)) { camEye = [player.x + Math.sin(a)*4.6, 1.25 + Math.sin(menuT*0.5)*0.25, player.z + Math.cos(a)*4.6]; camLook = [player.x, 0.45, player.z]; camFov = 44; return; }
     camEye = [player.x + Math.sin(a)*D, 1.25 + Math.sin(menuT*0.5)*0.25, player.z + Math.cos(a)*D]; camLook = [player.x, portrait ? -0.95 : 0.15, player.z]; camFov = portrait ? 62 : 44; return;
   }
-  const slip = player.bot ? 0 : Math.atan2(player.vl || 0, Math.max(6, player.vf));               // in a slide the camera follows the travel, so the car is seen sideways
-  camH = wrap(camH + wrap(player.h + slip*0.7 - camH)*Math.min(1, dt*4.6)); camX += (player.x - camX)*Math.min(1, dt*14); camZ += (player.z - camZ)*Math.min(1, dt*14);
-  const boost = player.boost > 0 ? 1 : 0, D = portrait ? 5.7 : 5.1, H = portrait ? 2.9 : 2.15;
+  const P = (state === 'finished' && spec) || player, slip = P.bot ? 0 : Math.atan2(P.vl || 0, Math.max(6, P.vf));               // in a slide the camera follows the travel, so the car is seen sideways
+  camH = wrap(camH + wrap(P.h + slip*0.7 - camH)*Math.min(1, dt*4.6)); camX += (P.x - camX)*Math.min(1, dt*14); camZ += (P.z - camZ)*Math.min(1, dt*14);
+  const boost = P.boost > 0 || (P !== player && P.nitro > 0) ? 1 : 0, D = portrait ? 5.7 : 5.1, H = portrait ? 2.9 : 2.15;
   camShake = Math.max(0, camShake - dt*2.2); const shake = (boost ? (Math.random() - 0.5)*0.05 : 0) + (Math.random() - 0.5)*camShake;
   camEye = [camX - Math.sin(camH)*D + shake, H + shake, camZ - Math.cos(camH)*D]; camLook = [camX + Math.sin(camH)*5, 0.9, camZ + Math.cos(camH)*5];
-  const target = (portrait ? 74 : 60) + Math.max(0, player.vf - 20)*0.45 + boost*5; camFov += (target - camFov)*Math.min(1, dt*5);
+  const target = (portrait ? 74 : 60) + Math.max(0, P.vf - 20)*0.45 + boost*5; camFov += (target - camFov)*Math.min(1, dt*5);
 }
 // Render resolution adapts to the device: if frames run slow, draw fewer pixels.
 let renderScale = Math.min(document.body.classList.contains('mob') ? 1.5 : 2, window.devicePixelRatio || 1), slowFrames = 0, fastFrames = 0;
-let STAGE = null, stageTick = 0;
+let STAGE = null, STAGE_T = null, stageTick = 0;
 // Where the showroom car should stand on screen: the centre and size of the empty box in the menu or the lobby.
-function stageBox() {
-  if (STAGE && (stageTick++ % 10)) return STAGE; stageTick = 1;
-  const lob = NET.on && !document.getElementById('mp').classList.contains('hidden'), el = document.getElementById(lob ? 'mpstage' : 'stage');
-  if (!el || !el.offsetWidth || (!lob && document.getElementById('menu').classList.contains('hidden'))) return (STAGE = null);
-  let x = 0, y = 0, e = el; while (e && e !== document.body) { x += e.offsetLeft - (e.scrollLeft || 0); y += e.offsetTop - (e.scrollTop || 0); e = e.offsetParent; }
-  return (STAGE = [x + el.offsetWidth/2, y + el.offsetHeight/2, el.offsetWidth, el.offsetHeight]);
+// Measured every few frames (at once after a layout change); the car glides to a new place instead of jumping.
+function stageBox(dt) {
+  if (!(stageTick++ % 6)) { stageTick = 1;
+    const lob = NET.on && !document.getElementById('mp').classList.contains('hidden'), el = document.getElementById(lob ? 'mpstage' : 'stage');
+    if (!el || !el.offsetWidth || (!lob && document.getElementById('menu').classList.contains('hidden'))) STAGE_T = null;
+    else { let x = 0, y = 0, e = el; while (e && e !== document.body) { x += e.offsetLeft - (e.scrollLeft || 0); y += e.offsetTop - (e.scrollTop || 0); e = e.offsetParent; }
+      STAGE_T = [x + el.offsetWidth/2, y + el.offsetHeight/2, el.offsetWidth, el.offsetHeight]; } }
+  if (!STAGE_T) return (STAGE = null);
+  if (!STAGE) return (STAGE = STAGE_T.slice());
+  const f = 1 - Math.exp(-(dt || 0.033)*12); for (let i = 0; i < 4; i++) { const d = STAGE_T[i] - STAGE[i]; STAGE[i] = Math.abs(d) < 0.5 ? STAGE_T[i] : STAGE[i] + d*f; }
+  return STAGE;
 }
-let ROT = false;                                  // true while the page is drawn rotated 90° inside an upright screen
+let WIDE = true, ROT = false;                                  // true while the page is drawn rotated 90° inside an upright screen
 function viewW() { return ROT ? window.innerHeight : window.innerWidth; }
 function viewH() { return ROT ? window.innerWidth : window.innerHeight; }
-function resize() { canvas.width = Math.max(2, Math.floor(viewW()*renderScale)); canvas.height = Math.max(2, Math.floor(viewH()*renderScale)); }
+function resize() { const w = Math.max(2, Math.floor(viewW()*renderScale)), h = Math.max(2, Math.floor(viewH()*renderScale)); if (canvas.width !== w) canvas.width = w; if (canvas.height !== h) canvas.height = h; }      // assigning a size, even the same one, wipes the picture and reallocates it
 // A phone plays in landscape. The player turns the phone so its top points left; the page is rotated to match.
 function layout() {
   const b = document.body, mob = b.classList.contains('mob'); ROT = mob && window.innerHeight > window.innerWidth*1.05;
-  b.classList.toggle('rot', ROT); b.classList.toggle('land', mob); b.classList.toggle('wide', mob || window.innerWidth >= 860); b.classList.toggle('tiny', mob && Math.max(window.innerWidth, window.innerHeight) < 760); STAGE = null;
+  const iw = window.innerWidth, ih = window.innerHeight, wide = mob || iw >= 860 || (iw >= 640 && iw >= ih*1.25);       // a PC window that is narrow or upright gets the one-column showroom
+  b.classList.toggle('rot', ROT); b.classList.toggle('land', mob); b.classList.toggle('wide', wide); WIDE = wide; b.classList.toggle('tiny', mob ? Math.max(iw, ih) < 760 : (wide && iw < 860)); stageTick = 0;
   if (ROT) { b.style.width = window.innerHeight + 'px'; b.style.height = window.innerWidth + 'px'; b.style.transform = 'translateX(' + window.innerWidth + 'px) rotate(90deg)'; }
   else { b.style.width = ''; b.style.height = ''; b.style.transform = ''; }
   resize();
@@ -2182,7 +2291,7 @@ function pause(on) {
 document.addEventListener('click', function () { if (document.body.classList.contains('mob') && TILT.mode === 'tilt') tiltStart(); });
 document.addEventListener('visibilitychange', function () { if (document.hidden && !NET.racing) pause(true); });
 function toMenu() {
-  if (NET.on) netLeave();
+  specStop(false); if (NET.on) netLeave();
   state = 'menu'; demo = null; particles = []; skids = []; engine(0, false);
   for (const id of ['finish','paused','mp']) document.getElementById(id).classList.add('hidden');
   document.getElementById('menu').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; buildMenu();
@@ -2249,6 +2358,8 @@ document.getElementById('fireback').addEventListener('click', function () { if (
 document.getElementById('share').addEventListener('click', share);
 document.getElementById('again').addEventListener('click', function () { startRace(T.id, !!rivalBot); });
 document.getElementById('tomenu').addEventListener('click', toMenu);
+document.getElementById('watch').addEventListener('click', specStart); document.getElementById('specback').addEventListener('click', function () { specStop(true); });
+document.getElementById('specprev').addEventListener('click', function () { specStep(-1); }); document.getElementById('specnext').addEventListener('click', function () { specStep(1); });
 document.getElementById('pause').addEventListener('click', function () { pause(true); });
 document.getElementById('resume').addEventListener('click', function () { pause(false); });
 document.getElementById('quit').addEventListener('click', toMenu);
