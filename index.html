@@ -222,7 +222,7 @@
       Работают и <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
     </div>
     <div style="margin-top:6px"><b>Долгий занос</b> заряжает турбо, оно сработает на выходе</div>
-    <div style="opacity:.5;margin-top:8px">версия 23</div>
+    <div style="opacity:.5;margin-top:8px">версия 24</div>
   </div>
 </div></div>
 
@@ -1278,7 +1278,7 @@ function autopilot(c) {
   return { steer: Math.max(-1, Math.min(1, d*3.2)), brake: c.vf > T.vp[(c.idx + 5) % N]*1.03 + 1 };
 }
 // computer opponents ride the centreline at a share of the ideal speed
-function newBot(color, skill, lane, name, type) { const b = newCar(color, type); b.bot = true; b.skill = skill; b.lane = lane; b.s = 0; b.v = 0; b.name = name; b.seed = Math.random()*6; return b; }
+function newBot(color, skill, lane, name, type) { const b = newCar(color, type); b.bot = true; if (name === 'Бот') name = CAR_TYPES[type || 0].name; b.skill = skill; b.lane = lane; b.s = 0; b.v = 0; b.name = name; b.seed = Math.random()*6; return b; }
 function stepBot(b, dt) {
   const v0 = b.v, N = T.N;
   if (b.done) { b.v = Math.max(0, b.v - 12*dt); }
@@ -1376,6 +1376,7 @@ function setupRace(trackId, useChallenge) {
   if (rivalBot) { r.style.display = 'block'; r.textContent = 'Соперник: ' + challenge.name + ' — ' + fmt(challenge.ms); } else r.style.display = 'none';
 }
 function resetRaceState() {
+  NET.results = {}; NET.firstFin = 0; raceClock = 0; if (!NET.racing) { player.nid = 0; bots.forEach(function (b, k) { b.nid = 100 + k; }); }
   raceT = 0; bestLap = 0; lapStart = 0; finishMs = 0; particles = []; skids = []; setupPickups(); hudItems(); camH = player.h; camX = player.x; camZ = player.z; demo = null;
   document.getElementById('speed').textContent = '0'; document.getElementById('boost').style.width = '0%'; document.getElementById('status').innerHTML = ''; keys.gas = keys.brake = keys.left = keys.right = false; gasBtn = brakeBtn = false;
   document.getElementById('total').textContent = cars.length; document.getElementById('laps').textContent = LAPS;
@@ -1392,13 +1393,14 @@ function beginCountdown() {
 }
 function progress(c) { return c.bot ? c.s - c.s0 + T.N : c.lap*T.N + c.idx; }
 function showBig(text, ms) { const el = document.getElementById('big'); el.textContent = text; el.classList.add('show'); setTimeout(function () { el.classList.remove('show'); }, ms || 700); }
+let raceClock = 0;
 let noteTimer = 0;
 function note(text) { const el = document.getElementById('note'); el.textContent = text; el.classList.add('show'); clearTimeout(noteTimer); noteTimer = setTimeout(function () { el.classList.remove('show'); }, 1200); }
 
 function finishRace() {
   state = 'finished'; finishMs = Math.round(raceT*1000); player.done = true; haptic('win'); beep(660, 0.5, 'triangle', 0.08, 1320);
   const ahead = cars.filter(function (b) { return b !== player && b.done; }).length; place = ahead + 1;
-  if (NET.racing) netFinished(player.nid, finishMs);
+  netFinished(player.nid, finishMs);
   const key = 'u' + T.id, isBest = !bestTimes[key] || finishMs < bestTimes[key];
   if (isBest) { bestTimes[key] = finishMs; saveBest(); }
   if (place === 1 && !NET.racing) { wins[key] = wins[key] || [0,0,0,0]; wins[key][level] = 1; try { localStorage.setItem('td_wins', JSON.stringify(wins)); } catch (e) {} }
@@ -1411,8 +1413,8 @@ function finishRace() {
   else if (NET.racing) v = '';
   else if (place === 1) v = 'Победа! Отправь время друзьям';
   document.getElementById('verdict').textContent = v;
-  const mpOn = NET.racing; for (const pr of [['share', !mpOn], ['again', !mpOn], ['tomenu', !mpOn], ['tolobby', mpOn && NET.host], ['mpleave', mpOn], ['fresults', mpOn]]) document.getElementById(pr[0]).style.display = pr[1] ? '' : 'none';
-  if (mpOn) netResults();
+  const mpOn = NET.racing; for (const pr of [['share', !mpOn], ['again', !mpOn], ['tomenu', !mpOn], ['tolobby', mpOn && NET.host], ['mpleave', mpOn], ['fresults', true]]) document.getElementById(pr[0]).style.display = pr[1] ? '' : 'none';
+  netResults();
   setTimeout(function () { if (state === 'finished') { document.getElementById('finish').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; if (!mpOn) buildMenu(); } }, 1600);
 }
 
@@ -1678,9 +1680,10 @@ function update(dt) {
   } else if (state === 'countdown') {
     countT -= dt; const n = Math.ceil(countT - 0.2), label = n >= 1 ? String(n) : 'GO!';
     if (label !== lastShown && countT < 3.1) { lastShown = label; showBig(label, 650); beep(n >= 1 ? 440 : 880, n >= 1 ? 0.15 : 0.4, 'square', 0.06); haptic('light'); }
-    if (countT <= 0.2) { state = 'race'; raceT = 0; lapStart = 0; }
+    if (countT <= 0.2) { state = 'race'; raceT = 0; raceClock = 0; lapStart = 0; }
   } else if (state === 'race' || state === 'finished') {
     if (state === 'race') raceT += dt;
+    raceClock += dt;
     const inp = state === 'race' ? readInput() : { steer: 0, brake: player.vf > 0.5, gas: false };
     const lapBefore = player.lap; player.gotBoost = false;
     { const n = Math.max(1, Math.ceil(dt*120)); let gb = false; for (let q = 0; q < n; q++) { stepCar(player, inp.steer, inp.brake, dt/n, inp.gas); gb = gb || player.gotBoost; } player.gotBoost = gb; }      // tyres need small steps
@@ -1696,7 +1699,7 @@ function update(dt) {
       const lapMs = Math.round((raceT - lapStart)*1000); lapStart = raceT; if (!bestLap || lapMs < bestLap) bestLap = lapMs;
       if (player.lap > LAPS) finishRace(); else { note(player.lap === LAPS ? 'Последний круг!' : 'Круг ' + fmt(lapMs)); beep(700, 0.2, 'triangle', 0.06); }
     } else if (state === 'race' && player.lap > lapBefore && lapBefore === 0) lapStart = raceT;
-    for (const b of bots) { stepBot(b, dt); if (!b.done && b.s - b.s0 >= LAPS*T.N) { b.done = true; if (NET.racing) netFinished(b.nid, Math.round(raceT*1000)); } if (b.sliding && particles.length < 50) smoke(b, [0.93,0.93,0.95], dt); else if (b.nitro > 0) smoke(b, [1,0.62,0.18], dt, true); }
+    for (const b of bots) { stepBot(b, dt); if (!b.done && b.s - b.s0 >= LAPS*T.N) { b.done = true; netFinished(b.nid, Math.round((raceClock - (b.v > 1 ? (b.s - b.s0 - LAPS*T.N)/b.v : 0))*1000)); } if (b.sliding && particles.length < 50) smoke(b, [0.93,0.93,0.95], dt); else if (b.nitro > 0) smoke(b, [1,0.62,0.18], dt, true); }
     if (state === 'race') collide(dt);
     updatePowerups(dt);
   }
@@ -1834,10 +1837,10 @@ function netStart() {
   NET.tr.all(m, -1); netBegin(m);
 }
 function netBegin(m) {
-  audio(); NET.racing = true; NET.seen = performance.now(); NET.last = {}; for (const id in NET.conn) NET.last[id] = NET.seen; NET.results = {}; NET.firstFin = 0; NET.sendT = 0; NET.roster = m.list; buildTrack(m.track); rivalBot = null; document.getElementById('rival').style.display = 'none';
+  audio(); NET.racing = true; NET.seen = performance.now(); NET.last = {}; for (const id in NET.conn) NET.last[id] = NET.seen; NET.sendT = 0; NET.roster = m.list; buildTrack(m.track); rivalBot = null; document.getElementById('rival').style.display = 'none';
   player = newCar(PAINTS[garage.color], garage.type); player.name = playerName; player.nid = NET.me; bots = []; cars = [];
   for (const b of m.bots) { if (NET.host) { const c = newBot(PAINTS[b.color] || PAINTS[0], b.skill, 0, 'Бот', b.type); c.nid = b.nid; bots.push(c); cars.push(c); }
-    else { const c = newCar(PAINTS[b.color] || PAINTS[0], b.type); c.net = true; c.nid = b.nid; c.name = 'Бот'; cars.push(c); } }
+    else { const c = newCar(PAINTS[b.color] || PAINTS[0], b.type); c.net = true; c.nid = b.nid; c.name = CAR_TYPES[b.type || 0].name; cars.push(c); } }
   for (const p of m.list) { if (p.nid === NET.me) continue; const c = newCar(PAINTS[p.color] || PAINTS[0], p.type); c.net = true; c.nid = p.nid; c.name = p.name; cars.push(c); }
   cars.push(player);
   m.order.forEach(function (nid, slot) { const c = carByNid(nid); if (!c) return; gridPlace(c, slot); if (c.bot) { placeBot(c); c.lap = 0; } c.sn = null; });
@@ -1864,7 +1867,7 @@ function netTick(dt) {
 function netFinished(nid, ms) { NET.results[nid] = ms; if (!NET.firstFin) { NET.firstFin = performance.now(); NET.closed = false; } netSend({ t: 'fin', nid: nid, ms: ms }); if (state === 'finished') netResults(); }
 function netResults() {
   const el = document.getElementById('fresults'); el.innerHTML = ''; const rows = [];
-  for (const c of cars) rows.push({ c: c, ms: NET.results[c.nid] }); rows.sort(function (a, b) { return (a.ms || 1e12) - (b.ms || 1e12); });
+  for (const c of cars) rows.push({ c: c, ms: NET.results[c.nid] }); rows.sort(function (a, b) { return a.ms || b.ms ? (a.ms || 1e12) - (b.ms || 1e12) : progress(b.c) - progress(a.c); });      // finished by time, the rest by how far they are
   rows.forEach(function (r, i) { const d = document.createElement('div'); if (r.c === player) d.className = 'me'; const sp = document.createElement('span'); sp.textContent = (r.ms ? (i + 1) + '. ' : '— ') + (r.c.name || 'Игрок'); const b = document.createElement('b'); b.textContent = r.ms ? fmt(r.ms) : 'едет…'; d.appendChild(sp); d.appendChild(b); el.appendChild(d); });
   const my = rows.findIndex(function (r) { return r.c === player; }); if (NET.results[NET.me]) document.getElementById('fplace').textContent = (my + 1) + ' место';
 }
