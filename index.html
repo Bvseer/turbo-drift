@@ -154,6 +154,12 @@
   .seclabel { width: min(340px, 100%); font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; opacity: .75; margin: 4px 0 8px; }
   .mpbtn { margin-bottom: 0; }
   .tag { position: absolute; left: 0; top: 0; padding: 1px 7px; border-radius: 8px; background: rgba(10,13,24,.42); font-size: 11px; font-weight: 700; white-space: nowrap; text-shadow: none; pointer-events: none; will-change: transform, opacity; }
+  .sw.taken { opacity: .22; pointer-events: none; }
+  body.land #mp > h1 { font-size: 24px !important; margin: 0; } body.land #mp .roomcode { font-size: 34px; margin: 0 0 4px; } body.land #mp .sub { margin-bottom: 4px; font-size: 13px; }
+  body.land #mplobby { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 330px); column-gap: 26px; align-items: start; justify-items: center; }
+  body.land #mplobby > * { grid-column: 1; } body.land #mplobby > #mphostbox, body.land #mplobby > #mpwait { grid-column: 2; grid-row: 1 / span 8; align-self: center; }
+  body.land #mplobby .plist { margin-top: 6px; } body.land #mplobby .plist div { padding: 6px 12px; font-size: 14px; } body.land #mplobby .btns { margin-top: 4px; } body.land #mplobby button.ghost { padding: 8px 20px; font-size: 14px; }
+  body.land #mptracks .track { padding: 8px 14px; } body.land #mp > .btns button { padding: 8px 22px; font-size: 14px; }
   .hints { margin-top: 16px; font-size: 13px; opacity: .85; line-height: 1.65; } .hints b { color: #ffd23f; }
   .card { background: rgba(255,255,255,.12); border-radius: 18px; padding: 16px 22px; margin-bottom: 14px; min-width: 240px; }
   .card .place { font-size: 54px; font-weight: 900; line-height: 1; } .card .row { display: flex; justify-content: space-between; gap: 24px; font-size: 15px; margin-top: 8px; }
@@ -225,7 +231,7 @@
       Работают и <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
     </div>
     <div style="margin-top:6px"><b>Долгий занос</b> заряжает турбо, оно сработает на выходе</div>
-    <div style="opacity:.5;margin-top:8px">версия 26</div>
+    <div style="opacity:.5;margin-top:8px">версия 27</div>
   </div>
 </div></div>
 
@@ -241,6 +247,9 @@
     <div class="roomcode" id="mproom"></div>
     <div class="btns"><button class="ghost" id="mpshare">Позвать друзей</button></div>
     <div class="plist" id="mplist"></div>
+    <div class="seclabel" style="margin:12px auto 4px">Твоя машина и цвет</div>
+    <div class="garage" style="margin:0 0 6px;justify-content:center"><button class="arrow" id="mpcarprev" aria-label="Предыдущая машина">‹</button><div class="carname"><span id="mpcarname"></span><small id="mpcareng"></small></div><button class="arrow" id="mpcarnext" aria-label="Следующая машина">›</button></div>
+    <div class="swatches" id="mpswatches" style="justify-content:center"></div>
     <div id="mphostbox"><div class="tracks" id="mptracks" style="margin-top:10px"></div><div class="btns"><button class="main" id="mpgo">Старт</button></div><div class="sub" style="margin-top:8px">С друзьями гонка идёт без ботов; если ты в комнате один, поедут боты</div></div>
     <div class="sub" id="mpwait" style="display:none">Ждём, когда хозяин комнаты начнёт заезд…</div>
   </div>
@@ -1937,9 +1946,21 @@ function netLobby() {
   const el = document.getElementById('mplist'); el.innerHTML = '';
   for (const p of NET.roster) { const d = document.createElement('div'); if (p.nid === NET.me) d.className = 'me'; const sp = document.createElement('span'), dot = document.createElement('i'), c = PAINTS[p.color] || [1,1,1];
     dot.style.background = 'rgb(' + c.map(function (v) { return Math.round(v*255); }).join(',') + ')'; sp.appendChild(dot); sp.appendChild(document.createTextNode(p.name + (p.nid === 0 ? ' · хозяин' : ''))); const b = document.createElement('b'); b.textContent = CAR_TYPES[p.type] ? CAR_TYPES[p.type].name : ''; d.appendChild(sp); d.appendChild(b); el.appendChild(d); }
+  { const me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0]; if (me) { garage.type = me.type; garage.color = me.color; }
+    document.getElementById('mpcarname').textContent = CAR_TYPES[garage.type].name; document.getElementById('mpcareng').textContent = CAR_TYPES[garage.type].eng.label;
+    const sw = document.getElementById('mpswatches'), used = NET.roster.filter(function (p) { return p.nid !== NET.me; }).map(function (p) { return p.color; }); sw.innerHTML = '';
+    PAINTS.forEach(function (p, i) { const b = document.createElement('button'); b.className = 'sw' + (i === garage.color ? ' on' : '') + (used.indexOf(i) >= 0 ? ' taken' : '');
+      b.style.background = 'rgb(' + p.map(function (v) { return Math.round(Math.pow(v, 0.8)*255); }).join(',') + ')'; b.setAttribute('aria-label', 'Цвет ' + (i + 1));
+      b.addEventListener('click', function () { netSetCar(garage.type, i); }); sw.appendChild(b); }); }
   if (NET.host) { const tl = document.getElementById('mptracks'); tl.innerHTML = '';
     TRACKS.forEach(function (tr, i) { const b = document.createElement('button'); b.className = 'track' + (i === NET.track ? ' on' : ''); const left = document.createElement('span'); left.textContent = tr.name; const sm = document.createElement('small'); sm.textContent = tr.desc; left.appendChild(sm); b.appendChild(left);
       b.addEventListener('click', function () { NET.track = i; netLobby(); }); tl.appendChild(b); }); }
+}
+function netFreeColor(want, nid) { const used = NET.roster.filter(function (p) { return p.nid !== nid; }).map(function (p) { return p.color; }); if (used.indexOf(want) < 0) return want; for (let c = 0; c < 8; c++) if (used.indexOf(c) < 0) return c; return want; }
+function netSetCar(type, color) {                   // the player changes car or colour in the lobby
+  garage.type = type; garage.color = color; saveGarage();
+  if (NET.host) { const me = NET.roster[0]; me.type = type; me.color = netFreeColor(color, 0); garage.color = me.color; netRoster(); }
+  else { NET.tr.send(0, { t: 'car', type: type, color: color }); netLobby(); }
 }
 function netRoster() { NET.tr.all({ t: 'roster', list: NET.roster, track: NET.track }, -1); if (!NET.racing) netLobby(); }
 function netStart() {
@@ -1952,6 +1973,7 @@ function netStart() {
 }
 function netBegin(m) {
   audio(); NET.racing = true; NET.seen = performance.now(); NET.last = {}; for (const id in NET.conn) NET.last[id] = NET.seen; NET.sendT = 0; NET.roster = m.list; buildTrack(m.track); rivalBot = null; document.getElementById('rival').style.display = 'none';
+  { const me = m.list.filter(function (p) { return p.nid === NET.me; })[0]; if (me) { garage.type = me.type; garage.color = me.color; } }
   player = newCar(PAINTS[garage.color], garage.type); player.name = playerName; player.nid = NET.me; bots = []; cars = [];
   for (const b of m.bots) { if (NET.host) { const c = newBot(PAINTS[b.color] || PAINTS[0], b.skill, 0, 'Бот', b.type); c.nid = b.nid; bots.push(c); cars.push(c); }
     else { const c = newCar(PAINTS[b.color] || PAINTS[0], b.type); c.net = true; c.nid = b.nid; c.name = CAR_TYPES[b.type || 0].name; cars.push(c); } }
@@ -1989,10 +2011,11 @@ function netMsg(from, m) {
   if (!m || typeof m !== 'object' || !NET.on) return;
   if (NET.host) {
     if (m.t === 'hello') { if (NET.racing || NET.roster.length >= 6) { NET.tr.send(from, { t: 'busy', why: NET.racing ? 'race' : 'full' }); return; }
-      const nid = NET.nextId++; NET.conn[from] = nid; NET.roster.push({ nid: nid, name: String(m.name || 'Игрок').slice(0, 16), type: Math.abs(m.type | 0) % CAR_TYPES.length, color: Math.abs(m.color | 0) % 8 }); NET.tr.send(from, { t: 'welcome', nid: nid }); netRoster(); return; }
+      const nid = NET.nextId++; NET.conn[from] = nid; NET.roster.push({ nid: nid, name: String(m.name || 'Игрок').slice(0, 16), type: Math.abs(m.type | 0) % CAR_TYPES.length, color: netFreeColor(Math.abs(m.color | 0) % 8, nid) }); NET.tr.send(from, { t: 'welcome', nid: nid }); netRoster(); return; }
     const who = NET.conn[from]; if (who === undefined) return; NET.last = NET.last || {}; NET.last[from] = performance.now();
     if (!NET.tr.mesh && (m.t === 'st' || m.t === 'use' || m.t === 'hit' || m.t === 'fin')) NET.tr.all(m, from);          // pass it on to the other guests
     if (m.t === 'bye') { netClosed(from); return; }
+    if (m.t === 'car' && !NET.racing) { const p = NET.roster.filter(function (q) { return q.nid === who; })[0]; if (p) { p.type = Math.abs(m.type | 0) % CAR_TYPES.length; p.color = netFreeColor(Math.abs(m.color | 0) % 8, who); netRoster(); } return; }
   } else {
     if (from === 0) NET.seen = performance.now();
     if (m.t === 'welcome') { NET.me = m.nid; return; }
@@ -2191,6 +2214,7 @@ document.getElementById('resume').addEventListener('click', function () { pause(
 document.getElementById('quit').addEventListener('click', toMenu);
 document.getElementById('mpopen').addEventListener('click', function () { audio(); netOpen(); });
 document.getElementById('mphost').addEventListener('click', netHost);
+for (const d of [-1, 1]) document.getElementById(d < 0 ? 'mpcarprev' : 'mpcarnext').addEventListener('click', function () { if (NET.on) netSetCar((garage.type + d + CAR_TYPES.length) % CAR_TYPES.length, garage.color); });
 document.getElementById('mpjoin').addEventListener('click', function () { netJoin(document.getElementById('mpcode').value); });
 document.getElementById('mpgo').addEventListener('click', netStart);
 document.getElementById('mpshare').addEventListener('click', netShare);
