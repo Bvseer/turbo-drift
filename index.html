@@ -9,6 +9,22 @@
     font-family: -apple-system, "SF Pro Text", Roboto, "Segoe UI", sans-serif;
     -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: none; overscroll-behavior: none; }
   #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  body.rot { position: fixed; left: 0; top: 0; transform-origin: 0 0; }
+  /* phone, landscape: menu in two columns, controls in the lower corners */
+  body.land #menu { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 340px); column-gap: 28px; justify-content: center; align-content: start; align-items: start; justify-items: center; padding: 10px 16px 16px; text-align: center;
+    background: linear-gradient(90deg, rgba(14,22,48,.86) 0, rgba(14,22,48,.55) 50%, rgba(14,22,48,.86) 100%); }
+  body.land #menu > * { grid-column: 1; }
+  body.land #menu > h1 { font-size: 30px; margin: 0; } body.land #menu > .sub { margin-bottom: 6px; font-size: 13px; }
+  body.land #menu .garage { margin: 2px 0 6px; } body.land #menu .swatches { margin-bottom: 8px; } body.land #menu .levels { margin-bottom: 7px; }
+  body.land #menu > .seclabel, body.land #menu > .tracks, body.land #menu > .mpbtn, body.land #menu > .challenge { grid-column: 2; }
+  body.land #menu > .sl1 { grid-row: 1; margin-top: 6px; } body.land #menu > .tracks { grid-row: 2 / span 5; gap: 7px; } body.land #menu > .challenge { grid-row: 9; }
+  body.land #menu > .sl2 { grid-row: 7; margin-top: 8px !important; } body.land #menu > .mpbtn { grid-row: 8; padding: 11px; }
+  body.land #menu .track { padding: 9px 14px; } body.land #menu > .hints { grid-column: 1 / span 2; margin-top: 10px; font-size: 12px; }
+  body.land .bottom, body.land.tilt .bottom { left: 0 !important; right: 0 !important; top: 10px; bottom: auto !important; align-items: center !important; flex-direction: column-reverse; }
+  body.land .tiltbar { bottom: 14px !important; } body.land .status { bottom: auto; top: 86px; } body.land .note { top: 30%; }
+  body.land .screen { justify-content: flex-start; } body.land .screen > :first-child { margin-top: auto; } body.land .screen > :last-child { margin-bottom: auto; }
+  body.land #menu > :first-child, body.land #menu > :last-child { margin-top: 0; margin-bottom: 0; }
+  body.land .big { top: 22%; font-size: 80px; } body.land #map { width: 104px; height: 104px; } body.land .btn-pause { top: 124px; }
   .hud { position: fixed; inset: 0; pointer-events: none; font-weight: 800; text-shadow: 0 2px 6px rgba(0,0,0,.45); }
   .tl { position: absolute; left: 14px; top: 12px; }
   .pos { font-size: 40px; line-height: 1; } .pos small { font-size: 18px; opacity: .85; }
@@ -134,7 +150,6 @@
   body.kbd .rival { top: 150px; }
   /* phone: everything within reach of the thumbs */
   body.mob .tracks, body.mob .levels, body.mob .mpbtn { width: min(360px, 100%); }
-  @media (orientation: landscape) and (max-height: 520px) { body.mob .garage { margin-top: 20vh; } body.mob #map { width: 92px; height: 92px; } body.mob .btn-pause { top: 112px; } body.mob .steer { left: max(12px, env(safe-area-inset-left)); } }
   .carname small { display: block; font-size: 11px; font-weight: 600; opacity: .8; margin-top: 2px; white-space: nowrap; }
   .seclabel { width: min(340px, 100%); font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; opacity: .75; margin: 4px 0 8px; }
   .mpbtn { margin-bottom: 0; }
@@ -189,9 +204,9 @@
   <div class="levels uisw" id="uisw"></div>
   <div class="levels uisw ctlsw for-mob" id="ctlsw"></div>
   <div class="challenge" id="challenge" style="display:none"></div>
-  <div class="seclabel">Одиночная гонка — нажми на трассу</div>
+  <div class="seclabel sl1">Одиночная гонка — нажми на трассу</div>
   <div class="tracks" id="tracks"></div>
-  <div class="seclabel" style="margin-top:16px">С друзьями</div>
+  <div class="seclabel sl2" style="margin-top:16px">С друзьями</div>
   <button class="main mpbtn" id="mpopen">Играть вместе</button>
   <div class="hints">
     <div class="for-mob">
@@ -207,7 +222,7 @@
       Работают и <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
     </div>
     <div style="margin-top:6px"><b>Долгий занос</b> заряжает турбо, оно сработает на выходе</div>
-    <div style="opacity:.5;margin-top:8px">версия 22</div>
+    <div style="opacity:.5;margin-top:8px">версия 23</div>
   </div>
 </div></div>
 
@@ -276,6 +291,8 @@ function initTelegram() {
   try {
     tg.ready(); tg.expand();
     if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+    try { if (tg.lockOrientation && document.body.classList.contains('mob')) tg.lockOrientation(); } catch (e) {}      // the page turns itself; the screen must not turn under it
+    setTimeout(layout, 300);
     if (tg.setHeaderColor) tg.setHeaderColor('#16203f');
     const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
     if (u && u.first_name) { playerName = u.first_name; document.getElementById('hello').textContent = 'Привет, ' + u.first_name + '! Выбери машину и трассу'; }
@@ -1581,7 +1598,7 @@ let stripSteer = 0, stripOn = false, brakeBtn = false, gasBtn = false;
 const TILT = { mode: 'tilt', g: null, t: 0, zero: 0, roll: 0, val: 0, asked: false, tgOn: false };
 try { const m = localStorage.getItem('td_ctl'); if (m === 'tilt' || m === 'strip') TILT.mode = m; } catch (e) {}
 function tiltRoll() {                                  // degrees, positive = right side down
-  const g = TILT.g; if (!g) return 0; let ang = 0; try { ang = (screen.orientation && screen.orientation.angle) || window.orientation || 0; } catch (e) {}
+  const g = TILT.g; if (!g) return 0; let ang = 0; try { ang = (screen.orientation && screen.orientation.angle) || window.orientation || 0; } catch (e) {} if (ROT) ang = 90;
   let up = g[1], right = g[0]; if (ang === 90) { up = g[0]; right = -g[1]; } else if (ang === 270 || ang === -90) { up = -g[0]; right = g[1]; } else if (ang === 180) { up = -g[1]; right = -g[0]; }
   const sgn = (Math.abs(up) > Math.abs(g[2]) ? up : g[2]) < 0 ? -1 : 1;                    // platforms disagree on the sign of gravity; this cancels it
   return Math.atan2(-right*sgn, Math.hypot(up, g[2]))*57.2958;
@@ -1591,7 +1608,7 @@ function tiltStart() {                                 // must run from a tap: i
   const onMotion = function (e) { const a = e.accelerationIncludingGravity; if (a && a.x !== null && a.x !== undefined) { TILT.g = [a.x, a.y, a.z || 0]; TILT.t = performance.now(); } };
   try { if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') DeviceMotionEvent.requestPermission().then(function (r) { if (r === 'granted') window.addEventListener('devicemotion', onMotion); }, function () {});
     else window.addEventListener('devicemotion', onMotion); } catch (e) {}
-  try { if (tg && tg.Accelerometer && tg.Accelerometer.start) { tg.Accelerometer.start({ refresh_rate: 20 }, function (ok) { TILT.tgOn = !!ok; }); if (tg.lockOrientation) tg.lockOrientation(); } } catch (e) {}
+  try { if (tg && tg.Accelerometer && tg.Accelerometer.start) { tg.Accelerometer.start({ refresh_rate: 20 }, function (ok) { TILT.tgOn = !!ok; }); } } catch (e) {}
 }
 function tiltLive() { return TILT.mode === 'tilt' && document.body.classList.contains('mob') && TILT.g && performance.now() - TILT.t < 1500; }
 function tiltFrame(dt) {
@@ -1610,14 +1627,14 @@ canvas.addEventListener('pointerdown', function () { audio(); });
 // Two interfaces: 'pc' (keyboard, wide layout, no touch controls) and 'mobile' (touch controls, compact layout).
 // 'auto' picks by the device and follows what the player actually uses.
 let uiMode = 'auto'; try { const u = localStorage.getItem('td_ui'); if (u === 'pc' || u === 'mobile') uiMode = u; } catch (e) {}
-function applyUI(kind) { document.body.classList.toggle('kbd', kind === 'pc'); document.body.classList.toggle('mob', kind !== 'pc'); }
+function applyUI(kind) { document.body.classList.toggle('kbd', kind === 'pc'); document.body.classList.toggle('mob', kind !== 'pc'); try { layout(); } catch (e) {} }      // before the renderer exists this quietly does nothing
 function detectUI() { if (uiMode !== 'auto') return uiMode; let touch = false; try { touch = (navigator.maxTouchPoints || 0) > 0 && window.matchMedia('(pointer: coarse)').matches; } catch (e) {} return touch ? 'mobile' : 'pc'; }
 applyUI(detectUI());
 window.addEventListener('touchstart', function () { if (uiMode === 'auto') applyUI('mobile'); }, { passive: true });
 (function () {                                        // the strip is a slider: where the thumb rests is how far the wheel is turned
   const el = document.getElementById('steer'), knob = document.getElementById('knob');
-  const set = function (e) { const r = el.getBoundingClientRect(), k = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width/2))/(r.width*0.40)));
-    stripSteer = Math.sign(k)*Math.pow(Math.abs(k), 1.25); knob.style.transform = 'translateX(' + (k*r.width*0.36) + 'px)'; };
+  const set = function (e) { const r = el.getBoundingClientRect(), k = Math.max(-1, Math.min(1, ROT ? (e.clientY - (r.top + r.height/2))/(r.height*0.40) : (e.clientX - (r.left + r.width/2))/(r.width*0.40)));
+    stripSteer = Math.sign(k)*Math.pow(Math.abs(k), 1.25); knob.style.transform = 'translateX(' + (k*(ROT ? r.height : r.width)*0.36) + 'px)'; };
   el.addEventListener('pointerdown', function (e) { audio(); stripOn = true; try { el.setPointerCapture(e.pointerId); } catch (x) {} set(e); e.preventDefault(); });
   el.addEventListener('pointermove', function (e) { if (stripOn) set(e); });
   const end = function () { stripOn = false; stripSteer = 0; knob.style.transform = 'translateX(0px)'; };
@@ -1938,12 +1955,23 @@ function camera(dt) {
 }
 // Render resolution adapts to the device: if frames run slow, draw fewer pixels.
 let renderScale = Math.min(document.body.classList.contains('mob') ? 1.5 : 2, window.devicePixelRatio || 1), slowFrames = 0, fastFrames = 0;
-function resize() { canvas.width = Math.max(2, Math.floor(window.innerWidth*renderScale)); canvas.height = Math.max(2, Math.floor(window.innerHeight*renderScale)); }
+let ROT = false;                                  // true while the page is drawn rotated 90° inside an upright screen
+function viewW() { return ROT ? window.innerHeight : window.innerWidth; }
+function viewH() { return ROT ? window.innerWidth : window.innerHeight; }
+function resize() { canvas.width = Math.max(2, Math.floor(viewW()*renderScale)); canvas.height = Math.max(2, Math.floor(viewH()*renderScale)); }
+// A phone plays in landscape. The player turns the phone so its top points left; the page is rotated to match.
+function layout() {
+  const b = document.body, mob = b.classList.contains('mob'); ROT = mob && window.innerHeight > window.innerWidth*1.05;
+  b.classList.toggle('rot', ROT); b.classList.toggle('land', mob);
+  if (ROT) { b.style.width = window.innerHeight + 'px'; b.style.height = window.innerWidth + 'px'; b.style.transform = 'translateX(' + window.innerWidth + 'px) rotate(90deg)'; }
+  else { b.style.width = ''; b.style.height = ''; b.style.transform = ''; }
+  resize();
+}
 function adapt(dt) {
   if (dt > 1/38) { slowFrames++; fastFrames = 0; } else { fastFrames++; if (fastFrames > 20) slowFrames = 0; }
   if (slowFrames > 45 && renderScale > 0.7) { renderScale = Math.max(0.7, renderScale*0.82); slowFrames = 0; resize(); }
 }
-window.addEventListener('resize', resize);
+window.addEventListener('resize', layout); window.addEventListener('orientationchange', function () { setTimeout(layout, 250); });
 function pause(on) {
   if (NET.racing) { document.getElementById('paused').classList.toggle('hidden', !on); document.getElementById('resume').textContent = 'Назад в гонку'; return; }
   document.getElementById('resume').textContent = 'Продолжить';
@@ -2028,7 +2056,7 @@ document.getElementById('mpleave').addEventListener('click', toMenu);
 document.getElementById('tolobby').addEventListener('click', function () { if (!NET.host) return; NET.tr.all({ t: 'lobby' }, -1); document.getElementById('finish').classList.add('hidden'); netLobby(); });
 
 try {
-  initGL(); makeAtlas(); CARS = CAR_TYPES.map(buildCar); buildPowerMeshes(); resize(); buildTrack(0); buildMenu();
+  initGL(); makeAtlas(); CARS = CAR_TYPES.map(buildCar); buildPowerMeshes(); layout(); buildTrack(0); buildMenu();
   challenge = parseChallenge(location.hash); showChallenge();
   { const rc = roomFromLink(location.hash); if (rc) { netOpen(); document.getElementById('mpcode').value = rc; } }
   const s = document.createElement('script'); s.src = 'https://telegram.org/js/telegram-web-app.js'; s.onload = initTelegram; s.onerror = function () {}; document.head.appendChild(s);
