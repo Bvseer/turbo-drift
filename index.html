@@ -163,6 +163,17 @@
   .chatbox.drive .phr { grid-template-columns: repeat(4, 1fr); } .chatbox.drive .phr button { padding: 12px 2px; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } body.kbd .chatbox.drive { top: 110px; }
   .btn-chat { right: 60px; }
   body.land .emorow { gap: 6px; } body.land .emorow button { width: 34px; }
+  /* home: one button per way to play; the race set-up and the settings live on their own screens */
+  .setupbtn { width: min(340px, 100%); padding: 9px 12px; font-size: 13.5px; margin-bottom: 16px; } body.mob .setupbtn { width: min(360px, 100%); } body.kbd.wide .setupbtn { width: 100%; } body:not(.wide) .msheet .setupbtn { width: min(440px, 100%); }
+  .netbtn { border: 0; border-radius: 16px; font-weight: 900; color: #fff; background: linear-gradient(180deg, #5fb0ff, #2c6fe6); box-shadow: 0 8px 22px rgba(44,111,230,.4); margin-bottom: 8px; } .netbtn:active { transform: translateY(2px); }
+  .frbtn { margin-bottom: 0; } body:not(.wide) .msheet .netbtn { margin-top: 0; } body:not(.wide) .msheet .frbtn { margin-top: 0; }
+  .homelinks { display: flex; gap: 8px; margin-top: 12px; } .homelinks button { padding: 9px 14px; font-size: 13.5px; white-space: nowrap; } body.tiny .homelinks { gap: 6px; } body.tiny .homelinks button { padding: 8px 9px; font-size: 12.5px; } body:not(.wide) .homelinks { margin-top: 18px; }
+  body.land .setupbtn { padding: 7px 10px; font-size: 12.5px; margin-bottom: 12px; } body.land .netbtn { margin-bottom: 6px; }
+  #setup, #prefs { justify-content: flex-start; background: rgba(14,22,48,.97); } #setup::before, #setup::after, #prefs::before, #prefs::after { content: ''; flex: 1 0 0px; } #setup > *, #prefs > * { flex-shrink: 0; }
+  #setup h1, #prefs h1 { font-size: 26px; margin: 0 0 10px; } body.land #setup h1, body.land #prefs h1 { font-size: 20px; margin-bottom: 4px; }
+  .setupgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; width: min(740px, 100%); align-items: start; } .scol { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+  body:not(.wide) .setupgrid { grid-template-columns: minmax(0, 1fr); gap: 6px; width: min(440px, 100%); } #setup .tracks, #setup .levels, #setup .seclabel, #setup .track.champ { width: 100%; } #setup .btns { width: 100%; margin-top: 10px; }
+  #setup .track.champ.on { outline: 3px solid #ffd23f; } #prefs .levels { width: min(440px, 100%); margin-bottom: 12px; } #prefs .btns { margin-top: 8px; }
   .pubstat { font-size: 24px; font-weight: 900; color: #ffd23f; margin: 4px 0 6px; text-shadow: 0 2px 8px rgba(0,0,0,.5); } #mppub .btns { margin: 8px auto 0; }
   .tag { position: absolute; left: 0; top: 0; padding: 1px 7px; border-radius: 8px; background: rgba(10,13,24,.42); font-size: 11px; font-weight: 700; white-space: nowrap; text-shadow: none; pointer-events: none; will-change: transform, opacity; }
   .sw.taken { opacity: .22; pointer-events: none; }
@@ -330,7 +341,7 @@
 <div class="screen" id="menu">
   <div class="mhead">
     <h1>TURBO <span>DRIFT</span></h1>
-    <div class="sub" id="hello">Жми «Играть» или выбери трассу</div>
+    <div class="sub" id="hello">Гонки с бонусами</div>
     <div class="coins" id="coins" title="Монеты: дают за заезды, тратятся на машины"></div>
   </div>
   <div class="mcol mcenter">
@@ -342,25 +353,42 @@
   </div>
   <div class="msheet">
     <div class="mcol mleft">
-      <div class="seclabel o1">Соперники</div>
-      <div class="levels o1" id="levels"></div>
-      <div class="seclabel o4">Настройки</div>
-      <div class="levels uisw o4" id="uisw"></div>
-      <div class="levels uisw ctlsw for-mob o4" id="ctlsw"></div>
-      <div class="levels uisw fpssw o4" id="fpssw"></div>
-      <button class="ghost helpbtn o4" id="helpopen">Как играть</button>
+      <div class="homelinks o4"><button class="ghost" id="prefsopen">Настройки</button><button class="ghost" id="helpopen">Как играть</button></div>
     </div>
     <div class="mcol mright">
       <div class="challenge o2" id="challenge" style="display:none"></div>
       <button class="main playbtn o2" id="play"><span>Играть</span><small id="playsub"></small></button>
-      <div class="seclabel sl1 o2">Или выбери трассу и условия</div>
-      <div class="levels opts o2" id="opts"></div>
-      <div class="tracks o2" id="tracks"></div>
-      <button class="track champ o2" id="champ"><span>Чемпионат<small>Три трассы подряд, очки за места</small></span><b>старт</b></button>
-      <div class="seclabel sl2 o3">С другими игроками</div>
-      <div class="mpbtn mprow o3"><button class="main" id="mpquick">Онлайн-гонка</button><button class="ghost" id="mpopen">С друзьями</button></div>
+      <button class="ghost setupbtn o2" id="setupopen">Трасса и соперники ›</button>
+      <button class="playbtn netbtn o3" id="mpquick"><span>Онлайн-гонка</span><small>с игроками со всего мира</small></button>
+      <button class="ghost playbtn frbtn o3" id="mpopen"><span>С друзьями</span><small>своя комната по коду</small></button>
     </div>
   </div>
+</div>
+
+<div class="screen hidden" id="setup">
+  <h1>Заезд</h1>
+  <div class="setupgrid">
+    <div class="scol">
+      <div class="seclabel">Трасса</div>
+      <div class="tracks" id="tracks"></div>
+      <button class="track champ" id="champ"><span>Чемпионат<small>Три трассы подряд, очки за места</small></span><b>× 3</b></button>
+    </div>
+    <div class="scol">
+      <div class="seclabel">Соперники</div>
+      <div class="levels" id="levels"></div>
+      <div class="seclabel">Условия</div>
+      <div class="levels opts" id="opts"></div>
+      <div class="btns"><button class="main" id="setupgo">Играть</button><button class="ghost" id="setupclose">Назад</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="screen hidden" id="prefs">
+  <h1>Настройки</h1>
+  <div class="levels uisw" id="uisw"></div>
+  <div class="levels uisw ctlsw for-mob" id="ctlsw"></div>
+  <div class="levels uisw fpssw" id="fpssw"></div>
+  <div class="btns"><button class="main" id="prefsclose">Готово</button></div>
 </div>
 
 <div class="screen hidden" id="welcome">
@@ -396,7 +424,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт через 15 секунд после второго игрока, свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>H</kbd> гудок</span><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 40</div>
+    <div style="opacity:.5;margin-top:8px">версия 41</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -468,7 +496,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 40</div>
+  <div class="fver">Turbo Drift · версия 41</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -502,7 +530,7 @@ function initTelegram() {
     setTimeout(layout, 300);
     if (tg.setHeaderColor) tg.setHeaderColor('#16203f');
     const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
-    if (u && u.first_name) { playerName = u.first_name; document.getElementById('hello').textContent = 'Привет, ' + u.first_name + '! Жми «Играть»'; }
+    if (u && u.first_name) { playerName = u.first_name; document.getElementById('hello').textContent = 'Привет, ' + u.first_name + '!'; }
     const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
     if (sp && !challenge) { challenge = parseChallenge(sp); showChallenge(); }
     { const rc = roomFromLink(sp); if (rc) { document.getElementById('welcome').classList.add('hidden'); netOpen(); document.getElementById('mpcode').value = rc; netJoin(rc); } else if (sp === 'online') netQuick(); else if (challenge) document.getElementById('welcome').classList.add('hidden'); }
@@ -1923,7 +1951,7 @@ function beginCountdown() {
   try { const hn = parseInt(localStorage.getItem('td_hint') || '0', 10), mob = document.body.classList.contains('mob'); if (hn < 6) { localStorage.setItem('td_hint', String(hn + 1));
     const text = hn < 2 ? (mob ? (document.body.classList.contains('tilt') ? 'Наклоняй телефон — это руль' : 'Веди пальцем по полосе слева — это руль') : '↑ газ · ← → руль · Пробел — бонус') : (mob ? 'Держи ТОРМОЗ, отпусти на GO — рывок' : 'Газ ровно на GO — рывок');
     setTimeout(function () { if (state === 'countdown') note(text, 2600); }, 400); } } catch (e) {}
-  for (const id of ['menu','finish','paused','mp']) document.getElementById(id).classList.add('hidden');
+  for (const id of ['menu','finish','paused','mp','setup','prefs']) document.getElementById(id).classList.add('hidden');
   document.getElementById('hud').style.display = 'block'; document.getElementById('linkbox').style.display = 'none';
 }
 function progress(c) { return c.rival ? c.s - c.s0 + T.N : c.lap*T.N + c.idx; }
@@ -2264,7 +2292,7 @@ function key(e, down) {
     else if (down && e.key === 'Enter') netJoin(e.target.value); return; }
   const k = (e.key || '').toLowerCase();
   if (down && !e.repeat && k === 'enter' && state === 'menu' && !NET.on) { const vis = function (id) { return !document.getElementById(id).classList.contains('hidden'); };
-    if (vis('welcome')) { document.getElementById('wgo').click(); return; } if (vis('menu') && !vis('help') && !vis('mp')) { document.getElementById('play').click(); return; } }
+    if (vis('welcome')) { document.getElementById('wgo').click(); return; } if (vis('menu') && !vis('help') && !vis('mp') && !vis('prefs')) { document.getElementById('play').click(); return; } }
   if (down && !e.repeat && NET.on && (k === 't' || k === 'е' || (k === 'enter' && chatDriving())) && document.getElementById('chatbox').classList.contains('hidden')) { chatOpen(chatDriving()); e.preventDefault(); return; }
   if (spec) { if (down && !e.repeat) { if (k === 'arrowleft' || k === 'a' || k === 'ф') specStep(-1); else if (k === 'arrowright' || k === 'd' || k === 'в') specStep(1); else if (k === 'escape' || k === 'enter' || k === ' ') specStop(true); } if (k.indexOf('arrow') === 0 || k === ' ') e.preventDefault(); return; }
   if (down && uiMode === 'auto' && (k.indexOf('arrow') === 0 || 'wasdцфыв'.indexOf(k) >= 0)) applyUI('pc');
@@ -2424,7 +2452,7 @@ function carByNid(n) { for (const c of cars) if (c.nid === n) return c; return n
 function mpMsg(t) { document.getElementById('mpmsg').textContent = t || ''; }
 function netError(e) { return ({ 'peer-unavailable': 'Комната с таким кодом не найдена', 'unavailable-id': 'Такой код уже занят, попробуй ещё раз', load: 'Не удалось загрузить модуль связи. Игра должна быть открыта с хостинга или из Telegram, нужен интернет', network: 'Нет связи с сервером, который сводит игроков', blocked: 'Нет связи с сервером, который сводит игроков. Если игра открыта в Claude — открой сам артефакт Turbo Drift, а не предпросмотр файла', denied: 'Нет прав на игру вместе в этом артефакте: владелец должен дать тебе доступ на участие', room: 'Не удалось открыть комнату, попробуй ещё раз', timeout: 'Не удалось соединиться: сеть одного из игроков не пропускает прямое соединение', browser: 'Этот браузер не поддерживает прямое соединение', connect: 'Не удалось соединиться с комнатой' })[e] || ('Ошибка соединения: ' + e); }
 function netOpen() {
-  for (const id of ['menu','finish','paused']) document.getElementById(id).classList.add('hidden');
+  for (const id of ['menu','finish','paused','setup','prefs']) document.getElementById(id).classList.add('hidden');
   document.getElementById('mp').classList.remove('hidden'); document.getElementById('mp').classList.toggle('inroom', NET.on); stageTick = 0; document.getElementById('mpstart').style.display = NET.on ? 'none' : ''; document.getElementById('mplobby').style.display = NET.on ? '' : 'none'; mpMsg('');
 }
 function netHost() {
@@ -2835,7 +2863,7 @@ document.addEventListener('visibilitychange', function () { if (document.hidden 
 function toMenu() {
   specStop(false); CHAMP.on = false; koSetup(false); document.body.classList.remove('rain'); if (NET.qon) { NET.qon = false; NET.busy = false; NET.qtok = (NET.qtok || 0) + 1; } if (NET.on) netLeave();
   state = 'menu'; demo = null; particles = []; skids = []; engine(0, false);
-  for (const id of ['finish','paused','mp']) document.getElementById(id).classList.add('hidden');
+  for (const id of ['finish','paused','mp','setup','prefs']) document.getElementById(id).classList.add('hidden');
   document.getElementById('menu').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; buildMenu();
 }
 function saveGarage() { try { localStorage.setItem('td_car', JSON.stringify({ type: garage.type, color: garage.color })); } catch (e) {} }
@@ -2884,7 +2912,7 @@ function buildFpsSwitch() {
 }
 function buildMenu() {
   buildGarage(); buildLevels(); buildUISwitch(); buildCtlSwitch(); buildFpsSwitch(); buildOpts();
-  { const names = []; if (opt.rev) names.push('обратно'); if (opt.rain) names.push('дождь'); if (opt.ko) names.push('выбывание'); document.getElementById('playsub').textContent = TRACKS[lastTrack].name + ' · ' + LEVELS[level].name + (names.length ? ' · ' + names.join(', ') : ''); }
+  { const names = []; if (opt.rev) names.push('обратно'); if (opt.rain) names.push('дождь'); if (opt.ko) names.push('выбывание'); document.getElementById('playsub').textContent = (champPick ? 'Чемпионат' : TRACKS[lastTrack].name) + ' · ' + LEVELS[level].name + (names.length ? ' · ' + names.join(', ') : ''); }
   const el = document.getElementById('tracks'); el.innerHTML = '';
   TRACKS.forEach(function (tr, i) {
     const b = document.createElement('button'); b.className = 'track';
@@ -2892,9 +2920,13 @@ function buildMenu() {
     for (let q = 0; q < 4; q++) { const u = document.createElement('u'); if (wv[q]) u.className = 'on'; md.appendChild(u); } left.appendChild(md);
     const sm = document.createElement('small'); sm.textContent = tr.desc; left.appendChild(sm);
     const right = document.createElement('b'); right.textContent = bestTimes[tk] ? fmt(bestTimes[tk]) : 'нет рекорда';
-    b.appendChild(left); b.appendChild(right); b.addEventListener('click', function () { CHAMP.on = false; startRace(i, false); }); el.appendChild(b);
+    if (i === lastTrack && !champPick) b.classList.add('on');
+    b.appendChild(left); b.appendChild(right); b.addEventListener('click', function () { champPick = false; lastTrack = i; try { localStorage.setItem('td_last', String(i)); } catch (e) {} buildMenu(); }); el.appendChild(b);
   });
+  document.getElementById('champ').classList.toggle('on', champPick);
 }
+let champPick = false;                                  // the championship is picked like a track; «Играть» starts whatever is picked
+function playGo() { for (const id of ['setup', 'prefs']) document.getElementById(id).classList.add('hidden'); if (champPick) champStart(); else { CHAMP.on = false; startRace(lastTrack, false); } }
 function showChallenge() {
   const el = document.getElementById('challenge'); if (!challenge) { el.style.display = 'none'; return; }
   el.style.display = 'block'; el.innerHTML = '';
@@ -2911,7 +2943,10 @@ function share() {
   try { navigator.clipboard.writeText(text + ' ' + link).then(function () { note('Ссылка скопирована'); }, function () {}); } catch (e) {}
 }
 for (const d of [-1, 1]) document.getElementById(d < 0 ? 'carprev' : 'carnext').addEventListener('click', function () { garage.view = ((garage.view === undefined ? garage.type : garage.view) + d + CAR_TYPES.length) % CAR_TYPES.length; if (owns(garage.view)) { garage.type = garage.view; saveGarage(); } buildGarage(); });
-document.getElementById('buycar').addEventListener('click', buyCar); document.getElementById('champ').addEventListener('click', function () { champStart(); });
+document.getElementById('buycar').addEventListener('click', buyCar); document.getElementById('champ').addEventListener('click', function () { champPick = true; buildMenu(); });
+document.getElementById('setupopen').addEventListener('click', function () { document.getElementById('setup').classList.remove('hidden'); }); document.getElementById('setupclose').addEventListener('click', function () { document.getElementById('setup').classList.add('hidden'); });
+document.getElementById('setupgo').addEventListener('click', playGo);
+document.getElementById('prefsopen').addEventListener('click', function () { document.getElementById('prefs').classList.remove('hidden'); }); document.getElementById('prefsclose').addEventListener('click', function () { document.getElementById('prefs').classList.add('hidden'); });
 for (let k = 0; k < 3; k++) { const el = document.getElementById('it' + k);
   el.addEventListener('click', function () { if (!document.body.classList.contains('mob')) selectItem(k); });
   el.addEventListener('pointerdown', function (e) { if (!document.body.classList.contains('mob')) return; e.preventDefault(); if (state === 'race' && player.items[k]) { sel = k; useItem(player, k); } }); }      // on a phone the press itself fires: no waiting for the finger to lift
@@ -2927,7 +2962,7 @@ document.getElementById('pause').addEventListener('click', function () { pause(t
 document.getElementById('resume').addEventListener('click', function () { pause(false); });
 document.getElementById('quit').addEventListener('click', toMenu);
 document.getElementById('mpopen').addEventListener('click', function () { audio(); netOpen(); });
-document.getElementById('play').addEventListener('click', function () { CHAMP.on = false; startRace(lastTrack, false); });
+document.getElementById('play').addEventListener('click', playGo);
 document.getElementById('wgo').addEventListener('click', function () { FRESH = false; CHAMP.on = false; opt = { rev: false, rain: false, ko: false }; startRace(0, false); });
 document.getElementById('wmenu').addEventListener('click', welcomeClose);
 document.getElementById('mphost').addEventListener('click', netHost);
