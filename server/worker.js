@@ -5,7 +5,7 @@
 const TRACKS = 3;                                    // Кольцо, Змейка, Шпильки
 const MIN_MS = [90000, 75000, 114000];               // nobody drives a clean race faster than this: such a time is not taken
 const MAX_MS = 20*60*1000;
-const CARS = ['Вектор GT', 'Аурум V10', 'Гром 427', 'Спарк RS', 'Атлас', 'Зефир', 'Фантом V12', 'Ион'];
+const CARS = 32;                                     // car numbers the game may send; the game itself knows their names
 const TOP = 15;
 const FRESH = 7*24*3600;                             // how old Telegram's signature of a player may be, seconds
 
@@ -61,7 +61,7 @@ async function board(env, track, me) {
 async function score(env, q, request) {
   const me = await whoIs(q.init, env); if (!me) return json({ ok: false, err: 'auth' }, 401);
   const track = q.track | 0, ms = Math.round(+q.ms), car = q.car | 0;
-  if (!(track >= 0 && track < TRACKS) || !(car >= 0 && car < CARS.length) || !(ms >= MIN_MS[track] && ms <= MAX_MS)) return json({ ok: false, err: 'range' }, 400);
+  if (!(track >= 0 && track < TRACKS) || !(car >= 0 && car < CARS) || !(ms >= MIN_MS[track] && ms <= MAX_MS)) return json({ ok: false, err: 'range' }, 400);
   let cc = String(request && request.cf && request.cf.country || '').toUpperCase(); if (!/^[A-Z]{2}$/.test(cc) || cc === 'XX') cc = '';          // the country the request came from, as Cloudflare sees it
   await withCountry(env, () => env.DB.prepare('INSERT INTO best (track, uid, name, ms, car, at, cc) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7) ON CONFLICT (track, uid) DO UPDATE SET name = excluded.name, ' +
     "cc = CASE WHEN excluded.cc != '' THEN excluded.cc ELSE best.cc END, " +
