@@ -161,7 +161,10 @@
   /* while driving: only the phrases, in a low strip under the speedometer, so the car stays in sight */
   .chatbox.drive { top: 74px; transform: translateX(-50%); width: min(560px, calc(100% - 224px)); padding: 8px; background: rgba(14,20,40,.8); } .chatbox.drive .chathead, .chatbox.drive .chatlog { display: none; }
   .chatbox.drive .phr { grid-template-columns: repeat(4, 1fr); } .chatbox.drive .phr button { padding: 12px 2px; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } body.kbd .chatbox.drive { top: 110px; }
-  .btn-chat { right: 60px; }
+  .btn-mic { right: 60px; } .btn-mic.on { background: linear-gradient(180deg, #46d47a, #1c9a4e); border-color: rgba(190,255,210,.8); }
+  .voicerow { display: flex; gap: 6px; justify-content: center; margin-top: 8px; width: 100%; } .voicerow button { flex: 1 1 0; min-width: 0; border: 0; border-radius: 12px; padding: 9px 4px; font-size: 12.5px; font-weight: 800; color: #fff; background: rgba(255,255,255,.14); white-space: nowrap; }
+  .voicerow button.on { background: linear-gradient(180deg, #46d47a, #1c9a4e); } .voicerow button.offd { opacity: .75; } .voicerow #earbtn.on { background: rgba(255,255,255,.22); }
+  .vmark { border: 0; background: none; padding: 0 0 0 5px; margin: 0; font-size: 12px; text-decoration: none; line-height: 1; vertical-align: baseline; } button.vmark.off { opacity: .6; } .emorow button.micbtn.on { background: linear-gradient(180deg, #46d47a, #1c9a4e); }
   body.land .emorow { gap: 6px; } body.land .emorow button { width: 34px; }
   /* home: one button per way to play; the race set-up and the settings live on their own screens */
   .setupbtn { width: min(340px, 100%); padding: 9px 12px; font-size: 13.5px; margin-bottom: 16px; } body.mob .setupbtn { width: min(360px, 100%); } body.kbd.wide .setupbtn { width: 100%; } body:not(.wide) .msheet .setupbtn { width: min(440px, 100%); }
@@ -242,6 +245,7 @@
   body.mob .track.champ { width: min(360px, 100%); }
   .emorow { display: flex; gap: 8px; justify-content: center; margin-top: 10px; } .emorow button { width: 44px; height: 40px; border: 0; border-radius: 12px; background: rgba(255,255,255,.14); font-size: 20px; line-height: 1; padding: 0; }
   .emotoast { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); padding: 7px 16px; border-radius: 16px; background: rgba(10,13,24,.82); border: 1px solid rgba(255,255,255,.16); font-size: 15px; font-weight: 800; max-width: calc(100% - 40px); box-sizing: border-box; text-align: center; opacity: 0; transition: opacity .2s; pointer-events: none; } .emotoast.show { opacity: 1; }
+  #mplist div > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; text-align: left; } #mplist div > b { white-space: nowrap; flex: 0 1 auto; overflow: hidden; text-overflow: ellipsis; max-width: 46%; } #mplist div > span { flex: 1 1 auto; } body.land #mplist div { gap: 6px; padding-left: 10px; padding-right: 10px; } body.land #mplist div > b { font-size: 12.5px; }
   .plist div em { font-style: normal; font-size: 12px; opacity: .8; margin-left: 8px; }
   body.land .stats { gap: 7px; margin-top: 3px; } body.land .stats i { width: 36px; height: 4px; } body.land .stats span { font-size: 8.5px; } body.land .coins { margin: 1px 0 3px; font-size: 13px; }
   body.land #menu .seclabel.sl2 { display: none; } body.land .opts { margin-bottom: 5px; } body.land .track.champ { margin-top: 5px; } body.land #menu .mpbtn { margin-top: 7px; padding: 10px; }
@@ -306,7 +310,7 @@
   <div class="rival" id="rival" style="display:none"></div>
   <div class="kobar" id="kobar" style="display:none">Выбывание через <b id="kot">0</b></div>
   <button class="btn-pause btn-horn" id="horn" aria-label="Гудок"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9.500v5h3.600l5.400 4.300V5.200L6.600 9.500z"/><path d="M15 8.300a5 5 0 0 1 0 7.400M17.600 5.600a9 9 0 0 1 0 12.800" fill="none" stroke="currentColor" stroke-width="1.900" stroke-linecap="round"/></svg></button>
-  <button class="btn-pause btn-chat" id="chatbtn" aria-label="Чат" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4.500h16a1.500 1.500 0 0 1 1.500 1.500v9.500a1.500 1.500 0 0 1-1.500 1.500h-8.300l-4.700 3.600v-3.600H4a1.500 1.500 0 0 1-1.500-1.500V6A1.500 1.500 0 0 1 4 4.500z"/></svg></button>
+  <button class="btn-pause btn-mic micbtn" id="micbtn2" aria-label="Микрофон" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="9" y="2.500" width="6" height="11.500" rx="3"/><path d="M5.500 11a6.500 6.500 0 0 0 13 0M12 17.500V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
   <canvas id="map" width="224" height="224"></canvas>
   <button class="btn-pause" id="pause" aria-label="Пауза"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.600"/><rect x="14" y="4" width="5" height="16" rx="1.600"/></svg></button>
   <div class="hpbar"><i id="hp"></i></div>
@@ -431,11 +435,12 @@
     <div><b>Старт</b> — <span class="for-pc">нажми газ ровно на GO</span><span class="for-mob">держи ТОРМОЗ и отпусти ровно на GO</span>: будет рывок<span class="for-pc">; раньше времени — пробуксовка</span></div>
     <div><b>Слипстрим</b> — держись прямо за соперником, машина разгонится сильнее; <b>обгон впритирку</b> без касания даёт турбо</div>
     <div><b>Графика</b> в настройках — от минимальной до максимальной: чем ниже, тем меньше чёткости, теней и эффектов, зато плавнее на слабом телефоне. <b>Батарея → Экономия</b> рисует вдвое меньше кадров: телефон греется меньше</div>
-    <div><b>Чат</b> — кнопка 💬 в комнате, в заезде и на финише: готовые фразы в одно касание<span class="for-pc">, свой текст — клавиша <kbd>T</kbd></span><span class="for-mob">, свой текст — «Написать своё» (не во время езды)</span>. Чат можно выключить</div>
+    <div><b>Чат</b> — кнопка 💬 в комнате и на финише: готовые фразы в одно касание<span class="for-pc">, свой текст — клавиша <kbd>T</kbd></span><span class="for-mob">, свой текст — «Написать своё»</span>. В заезде писать нельзя — там говорят голосом. Чат можно выключить</div>
+    <div><b>Голос</b> — кнопка с микрофоном в комнате, в заезде и на финише. Микрофон выключен, пока сам не включишь; чужие голоса слышно сразу. В комнате можно заглушить всех (кнопка «Голоса») или одного игрока — нажми на 🎤 возле его имени</div>
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт через 15 секунд после второго игрока, свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>H</kbd> гудок</span><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 46</div>
+    <div style="opacity:.5;margin-top:8px">версия 47</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -473,6 +478,7 @@
       <div class="btns"><button class="ghost" id="mpshare">Позвать друзей</button></div>
       <div class="plist" id="mplist"></div>
       <div class="emorow" id="mpemo"></div>
+      <div class="voicerow" id="voicerow" style="display:none"><button class="micbtn" id="micbtn"></button><button id="earbtn"></button></div>
     </div>
     <div class="mcol mright">
       <div id="mphostbox"><div class="levels opts" id="mpopts"></div><div class="tracks" id="mptracks"></div><div class="btns"><button class="main" id="mpgo">Старт</button></div><div class="sub" style="margin-top:8px">С друзьями гонка идёт без ботов; если ты в комнате один, поедут боты</div></div>
@@ -507,7 +513,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 46</div>
+  <div class="fver">Turbo Drift · версия 47</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1943,7 +1949,7 @@ function setupRace(trackId, useChallenge) {
   if (rivalBot) { r.style.display = 'block'; r.textContent = 'Соперник: ' + challenge.name + ' — ' + fmt(challenge.ms); } else r.style.display = 'none';
 }
 function resetRaceState() {
-  specStop(false); hudReset(); chatClose(); padClose(); document.getElementById('chatbtn').style.display = NET.racing ? '' : 'none';
+  specStop(false); hudReset(); chatClose(); padClose(); voiceUI();
   NET.results = {}; NET.firstFin = 0; raceClock = 0; if (!NET.racing) { player.nid = 0; bots.forEach(function (b, k) { b.nid = 100 + k; }); }
   raceT = 0; bestLap = 0; lapStart = 0; finishMs = 0; particles = []; skids = []; player.draft = 0; GHOST.play = null; GHOST.car = null; GHOST.rec = []; document.body.classList.toggle('rain', RAIN); setupPickups(); hudItems(); camH = player.h; camX = player.x; camZ = player.z; demo = null;
   document.getElementById('speed').textContent = '0'; document.getElementById('boost').style.width = '0%'; document.getElementById('status').innerHTML = ''; keys.gas = keys.brake = keys.left = keys.right = false; gasBtn = brakeBtn = false;
@@ -2304,7 +2310,7 @@ function key(e, down) {
   const k = (e.key || '').toLowerCase();
   if (down && !e.repeat && k === 'enter' && state === 'menu' && !NET.on) { const vis = function (id) { return !document.getElementById(id).classList.contains('hidden'); };
     if (vis('welcome')) { document.getElementById('wgo').click(); return; } if (vis('menu') && !vis('help') && !vis('mp') && !vis('prefs')) { document.getElementById('play').click(); return; } }
-  if (down && !e.repeat && NET.on && (k === 't' || k === 'е' || (k === 'enter' && chatDriving())) && document.getElementById('chatbox').classList.contains('hidden')) { chatOpen(chatDriving()); e.preventDefault(); return; }
+  if (down && !e.repeat && NET.on && !chatDriving() && (k === 't' || k === 'е') && document.getElementById('chatbox').classList.contains('hidden')) { chatOpen(false); e.preventDefault(); return; }
   if (spec) { if (down && !e.repeat) { if (k === 'arrowleft' || k === 'a' || k === 'ф') specStep(-1); else if (k === 'arrowright' || k === 'd' || k === 'в') specStep(1); else if (k === 'escape' || k === 'enter' || k === ' ') specStop(true); } if (k.indexOf('arrow') === 0 || k === ' ') e.preventDefault(); return; }
   if (down && uiMode === 'auto' && (k.indexOf('arrow') === 0 || 'wasdцфыв'.indexOf(k) >= 0)) applyUI('pc');
   if (k === 'arrowleft' || k === 'a' || k === 'ф') keys.left = down; else if (k === 'arrowright' || k === 'd' || k === 'в') keys.right = down;
@@ -2405,18 +2411,27 @@ function peerTransport() {
   const load = function (done0) { if (window.Peer) return done0(null); let lf = false; const done = function (e) { if (!lf) { lf = true; done0(e); } }; setTimeout(function () { done('load'); }, 12000);
     const urls = ['https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js', 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js']; let k = 0;
     const next = function () { if (k >= urls.length) return done('load'); const sc = document.createElement('script'); sc.src = urls[k++]; sc.onload = function () { window.Peer ? done(null) : next(); }; sc.onerror = next; document.head.appendChild(sc); }; next(); };
-  return self = { msg: netMsg, gone: netClosed,
+  const vout = {}, vin = {};                           // voice: calls I make carry my microphone one way; calls I get are only listened to
+  const wireVoice = function () { peer.on('call', function (call) { const who = call.peer; if (!self.vAccept || !self.vAccept(who)) { try { call.close(); } catch (e) {} return; }
+    if (vin[who]) { try { vin[who].close(); } catch (e) {} } vin[who] = call; try { call.answer(); } catch (e) { return; }
+    call.on('stream', function (st) { if (vin[who] === call && self.vIn) self.vIn(who, st); }); call.on('close', function () { if (vin[who] === call) { delete vin[who]; if (self.vIn) self.vIn(who, null); } }); call.on('error', function () {}); }); };
+  return self = { msg: netMsg, gone: netClosed, voice: true, vAccept: null, vIn: null,
+    pid: function () { return peer ? peer.id : null; }, pidOf: function (id) { return conns[id] ? conns[id].peer : null; },
+    vCall: function (pids, stream) { for (const q of Object.keys(vout)) if (!stream || pids.indexOf(q) < 0 || vout[q].st !== stream) { try { vout[q].c.close(); } catch (e) {} delete vout[q]; }
+      if (stream && peer) for (const q of pids) if (q && !vout[q] && q !== peer.id) { let c = null; try { c = peer.call(q, stream); } catch (e) {} if (!c) continue; const rec = vout[q] = { c: c, st: stream };
+        c.on('close', function () { if (vout[q] === rec) delete vout[q]; }); c.on('error', function () { if (vout[q] === rec) delete vout[q]; }); } },
+    vDrop: function (who) { if (vin[who]) { try { vin[who].close(); } catch (e) {} delete vin[who]; } },
     host: function (code, done) { load(function (err) { if (err) return done(err);
       let fin = false; const end = function (e) { if (!fin) { fin = true; done(e); } };
       try { peer = new Peer(ROOM_PREFIX + code); } catch (e) { return end('browser'); }
-      peer.on('open', function () { opened = true; end(null); });
+      peer.on('open', function () { opened = true; end(null); }); wireVoice();
       peer.on('error', function (e) { if (!opened) end(e && e.type || 'error'); });
       setTimeout(function () { end('blocked'); }, 12000);
       peer.on('disconnected', function () { try { peer.reconnect(); } catch (e) {} });
       peer.on('connection', function (c) { const id = seq++; c.on('open', function () { conns[id] = c; }); c.on('data', function (d) { self.msg(id, d); }); c.on('close', function () { delete conns[id]; self.gone(id); }); c.on('error', function () {}); }); }); },
     join: function (code, done, ms) { let fin = false; const end = function (e) { if (!fin) { fin = true; done(e); } };
       load(function (err) { if (err) return end(err);
-        try { peer = new Peer(); } catch (e) { return end('browser'); }
+        try { peer = new Peer(); } catch (e) { return end('browser'); } wireVoice();
         peer.on('open', function () { hc = peer.connect(ROOM_PREFIX + code, { serialization: 'json' });
           hc.on('open', function () { end(null); }); hc.on('data', function (d) { self.msg(0, d); }); hc.on('close', function () { self.gone(0); }); hc.on('error', function () { end('connect'); }); });
         peer.on('error', function (e) { end(e && e.type || 'error'); });
@@ -2471,18 +2486,18 @@ function netHost() {
   if (NET.busy) return; NET.busy = true; mpMsg('Создаю комнату…'); netTransport(function (tr) {
   tr.host(code, function (err) { NET.busy = false; if (err) { mpMsg(netError(err)); tr.close(); return; }
     NET.on = true; NET.host = true; NET.pub = false; NET.racing = false; NET.code = code; NET.me = 0; NET.tr = tr; NET.nextId = 1; NET.conn = {}; NET.track = T.id;
-    NET.roster = [{ nid: 0, name: playerName, type: garage.type, color: garage.color }]; netLobby(); }); });
+    NET.roster = [{ nid: 0, name: playerName, type: garage.type, color: garage.color, pid: tr.pid ? tr.pid() : null }]; voiceBind(tr); netLobby(); }); });
 }
 function netJoin(code) {
   code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (code.length < 4) { mpMsg('Введи код комнаты'); return; }
   if (NET.busy) return; NET.busy = true; mpMsg('Подключаюсь…'); netTransport(function (tr) {
   tr.join(code, function (err) { NET.busy = false; if (err) { mpMsg(netError(err)); tr.close(); return; }
-    NET.on = true; NET.host = false; NET.pub = false; NET.racing = false; NET.code = code; NET.tr = tr; NET.me = -1; NET.roster = [];
+    NET.on = true; NET.host = false; NET.pub = false; NET.racing = false; NET.code = code; NET.tr = tr; NET.me = -1; NET.roster = []; voiceBind(tr);
     tr.send(0, { t: 'hello', name: playerName, type: garage.type, color: garage.color }); netLobby(); }); });
 }
 function netLeave() {
   if (!NET.on) return; try { netSend({ t: 'bye', nid: NET.me }); } catch (e) {}
-  chatReset(); const tr = NET.tr; NET.on = false; NET.racing = false; NET.pub = false; NET.wait = null; NET.qtok = (NET.qtok || 0) + 1; NET.tr = null; NET.roster = []; setTimeout(function () { if (tr) tr.close(); }, 200);
+  chatReset(); voiceStop(); const tr = NET.tr; NET.on = false; NET.racing = false; NET.pub = false; NET.wait = null; NET.qtok = (NET.qtok || 0) + 1; NET.tr = null; NET.roster = []; setTimeout(function () { if (tr) tr.close(); }, 200);
 }
 // ---------------------------------------------------------------------------
 // Open rooms: strangers drop in and the race starts by itself. No server keeps a list of rooms, so the rooms
@@ -2500,10 +2515,10 @@ function pubKnock(code, cb) {
 }
 function pubOwn(tr, k) {
   NET.on = true; NET.host = true; NET.pub = true; NET.slot = k; NET.racing = false; NET.code = pubCode(k); NET.me = 0; NET.tr = tr; NET.nextId = 1; NET.conn = {}; NET.last = {}; NET.wait = null;
-  NET.roster = [{ nid: 0, name: playerName, type: garage.type, color: garage.color }]; NET.auto = 0; NET.back = 0; NET.regroup = 0; NET.probeT = performance.now() + 15000; pubPick(); netLobby();
+  NET.roster = [{ nid: 0, name: playerName, type: garage.type, color: garage.color, pid: tr.pid ? tr.pid() : null }]; voiceBind(tr); NET.auto = 0; NET.back = 0; NET.regroup = 0; NET.probeT = performance.now() + 15000; pubPick(); netLobby();
 }
 function pubEnter(tr, k, nid) {
-  NET.on = true; NET.host = false; NET.pub = true; NET.slot = k; NET.racing = false; NET.code = pubCode(k); NET.tr = tr; NET.me = nid; NET.roster = []; NET.seen = performance.now(); NET.wait = null; tr.msg = netMsg; tr.gone = netClosed; netLobby();
+  NET.on = true; NET.host = false; NET.pub = true; NET.slot = k; NET.racing = false; NET.code = pubCode(k); NET.tr = tr; NET.me = nid; NET.roster = []; NET.seen = performance.now(); NET.wait = null; tr.msg = netMsg; tr.gone = netClosed; voiceBind(tr); netLobby();
 }
 function pubPick() { let t = NET.track | 0; if (TRACKS.length > 1) while (t === (NET.track | 0)) t = Math.floor(Math.random()*TRACKS.length); NET.track = t; NET.opt = { rev: Math.random() < 0.3, rain: Math.random() < 0.2, ko: false }; }
 function netQuick(text) {
@@ -2571,7 +2586,11 @@ function netLobby() {
   document.getElementById('mphostbox').style.display = NET.host && !NET.pub ? '' : 'none'; document.getElementById('mpwait').style.display = NET.host || NET.pub ? 'none' : ''; document.getElementById('mppub').style.display = NET.pub ? '' : 'none'; if (NET.pub) pubStat(NET.wait);
   const el = document.getElementById('mplist'); el.innerHTML = '';
   for (const p of NET.roster) { const d = document.createElement('div'); if (p.nid === NET.me) d.className = 'me'; const sp = document.createElement('span'), dot = document.createElement('i'), c = PAINTS[p.color] || [1,1,1];
-    dot.style.background = 'rgb(' + c.map(function (v) { return Math.round(v*255); }).join(',') + ')'; sp.appendChild(dot); sp.appendChild(document.createTextNode(p.name + (p.nid === 0 ? ' ★' : ''))); if (p.nid === 0) d.title = 'Хозяин комнаты'; if (NET.roster.some(function (q) { return q.pts > 0; })) { const em = document.createElement('em'); em.textContent = (p.pts || 0) + ' очк.'; sp.appendChild(em); } const b = document.createElement('b'); b.textContent = CAR_TYPES[p.type] ? CAR_TYPES[p.type].name : ''; d.appendChild(sp); d.appendChild(b); el.appendChild(d); }
+    dot.style.background = 'rgb(' + c.map(function (v) { return Math.round(v*255); }).join(',') + ')'; sp.appendChild(dot); sp.appendChild(document.createTextNode(p.name + (p.nid === 0 ? ' ★' : ''))); if (p.nid === 0) d.title = 'Хозяин комнаты'; if (NET.roster.some(function (q) { return q.pts > 0; })) { const em = document.createElement('em'); em.textContent = (p.pts || 0) + ' очк.'; sp.appendChild(em); } const b = document.createElement('b'); b.textContent = CAR_TYPES[p.type] ? CAR_TYPES[p.type].name : ''; d.appendChild(sp);
+    if (p.mic && p.nid !== NET.me) { const mk = document.createElement('button'); mk.className = 'vmark' + (VOICE.muted[p.nid] ? ' off' : ''); mk.textContent = VOICE.muted[p.nid] ? '🔇' : '🎤'; mk.setAttribute('aria-label', 'Заглушить игрока'); mk.addEventListener('click', function () { VOICE.muted[p.nid] = !VOICE.muted[p.nid]; voiceSync(); netLobby(); }); sp.insertBefore(mk, sp.querySelector('em')); }
+    else if (p.mic) { const mk = document.createElement('u'); mk.className = 'vmark'; mk.textContent = '🎤'; sp.insertBefore(mk, sp.querySelector('em')); }
+    d.appendChild(b); el.appendChild(d); }
+  voiceUI();
   { const me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0]; if (me) { garage.type = me.type; garage.color = me.color; }
     document.getElementById('mpcarname').textContent = CAR_TYPES[garage.type].name; document.getElementById('mpcareng').textContent = CAR_TYPES[garage.type].eng.label; statBars(document.getElementById('mpcarstats'), garage.type);
     { const o = NET.opt || {}, names = []; if (o.rev) names.push('обратно'); if (o.rain) names.push('дождь'); if (o.ko) names.push('выбывание'); document.getElementById('mpoptline').textContent = names.length ? ' Заезд: ' + names.join(', ') + '.' : ''; }
@@ -2591,7 +2610,7 @@ function netSetCar(type, color) {                   // the player changes car or
   if (NET.host) { const me = NET.roster[0]; me.type = type; me.color = netFreeColor(color, 0); garage.color = me.color; netRoster(); }
   else { NET.tr.send(0, { t: 'car', type: type, color: color }); netLobby(); }
 }
-function netRoster() { NET.tr.all({ t: 'roster', list: NET.roster, track: NET.track, opt: NET.opt, pub: NET.pub ? 1 : 0 }, -1); if (!NET.racing) netLobby(); }
+function netRoster() { NET.tr.all({ t: 'roster', list: NET.roster, track: NET.track, opt: NET.opt, pub: NET.pub ? 1 : 0 }, -1); voiceSync(); if (!NET.racing) netLobby(); }
 // The room keeps score from race to race: points for places, added up by the host when a race is over.
 function netAward() {
   if (!NET.host || NET.awarded || NET.roster.length < 2) return; NET.awarded = true;
@@ -2601,7 +2620,8 @@ function netAward() {
 const EMO = ['👍', '😂', '😡', '🔥'];
 let emoT = 0, hornT = 0;
 function emoRow(el) { if (el.childNodes.length) return; EMO.forEach(function (e, i) { const b = document.createElement('button'); b.textContent = e; b.setAttribute('aria-label', 'Реакция'); b.addEventListener('click', function () { sendEmo(i); }); el.appendChild(b); });
-  const c = document.createElement('button'); c.textContent = '💬'; c.setAttribute('aria-label', 'Чат'); c.addEventListener('click', function () { chatOpen(false); }); el.appendChild(c); }
+  const c = document.createElement('button'); c.textContent = '💬'; c.setAttribute('aria-label', 'Чат'); c.addEventListener('click', function () { chatOpen(false); }); el.appendChild(c);
+  if (el.id === 'femo') { const m = document.createElement('button'); m.textContent = '🎤'; m.className = 'micbtn'; m.setAttribute('aria-label', 'Микрофон'); m.addEventListener('click', function () { voiceMic(!VOICE.stream); }); el.appendChild(m); } }
 // ---------------------------------------------------------------------------
 // Chat. Ready phrases are one tap away (the only way to talk while steering a phone); free text is typed
 // on a PC keyboard, or on a phone in a pad that stands upright even though the game is drawn turned.
@@ -2629,7 +2649,7 @@ function chatIn(m) {
 }
 function chatLine(e) { const d = document.createElement('div'), b = document.createElement('b'); b.textContent = e.name; b.style.color = 'rgb(' + e.col.map(function (v) { return Math.round(110 + Math.pow(v, 0.8)*145); }).join(',') + ')'; d.appendChild(b); d.appendChild(document.createTextNode(e.text)); return d; }
 function chatOpen(slim) {
-  if (!NET.on) return; const b = document.getElementById('chatbox'), mob = document.body.classList.contains('mob'); slim = !!slim && !mob && !CHAT.off;
+  if (!NET.on || chatDriving()) return; const b = document.getElementById('chatbox'), mob = document.body.classList.contains('mob'); slim = false;          // no typing at the wheel: in a race people talk by voice
   b.classList.remove('hidden'); b.classList.toggle('slim', slim); b.classList.toggle('drive', chatDriving() && !slim && !CHAT.off); b.classList.toggle('off', CHAT.off); clearTimeout(CHAT.shut); if (chatDriving() && mob) CHAT.shut = setTimeout(chatClose, 6000); document.getElementById('chatmute').textContent = CHAT.off ? 'включить чат' : 'выключить чат';
   document.getElementById('chatwrite').style.display = chatDriving() ? 'none' : ''; document.getElementById('chatlog').scrollTop = 1e6;
   if (!mob && !CHAT.off) { for (const k in keys) keys[k] = false; const i = document.getElementById('chatin'); i.value = ''; try { i.focus(); } catch (e) {} }
@@ -2642,11 +2662,54 @@ function padLayout() {                                  // undo the page's quart
   const p = document.getElementById('chatpad'); if (p.classList.contains('hidden')) return; const vv = window.visualViewport, iw = window.innerWidth, ih = Math.min(window.innerHeight, vv ? vv.height : 1e9);
   p.style.width = iw + 'px'; p.style.height = ih + 'px'; p.style.transform = ROT ? 'rotate(-90deg) translateX(-' + iw + 'px)' : '';
 }
+// ---------------------------------------------------------------------------
+// Voice. The microphone is off until its button is pressed. Whoever switches it on calls every other player
+// of the room and sends the sound one way; hearing the others needs nothing from the listener.
+// ---------------------------------------------------------------------------
+const VOICE = { stream: null, busy: false, deaf: false, muted: {}, nodes: {}, seen: {} };
+// a call may outrun the list of players, so every call is answered; a voice that is still a stranger a few seconds later is dropped
+function voiceBind(tr) { if (!tr || !tr.voice) return; tr.vAccept = function () { return NET.on && NET.tr === tr; }; tr.vIn = function (pid, st) { if (st) voiceAdd(pid, st); else voiceDrop(pid); }; }
+function voiceCan() { return !!(NET.on && NET.tr && NET.tr.voice && navigator.mediaDevices && navigator.mediaDevices.getUserMedia); }
+function voiceAdd(pid, st) {                            // through the game's own sound graph: it is already unlocked by a tap, and gives every voice its own volume
+  voiceDrop(pid, true); const n = { st: st, el: null, src: null, g: null, t0: performance.now() }; setTimeout(voiceSync, 4500);
+  try { n.el = document.createElement('audio'); n.el.muted = true; n.el.srcObject = st; const pr = n.el.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {}      // some browsers do not pull a remote stream until an element holds it
+  try { const a = audio(); n.src = a.createMediaStreamSource(st); n.g = a.createGain(); n.src.connect(n.g); n.g.connect(a.destination); } catch (e) { try { if (n.el) n.el.muted = false; } catch (x) {} }
+  VOICE.nodes[pid] = n; voiceSync();
+}
+function voiceDrop(pid, keep) { const n = VOICE.nodes[pid]; if (!n) return; try { if (n.src) n.src.disconnect(); if (n.g) n.g.disconnect(); if (n.el) { n.el.srcObject = null; } } catch (e) {} delete VOICE.nodes[pid]; if (!keep && NET.tr && NET.tr.vDrop) NET.tr.vDrop(pid); }
+function voiceSync() {                                  // after any change in the room: call the newcomers, let go of those who left or switched off, set the volumes
+  const tr = NET.tr; if (!tr || !tr.voice) return; const others = NET.roster.filter(function (p) { return p.nid !== NET.me && p.pid; });
+  tr.vCall(VOICE.stream ? others.map(function (p) { return p.pid; }) : [], VOICE.stream);
+  for (const pid of Object.keys(VOICE.nodes)) { const p = others.filter(function (q) { return q.pid === pid; })[0]; if (p && p.mic) VOICE.seen[pid] = true;
+    const n = VOICE.nodes[pid]; if (!p && performance.now() - n.t0 < 4000) { try { if (n.g) n.g.gain.value = 0; } catch (e) {} continue; }
+    if (!p || (VOICE.seen[pid] && !p.mic)) { delete VOICE.seen[pid]; voiceDrop(pid); continue; }
+    const v = VOICE.deaf || VOICE.muted[p.nid] ? 0 : 1.4; try { if (n.g) n.g.gain.value = v; else if (n.el) n.el.muted = !v; } catch (e) {} }
+}
+function voiceTell(on) { const me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0]; if (me) me.mic = on ? 1 : 0; if (NET.host) netRoster(); else { netSend({ t: 'vc', on: on ? 1 : 0 }); voiceSync(); if (!NET.racing) netLobby(); } voiceUI(); }
+function voiceMic(on) {
+  if (on === !!VOICE.stream || VOICE.busy) return;
+  if (!on) { try { VOICE.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} VOICE.stream = null; voiceTell(false); toast('Микрофон выключен'); return; }
+  if (!voiceCan()) { toast('Голос здесь недоступен'); return; }
+  VOICE.busy = true; voiceUI(); audio();
+  navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false }).then(function (st) {
+    VOICE.busy = false; if (!NET.on) { st.getTracks().forEach(function (t) { t.stop(); }); voiceUI(); return; }
+    VOICE.stream = st; voiceTell(true); toast('Микрофон включён — тебя слышат все в комнате');
+  }, function () { VOICE.busy = false; voiceUI(); toast('Нет доступа к микрофону — разреши его в настройках'); });
+}
+function voiceStop() { if (VOICE.stream) { try { VOICE.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} } VOICE.stream = null; VOICE.busy = false; for (const pid of Object.keys(VOICE.nodes)) voiceDrop(pid, true); VOICE.muted = {}; VOICE.seen = {}; voiceUI(); }
+function voiceUI() {
+  const can = voiceCan(), on = !!VOICE.stream; document.getElementById('voicerow').style.display = can ? '' : 'none'; document.getElementById('micbtn2').style.display = can && NET.racing ? '' : 'none';
+  const mb = document.getElementById('micbtn'); mb.textContent = VOICE.busy ? '🎤 …' : '🎤 Микрофон'; mb.title = on ? 'Микрофон включён' : 'Микрофон выключен'; mb.classList.toggle('on', on);
+  const eb = document.getElementById('earbtn'); eb.textContent = VOICE.deaf ? '🔇 Голоса' : '🔊 Голоса'; eb.title = VOICE.deaf ? 'Голоса других выключены' : 'Голоса других включены'; eb.classList.toggle('offd', VOICE.deaf); eb.classList.toggle('on', !VOICE.deaf);
+  const all = document.querySelectorAll('.micbtn'); for (let i = 0; i < all.length; i++) { all[i].classList.toggle('on', on); if (all[i].parentNode && all[i].parentNode.id === 'femo') all[i].style.display = can ? '' : 'none'; }
+}
+(function () { const tog = function () { voiceMic(!VOICE.stream); }; document.getElementById('micbtn').addEventListener('click', tog); document.getElementById('micbtn2').addEventListener('click', tog);
+  document.getElementById('earbtn').addEventListener('click', function () { VOICE.deaf = !VOICE.deaf; voiceSync(); voiceUI(); toast(VOICE.deaf ? 'Голоса других игроков выключены' : 'Голоса других игроков включены'); }); })();
 function chatReset() { CHAT.log = []; CHAT.seen = {}; for (const id of ['chatlog', 'padlog', 'chatfeed']) document.getElementById(id).innerHTML = ''; chatClose(); padClose(); }
 (function () { const g = document.getElementById('phr'); PHRASES.forEach(function (t, i) { const b = document.createElement('button'); b.textContent = t; b.addEventListener('click', function () { if (chatSend(null, i) && chatDriving()) chatClose(); }); g.appendChild(b); });
   document.getElementById('chatx').addEventListener('click', chatClose); document.getElementById('padx').addEventListener('click', padClose);
   document.getElementById('chatgo').addEventListener('click', function () { chatType(document.getElementById('chatin')); }); document.getElementById('padgo').addEventListener('click', function () { chatType(document.getElementById('padin')); });
-  document.getElementById('chatwrite').addEventListener('click', padOpen); document.getElementById('chatbtn').addEventListener('click', function () { if (document.getElementById('chatbox').classList.contains('hidden')) chatOpen(false); else chatClose(); });
+  document.getElementById('chatwrite').addEventListener('click', padOpen);
   document.getElementById('chatmute').addEventListener('click', function () { CHAT.off = !CHAT.off; try { localStorage.setItem('td_chat', CHAT.off ? '0' : '1'); } catch (e) {} if (CHAT.off) { document.getElementById('chatfeed').innerHTML = ''; chatClose(); } else chatOpen(false); });
   if (window.visualViewport) window.visualViewport.addEventListener('resize', padLayout); })();
 function sendEmo(i) { const now = performance.now(); if (!NET.on || now - emoT < 700) return; emoT = now; const m = { t: 'emo', nid: NET.me, e: i }; netSend(m); netFx(m); }
@@ -2710,11 +2773,12 @@ function netResults() {
 }
 function netMsg(from, m) {
   if (!m || typeof m !== 'object' || !NET.on) return;
+  if (m.t === 'vc') { if (NET.host && NET.conn[from] !== undefined) { const p = NET.roster.filter(function (q) { return q.nid === NET.conn[from]; })[0]; if (p) { p.mic = m.on ? 1 : 0; netRoster(); } } return; }
   if (m.t === 'emo' || m.t === 'horn' || m.t === 'chat') { if (NET.host) { if (NET.conn[from] === undefined) return; if (m.t === 'chat') m.nid = NET.conn[from]; if (!NET.tr.mesh) NET.tr.all(m, from); } if (m.t === 'chat') chatIn(m); else netFx(m); return; }
   if (m.t === 'ko') { if (!NET.host && NET.racing) koOut(m.nid | 0); return; }
   if (NET.host) {
     if (m.t === 'hello') { const late = NET.racing && NET.pub; if (NET.conn[from] !== undefined) return; if ((NET.racing && !late) || NET.roster.length >= 6) { NET.tr.send(from, { t: 'busy', why: NET.racing && !late ? 'race' : 'full' }); return; }
-      const nid = NET.nextId++, np = { nid: nid, name: String(m.name || 'Игрок').slice(0, 16), type: Math.abs(m.type | 0) % CAR_TYPES.length, color: netFreeColor(Math.abs(m.color | 0) % 8, nid) }; if (late) np.late = 1;
+      const nid = NET.nextId++, np = { nid: nid, name: String(m.name || 'Игрок').slice(0, 16), type: Math.abs(m.type | 0) % CAR_TYPES.length, color: netFreeColor(Math.abs(m.color | 0) % 8, nid), pid: NET.tr.pidOf ? NET.tr.pidOf(from) : null }; if (late) np.late = 1;
       NET.conn[from] = nid; NET.last = NET.last || {}; NET.last[from] = performance.now(); NET.roster.push(np); NET.tr.send(from, { t: 'welcome', nid: nid }); netRoster();
       if (NET.pub) { const now = performance.now();
         if (late && !NET.regroup && cars.filter(function (c) { return c.nid < 100; }).length < 2) { NET.regroup = now + 3500; note('Нашёлся соперник: ' + np.name, 2600); }          // racing the bots alone: stop and start together
@@ -2729,7 +2793,7 @@ function netMsg(from, m) {
     if (from === 0) NET.seen = performance.now();
     if (m.t === 'welcome') { NET.me = m.nid; return; }
     if (m.t === 'bye' && from === 0) { netClosed(0); return; }
-    if (m.t === 'roster') { NET.roster = m.list || []; NET.track = m.track | 0; NET.opt = m.opt || {}; NET.pub = !!m.pub; if (!NET.racing) netLobby(); return; }
+    if (m.t === 'roster') { NET.roster = m.list || []; NET.track = m.track | 0; NET.opt = m.opt || {}; NET.pub = !!m.pub; voiceSync(); if (!NET.racing) netLobby(); return; }
     if (m.t === 'kick' && from === 0) { netLeave(); toMenu(); netOpen(); mpMsg('Ты не ехал в заезде — комната пошла дальше без тебя'); return; }
     if (m.t === 'wait') { if (!NET.racing && NET.pub) pubStat(m); return; }
     if (m.t === 'busy') { mpMsg(m.why === 'full' ? 'В комнате уже 6 игроков' : 'В комнате идёт заезд, подожди конца'); const tr = NET.tr; NET.on = false; NET.tr = null; if (tr) tr.close(); netOpen(); mpMsg(m.why === 'full' ? 'В комнате уже 6 игроков' : 'В комнате идёт заезд, зайди после финиша'); return; }
