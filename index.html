@@ -467,7 +467,7 @@
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 60</div>
+    <div style="opacity:.5;margin-top:8px">версия 61</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -541,7 +541,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 60</div>
+  <div class="fver">Turbo Drift · версия 61</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1405,7 +1405,7 @@ let W = null;
 // ---------------------------------------------------------------------------
 const NEON = [[0.95,0.22,0.52],[0.18,0.82,0.95],[0.95,0.16,0.10],[1.0,0.78,0.16],[0.28,0.95,0.42],[0.92,0.92,1.0],[0.60,0.34,1.0],[1.0,0.48,0.10]];
 function cityKit(c, o) { o = o || {};
-  const mb = c.mb, at = c.at, N = c.N, x = c.x, z = c.z, h = c.h, rnd = c.rnd, HW = ROAD_W/2, WY = o.wy || -14, UPc = [0,-50,0], NITE = SKY.night > 0.6, K = { WY: WY, water: [], placed: [], clears: [], NITE: NITE };
+  const mb = c.mb, at = c.at, N = c.N, x = c.x, z = c.z, h = c.h, rnd = c.rnd, HW = ROAD_W/2, WY = o.wy || -14, UPc = [0,-50,0], NITE = SKY.night > 0.6, K = { WY: WY, water: [], placed: [], clears: [], lots: [], NITE: NITE };
   // the look of a city: wall colours, roofs, signs, how tall the rows along the road stand
   const ST = K.style = { pal: null, roof: 'flat', neon: true, signs: 1, rowH: null, land: [0.19,0.19,0.21], quay: [0.30,0.30,0.32], water: null, tight: null, cornice: false }; for (const k in (o.style || {})) ST[k] = o.style[k];
   const mul = function (c3, k) { return [c3[0]*k, c3[1]*k, c3[2]*k]; };
@@ -1477,7 +1477,10 @@ function cityKit(c, o) { o = o || {};
   K.fill = function (tries, x0, z0, x1, z1, smin, smax, hmin, hmax, clear, ok) {
     for (let k = 0; k < tries; k++) { const px = x0 + rnd()*(x1-x0), pz = z0 + rnd()*(z1-z0), wide = smin + rnd()*(smax-smin), deep = smin + rnd()*(smax-smin), r = 0.5*Math.max(wide, deep), hgt = hmin + rnd()*rnd()*(hmax-hmin);
       if (ok && !ok(px, pz)) continue; const hg = K.cap(px, pz, hgt, r); if (K.wet(px, pz, r) || !K.free(px, pz, r*0.95) || K.road(px, pz) < clear + r) continue;
-      K.tower(px, pz, deep, wide, hg, rnd() < 0.8 ? (rnd() - 0.5)*0.05 : rnd()*1.57); K.keep(px, pz, r*0.95); } };      // never exactly square to its neighbours: two walls in one plane would flicker
+      // never exactly square to its neighbours, and never running into one of them: where two walls lie in one plane or cross, the picture flickers
+      const turned = rnd() >= 0.8, ry = turned ? rnd()*1.57 : (rnd() - 0.5)*0.05, hx = turned ? r*1.42 : deep/2, hz = turned ? r*1.42 : wide/2; let hit = false;
+      for (const b of K.lots) if (Math.abs(b[0] - px) < b[2] + hx + 0.8 && Math.abs(b[1] - pz) < b[3] + hz + 0.8) { hit = true; break; } if (hit) continue; K.lots.push([px, pz, hx, hz]);
+      K.tower(px, pz, deep, wide, hg, ry); K.keep(px, pz, r*0.95); } };
   // tunnel over `len` points of the road from point i0
   K.tunnel = function (i0, len, o2) { o2 = o2 || {};
     let WI = 0; for (let k = 0; k <= len; k++) { const j = (i0+k) % N; WI = Math.max(WI, c.wp[j], c.wn[j]); } WI += 1.0;
@@ -1876,12 +1879,12 @@ const CITY_GEN = {
     K.fill(420, -1500, -1300, 720, 1900, 30, 60, 30, 160, 500, function (px, pz) { return Math.hypot(px - CX, pz - CZ) > 640; });
     K.street(9, 0.5, [0, 1, 0, 6], 4.0, 1.4);
   },
-  // Tashkent on a clear day: the square with the rider, the hotel's curved front, blue domes, the television tower, mountains far away
-  tashkent: function (c) { const PAL = [[0.90,0.88,0.82],[0.84,0.80,0.70],[0.78,0.76,0.72],[0.88,0.84,0.74],[0.70,0.72,0.74],[0.80,0.74,0.62]];
-    const K = cityKit(c, { wy: -5, style: { neon: false, signs: 0.6, land: [0.27,0.27,0.28], quay: [0.62,0.60,0.56], pal: function (hgt) { const p = PAL[(c.rnd()*PAL.length) | 0], k = 0.92 + c.rnd()*0.14; return hgt > 44 ? [0.36*k,0.46*k,0.58*k] : [p[0]*k, p[1]*k, p[2]*k]; },
-      rowH: function (row, rnd) { const u = rnd(); return u < 0.55 ? 8 + rnd()*8 : (u < 0.9 ? 16 + rnd()*12 : 30 + rnd()*22); } } });
+  // Tashkent on a clear day. West of the canal the new business quarter: a park with a lake inside the bend of the road, glass towers all round, the tallest at the end of an avenue. East of it the old centre: the square with the rider, the hotel's curved front, the arch with storks; the television tower and mountains far away
+  tashkent: function (c) { const PAL = [[0.90,0.88,0.82],[0.84,0.80,0.70],[0.78,0.76,0.72],[0.88,0.84,0.74],[0.70,0.72,0.74],[0.80,0.74,0.62]], GLS = [[0.30,0.42,0.54],[0.36,0.46,0.52],[0.26,0.34,0.46],[0.44,0.50,0.54],[0.50,0.44,0.34],[0.62,0.66,0.70]];
+    const K = cityKit(c, { wy: -5, style: { neon: false, signs: 0.6, land: [0.27,0.27,0.28], quay: [0.62,0.60,0.56], pal: function (hgt) { const a = hgt > 28 ? GLS : PAL, p = a[(c.rnd()*a.length) | 0], k = 0.92 + c.rnd()*0.14; return [p[0]*k, p[1]*k, p[2]*k]; },
+      rowH: function (row, rnd, j, p) { if (p[0] < -345) return 30 + rnd()*26; const u = rnd(); return u < 0.5 ? 8 + rnd()*8 : (u < 0.85 ? 16 + rnd()*12 : 30 + rnd()*24); } } });
     const mb = c.mb, at = c.at, N = c.N, rnd = c.rnd, HW = ROAD_W/2, L = 1500, CX = -40, CZ = 280, S = c.S, WH = [0.94,0.94,0.91], TQ = [0.14,0.56,0.62], GOLD = [0.85,0.65,0.18], SX = 260, SZ = 400;
-    K.ground(CX, CZ, L, [[-345,CZ - L,-305,CZ + L]], 720);
+    K.ground(CX, CZ, L, [[-345,CZ - L,-305,CZ + L],[-612,212,-452,338]], 860);
     // the square inside the big bend: lawn, paths to the middle, the rider on his plinth, a domed rotunda, two clock towers, a hall with columns
     { const R = 149, n = 28; for (let k = 0; k < n; k++) { const a0 = k/n*6.2832, a1 = (k+1)/n*6.2832; mb.tri([SX, 0.0, SZ], [SX + Math.cos(a0)*R, 0.0, SZ + Math.sin(a0)*R], [SX + Math.cos(a1)*R, 0.0, SZ + Math.sin(a1)*R], [1,1,1], 1, [0,-50,0]); }
       K.keep(SX, SZ, 151);
@@ -1908,25 +1911,60 @@ const CITY_GEN = {
       for (let a = 0; a < 3; a++) { const ang = a*2.0944 + 0.5, fx = px + Math.cos(ang)*36, fz = pz + Math.sin(ang)*36, tx = px + Math.cos(ang)*3.2, tz = pz + Math.sin(ang)*3.2, nx = -Math.sin(ang)*1.4, nz = Math.cos(ang)*1.4;
         mb.quad([fx - nx, 0, fz - nz], [fx + nx, 0, fz + nz], [tx + nx, yJ*0.96, tz + nz], [tx - nx, yJ*0.96, tz - nz], G, 0, [px, 0, pz]); mb.quad([fx, 0, fz], [fx, 2.8, fz], [tx, yJ*0.96 + 2.8, tz], [tx, yJ*0.96, tz], K.mul(G, 0.85), 0, null); }
       K.keep(px, pz, 42); }
-    // the old town to the west: the bazaar under its great dome, a madrasa with a tiled portal; a white mosque by the canal; glass towers further out
-    { const px = -615, pz = 270; K.open(-700,45,-512,362); mb.cyl(px, 0, pz, 44, 44, 5, 28, [0.86,0.84,0.78], 0, [0.60,0.60,0.58]); mb.cyl(px, 5, pz, 43, 42, 4.5, 28, [0.16,0.36,0.56], 11, [0.60,0.60,0.58]); K.dome(px, 9.5, pz, 42, 18, TQ, 11, { ribs: true, seg: 28, pow: 0.62, finial: GOLD });
-      for (let k = 0; k < 8; k++) { const a = k/8*6.2832 + 0.39, qx = px + Math.cos(a)*56, qz = pz + Math.sin(a)*56; mb.cyl(qx, 0, qz, 8, 8, 5, 12, [0.86,0.84,0.78], 0); K.dome(qx, 5, qz, 7.6, 6, TQ, 11, { ribs: true, seg: 12, pow: 0.7 }); }
-      const AW = [[0.80,0.20,0.16],[0.16,0.36,0.70],[0.90,0.74,0.20],[0.20,0.56,0.32],[0.92,0.92,0.90]]; for (let k = 0; k < 30; k++) { const qx = -548 + rnd()*30, qz = 190 + rnd()*165; mb.box(qx, 2.7, qz, 3.0, 0.22, 3.0, AW[(rnd()*5) | 0], 0, rnd()); mb.box(qx, 1.3, qz, 0.14, 2.6, 0.14, [0.3,0.3,0.32], 0); } }
-    { const px = -592, pz = 108, ry = 1.5708, F = K.loc(px, pz, ry), BR = [0.76,0.64,0.46]; K.pishtaq(px, pz, ry, 18, 23, 8, { stone: BR });
-      for (const sx of [-1, 1]) { const q = F(sx*24, -1); mb.box(q[0], 5.5, q[1], 30, 11, 7, BR, 0, ry); for (let k = 0; k < 4; k++) for (let fl = 0; fl < 2; fl++) { const n = F(sx*(12.5 + k*7), 2.56); mb.box(n[0], 2.7 + fl*5, n[1], 3.6, 3.6, 0.12, [0.12,0.10,0.10], 0, ry); }
-        const t = F(sx*40.5, 1.5); mb.cyl(t[0], 0, t[1], 2.3, 1.9, 14, 10, BR, 0); K.dome(t[0], 14, t[1], 2.2, 2.6, TQ, 11, { seg: 10, pow: 0.8 }); } }
+    // ---- the business quarter ----
+    // the park: lawn and trees round a lake with a line of fountains, a paved walk along the water, a white dome
+    { const kp = { keep: function (px, pz) { return !(px > -624 && px < -440 && pz > 200 && pz < 350) && !(px > -446 && pz > 196 && pz < 436) && Math.hypot(px + 566, pz - 404) > 15 && px > -668 && pz < 440; } };
+      K.park(-682,160,-612,452, 16, kp); K.park(-452,160,-365,452, 12, kp); K.park(-612,160,-452,212, 14, kp); K.park(-612,338,-452,452, 26, kp); K.open(-682,88,-365,160);
+      for (let zz = 150; zz <= 456; zz += 9) K.keep(-690, zz, 5); for (let xx = -690; xx <= -372; xx += 9) K.keep(xx, 460, 5); }      // no street trees between the road and the park: the lake and the towers beyond it stay in view
+    { const PV = [0.66,0.63,0.58]; mb.box(-532, 0.03, 207, 172, 0.06, 6, PV, 0); mb.box(-532, 0.03, 343, 172, 0.06, 6, PV, 0); mb.box(-617, 0.03, 275, 6, 0.06, 136, PV, 0); mb.box(-447, 0.03, 275, 6, 0.06, 136, PV, 0);
+      for (let k = 0; k < 11; k++) { const fx = -592 + k*12, fh = 11 + 13*Math.sin(3.1416*k/10); mb.cyl(fx, K.WY, 275, 1.2, 0.0, fh - K.WY, 6, [0.88,0.93,0.98], 0); if (k % 2) for (const o of [-9, 9]) mb.cyl(fx, K.WY, 275 + o, 0.5, 0.0, 4 - K.WY, 5, [0.88,0.93,0.98], 0); }
+      mb.cyl(-566, 0, 404, 10, 10, 3, 18, WH, 0, WH); K.dome(-566, 3, 404, 9.6, 8, [0.90,0.91,0.93], 6, { seg: 18, pow: 0.8 }); }
+    // the hotel on the east shore: a tall slab of glass bowed toward the lake; the low wide congress hall beside it under a flat roof, a walkway between them
+    for (let k = -2; k <= 2; k++) { mb.box(-398 + k*k*1.7, 23.5, 252 + k*16.4, 13, 47, 17.4, [0.33,0.46,0.58], 7, -k*0.11); mb.box(-398 + k*k*1.7, 47.6, 252 + k*16.4, 13.6, 1.2, 17.8, [0.86,0.87,0.88], 0, -k*0.11); K.keep(-398 + k*k*1.7, 252 + k*16.4, 10); }
+    { const px = -404, pz = 384, GD = [0.80,0.68,0.46]; mb.box(px, 5.5, pz, 58, 11, 48, GD, 0); mb.box(px, 5.6, pz, 58.3, 6.5, 40, [0.08,0.10,0.14], 4); mb.box(px, 12, pz, 68, 1.6, 58, WH, 0); for (let k = 0; k < 15; k++) { mb.box(px - 29.4, 5.5, pz - 22.4 + k*3.2, 0.8, 11, 0.9, GD, 0); mb.box(px + 29.4, 5.5, pz - 22.4 + k*3.2, 0.8, 11, 0.9, GD, 0); }
+      for (const o of [-27, 27]) for (const q of [-22, 22]) mb.cyl(px + o*1.12, 0, pz + q*1.14, 0.7, 0.7, 11.4, 8, WH, 0); mb.box(-399, 8, 324, 5, 3, 76, [0.30,0.40,0.50], 7); K.keep(px, pz, 38); }
+    // the banks: five towers in a row between the park and the south road
+    [[-654,66,GLS[2]],[-603,60,GLS[4]],[-552,90,GLS[0]],[-501,63,GLS[3]],[-450,68,GLS[1]]].forEach(function (b) { mb.box(b[0], b[1]/2, 124, 25, b[1], 23, b[2], 7); mb.box(b[0], b[1] + 1.6, 124, 21, 3.2, 19, K.mul(b[2], 0.7), 7); mb.box(b[0], 3, 124, 31, 6, 29, K.mul(b[2], 0.8), 7); mb.box(b[0], b[1] + 3.7, 124, 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5); if (b[1] < 80) c.shade(b[0], 124, 25, 23, b[1], 0, K); K.keep(b[0], 124, 16); });
+    // the tallest tower north of the road, on the axis of the avenue that comes from the old centre: a blade of blue glass that swells and narrows again, two round towers beside it on one base
+    { const px = -520, pz = 548, H = 155, n = 10, B = [0.24,0.38,0.54]; K.open(-612,492,-428,612); mb.box(px, 4, pz, 156, 8, 58, [0.30,0.36,0.42], 7);
+      for (let k = 0; k < n; k++) { const t0 = (k + 0.5)/n, sw = (0.92 + 0.16*Math.sin(3.1416*t0*0.85))*(t0 > 0.78 ? 1 - (t0 - 0.78)*1.5 : 1); mb.box(px + 2.6*Math.sin(3.1416*t0), 8 + (H - 8)*t0, pz, 27*sw, (H - 8)/n, 22*sw, K.mul(B, k % 2 ? 1.0 : 1.08), 7, 0.06*k); }
+      mb.cyl(px, H, pz, 0.8, 0.15, 21, 6, [0.85,0.85,0.86], 0); mb.box(px, H + 21.5, pz, 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5);
+      for (const o of [-66, 66]) { mb.cyl(px + o, 8, pz, 12, 12, 62, 14, [0.30,0.44,0.58], 7, [0.5,0.5,0.52]); mb.cyl(px + o, 70, pz, 12.6, 12.6, 1.4, 14, [0.86,0.87,0.88], 0); mb.box(px + o, 72, pz, 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5); } for (let o = -70; o <= 70; o += 35) K.keep(px + o, pz, 30); }
+    // the mall west of the road: a long low block with a glass front, three towers on it
+    { K.open(-902,194,-716,354); mb.box(-808, 6, 274, 168, 12, 144, [0.82,0.80,0.74], 7); mb.box(-723.7, 7, 274, 0.4, 13, 62, [0.08,0.10,0.14], 4); mb.box(-808, 12.5, 274, 172, 1.0, 148, [0.60,0.60,0.60], 0);
+      [[228,70,GLS[0]],[274,64,GLS[3]],[320,66,GLS[1]]].forEach(function (b) { mb.box(-846, 12 + b[1]/2, b[0], 24, b[1], 24, b[2], 7); mb.box(-846, 13.2 + b[1], b[0], 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5); }); for (let o = -70; o <= 70; o += 28) for (const q of [-45, 0, 45]) K.keep(-808 + o, 274 + q, 22); }
+    // the square south of the road: the palace behind its screen of white fins, a fairy-tale castle of an amusement park, the round ice arena
+    { const PV = [0.64,0.62,0.57]; K.open(-722,-150,-362,56); mb.quad([-700,0.02,-140],[-366,0.02,-140],[-366,0.02,52],[-700,0.02,52],PV,0,[0,-50,0]); K.fountain(-540, 16, 9);
+      for (let k = 0; k < 44; k++) { const tx = -696 + rnd()*326, tz = -136 + rnd()*184; if ((tx > -580 && tx < -500 && tz > -140 && tz < 34) || Math.hypot(tx + 650, tz + 80) < 46 || Math.hypot(tx + 404, tz + 40) < 42) continue; c.tree(tx, tz, [0, 1, 0, 6][(rnd()*4) | 0], 5.5 + rnd()*3, 0.8 + rnd()*0.3); }
+      mb.box(-540, 10, -106, 62, 20, 46, [0.80,0.74,0.62], 0); mb.box(-540, 21, -106, 70, 2, 54, WH, 0); mb.box(-540, 9, -82.6, 44, 14, 0.3, [0.10,0.12,0.16], 4); for (let k = 0; k < 17; k++) mb.box(-570 + k*3.75, 10, -80.6, 1.0, 20, 2.6, WH, 0); K.keep(-540, -106, 38);
+      { const px = -404, pz = -56, WL = [0.93,0.88,0.86], RF = [0.18,0.34,0.70], q = 1.5; mb.box(px, 9*q, pz, 26*q, 18*q, 20*q, WL, 0); mb.box(px, 4.5*q, pz + 10.1*q, 7*q, 9*q, 0.3, [0.20,0.14,0.10], 0);
+        for (const a of [[-13,-10],[13,-10],[13,10],[-13,10]]) { mb.cyl(px + a[0]*q, 0, pz + a[1]*q, 3.0*q, 3.0*q, 26*q, 10, WL, 0); mb.cyl(px + a[0]*q, 26*q, pz + a[1]*q, 3.6*q, 0.0, 9*q, 10, RF, 11); }
+        mb.cyl(px, 18*q, pz - 2*q, 4.4*q, 4.0*q, 20*q, 10, WL, 0); mb.cyl(px, 38*q, pz - 2*q, 5.0*q, 0.0, 13*q, 10, RF, 11); mb.cyl(px - 6*q, 18*q, pz + 4*q, 2.2*q, 2.2*q, 10*q, 8, WL, 0); mb.cyl(px - 6*q, 28*q, pz + 4*q, 2.7*q, 0.0, 7*q, 8, RF, 11); mb.cyl(px + 6*q, 18*q, pz + 4*q, 2.2*q, 2.2*q, 13*q, 8, WL, 0); mb.cyl(px + 6*q, 31*q, pz + 4*q, 2.7*q, 0.0, 7*q, 8, RF, 11);
+        const PC = [[0.90,0.62,0.56],[0.62,0.76,0.86],[0.92,0.86,0.60],[0.66,0.84,0.72],[0.86,0.72,0.88]]; for (let k = 0; k < 5; k++) { mb.box(px - 20 + k*9.4, 5 + (k % 2), pz + 44, 9, 10 + 2*(k % 2), 9, PC[k], 7); mb.box(px - 20 + k*9.4, 10.7 + 2*(k % 2), pz + 44, 9.4, 1.4, 9.4, [0.62,0.34,0.22], 0); } K.keep(px, pz, 32); }
+      { const px = -650, pz = -80, SV = [0.84,0.85,0.87]; mb.cyl(px, 0, pz, 38, 39, 9, 26, SV, 6, SV); mb.cyl(px, 2.6, pz, 38.6, 38.9, 3.6, 26, [0.08,0.10,0.14], 4); mb.cyl(px, 9, pz, 39, 43, 2.4, 26, WH, 0, WH); K.dome(px, 11.4, pz, 40, 8, [0.90,0.91,0.93], 6, { seg: 26, pow: 0.55 }); K.keep(px, pz, 44); } }
+    // north-west, at the end of the north road: a vast white hall in the old manner, a portal on each side, a turquoise dome over the middle; two minarets and a bazaar's dome behind
+    { const px = -872, pz = 478, WB = [0.92,0.88,0.78], q = 1.25; K.open(-960,404,-796,552); mb.box(px, 7*q, pz, 70*q, 14*q, 94*q, WB, 0); mb.box(px, 14.4*q, pz, 72*q, 0.8*q, 96*q, K.mul(WB, 0.85), 0);
+      for (let k = 0; k < 9; k++) for (const sx of [-1, 1]) { if (k === 4) continue; mb.box(px + sx*35.06*q, 6*q, pz + (-40 + k*10)*q, 0.12, 8.5*q, 5*q, [0.08,0.14,0.26], 0); mb.box(px + sx*35.1*q, 11.6*q, pz + (-40 + k*10)*q, 0.12, 1.2*q, 6.4*q, TQ, 11); }
+      K.pishtaq(px + 33*q, pz, 1.5708, 19*q, 21*q, 6*q, { stone: WB, tile: TQ }); K.pishtaq(px - 33*q, pz, -1.5708, 19*q, 21*q, 6*q, { stone: WB, tile: TQ }); K.pishtaq(px, pz + 45*q, 0, 19*q, 21*q, 6*q, { stone: WB, tile: TQ }); K.pishtaq(px, pz - 45*q, 3.1416, 19*q, 21*q, 6*q, { stone: WB, tile: TQ });
+      mb.cyl(px, 14*q, pz, 14.5*q, 14.5*q, 9*q, 22, WB, 0, WB); mb.cyl(px, 19.5*q, pz, 14.7*q, 14.7*q, 2.2*q, 22, TQ, 11); K.dome(px, 23*q, pz, 14.8*q, 16*q, TQ, 11, { ribs: true, seg: 22, pow: 0.7, finial: GOLD });
+      for (const a of [[-1,-1],[1,-1],[1,1],[-1,1]]) { mb.cyl(px + a[0]*31*q, 14*q, pz + a[1]*43*q, 3.2*q, 3.2*q, 3*q, 12, WB, 0); K.dome(px + a[0]*31*q, 17*q, pz + a[1]*43*q, 3.3*q, 3.8*q, TQ, 11, { seg: 12, pow: 0.75 }); }
+      K.minaret(-975, 428, 42, 2.1, [0.76,0.64,0.46], TQ); K.minaret(-975, 528, 42, 2.1, [0.76,0.64,0.46], TQ); K.keep(px, pz, 74);
+      mb.cyl(-1010, 0, 690, 30, 30, 5, 22, [0.86,0.84,0.78], 0, [0.60,0.60,0.58]); mb.cyl(-1010, 5, 690, 29, 28, 3.5, 22, [0.16,0.36,0.56], 11); K.dome(-1010, 8.5, 690, 28, 12, TQ, 11, { ribs: true, seg: 22, pow: 0.62, finial: GOLD }); K.keep(-1010, 690, 34); }
+    // two more tall ones on the skyline: glass under a pyramid to the south-east, a pale tower with a stepped top to the north
+    mb.box(560, 47, -270, 21, 94, 21, GLS[0], 7); mb.cyl(560, 94, -270, 14.8, 0.0, 14, 4, [0.60,0.66,0.72], 6, null, 0.7854); K.keep(560, -270, 16);
+    mb.box(110, 26, 730, 24, 52, 24, [0.86,0.82,0.72], 7); mb.box(110, 55, 730, 17, 6, 17, [0.30,0.42,0.54], 7); mb.box(110, 60, 730, 10, 4, 10, [0.86,0.82,0.72], 0); K.keep(110, 730, 18);
     { const px = -252, pz = 172, ry = 3.1416, F = K.loc(px, pz, ry); K.park(-299,96,-200,252, 16, { keep: function (qx, qz) { return Math.hypot(qx - px, qz - pz + 6) > 34; } });
       mb.box(px, 6.5, pz, 36, 13, 26, WH, 0, ry); const f = F(0, 14); K.pishtaq(f[0], f[1], ry, 13, 19, 3.5, { stone: WH, tile: TQ });
       mb.cyl(px, 13, pz, 9.6, 9.6, 4, 16, WH, 0, WH); mb.cyl(px, 15.4, pz, 9.7, 9.7, 1.0, 16, TQ, 11); K.dome(px, 17, pz, 9.4, 9.5, TQ, 11, { ribs: true, pow: 0.72, finial: GOLD });
       for (const sx of [-1, 1]) { const m2 = F(sx*21, 13); K.minaret(m2[0], m2[1], 40, 1.7, WH, TQ); } K.keep(px, pz, 26); }
-    mb.cyl(-800, 0, 470, 13, 11, 152, 12, [0.34,0.44,0.56], 7); mb.box(-800, 153, 470, 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5); K.keep(-800, 470, 16); K.cluster(-840, 470, 10, 130, 55, 115, [0.34,0.44,0.56]);
-    K.vistas.push([330,0, 770,-30, 3, 5, 0.05, 0.14], [-441,470, -800,470, 3, 5, 0.06, 0.14]);
+    K.vistas.push([330,0, 770,-30, 3, 5, 0.05, 0.14], [-150,560, -520,548, 3, 5, 0.05, 0.14], [-712,474, -800,478, 40, 6, 0.0, 0.3]);
     for (const b of [S.bridge, S.bridge2]) { const DW = K.deck(b[0], b[1], { conc: [0.82,0.82,0.80], rail: [0.16,0.50,0.58], piers: 0 }); for (const e of [3, b[1] - 3]) for (const sd of [-1, 1]) { const q = at(b[0] + e, sd*(DW + 0.2), 0); mb.box(q[0], 1.4, q[2], 1.2, 2.8, 1.2, WH, 0, c.h[(b[0] + e) % N]); K.dome(q[0], 2.8, q[2], 0.7, 0.8, TQ, 11, { seg: 8 }); } }
     K.tunnel(S.tunnel[0], S.tunnel[1], { blocks: false, conc: [0.74,0.72,0.68] });
     K.gantry(S.tunnel[0] - 44, [0.05,0.16,0.36]); K.gantry(S.tunnel[0] + S.tunnel[1] + 60, [0.05,0.16,0.36]);
     K.rows(null);
-    K.fill(900, -720, -260, 660, 820, 14, 34, 8, 30, HW + 30, null);
-    K.fill(700, -1000, -560, 900, 1150, 20, 46, 8, 44, 120, null);
+    K.fill(700, -300, -260, 660, 820, 14, 34, 8, 30, HW + 30, null);
+    K.fill(600, -1000, -300, -350, 860, 18, 36, 18, 62, HW + 30, null);
+    K.fill(700, -1100, -560, 900, 1150, 20, 46, 8, 44, 120, null);
     K.street(6, 0.22, [0, 1, 0, 1, 6], 5.5, 3.5);
   },
   // Paris late in the day: under the arch on the avenue, across the river toward the iron tower, a tunnel on the quay, the cathedral by the second bridge
@@ -2497,9 +2535,9 @@ const TRACKS = [
   { name: 'Осака', desc: 'Сумерки: красный мост, канал в огнях, замок · 2 круга', pace: 1.02, sky: 'osaka', laps: 2,
     city: { kind: 'osaka', spans: { tunnel: [[-400,310],[-400,100]], bridge: [[440,128],[440,304]] } },
     pts: [[0,0,0],[340,0,50],[440,100,60],[440,330,50],[340,430,50],[80,430,40],[0,350,30],[-120,350,40],[-200,430,40],[-330,430,50],[-400,340,50],[-400,60,60],[-300,-40,50],[-200,-40,30],[-140,0,30]] },
-  { name: 'Ташкент', desc: 'Солнце: сквер, купола, телебашня, горы вдали · 2 круга', pace: 1.02, sky: 'tashkent', laps: 2,
-    city: { kind: 'tashkent', spans: { tunnel: [[420,140],[420,365]], bridge: [[-285,470],[-365,470]], bridge2: [[-365,70],[-285,70]] }, mountains: { ang: 0.8, low: 0.10, far: 700 } },
-    pts: [[0,0,0],[330,0,60],[420,90,60],[420,560,160],[-150,560,60],[-240,470,50],[-420,470,50],[-500,390,50],[-500,150,50],[-420,70,50],[-200,70,40],[-120,0,30]] },
+  { name: 'Ташкент', desc: 'Деловой центр с парком и озером, сквер, мосты через канал, телебашня · 2 круга', pace: 1.02, sky: 'tashkent', laps: 2, kid: '5b', lb: 15,      // kid, lb: the lap was redrawn, so its records start anew, here and on the server
+    city: { kind: 'tashkent', spans: { tunnel: [[420,140],[420,365]], bridge: [[-285,470],[-365,470]], bridge2: [[-365,70],[-285,70]] }, mountains: { ang: 0.8, low: 0.10, far: 900 } },
+    pts: [[0,0,0],[330,0,60],[420,90,60],[420,560,160],[-150,560,60],[-240,470,50],[-620,470,60],[-700,390,60],[-700,150,60],[-620,70,60],[-200,70,40],[-120,0,30]] },
   { name: 'Париж', desc: 'Вечер: арка на проспекте, мосты через реку, башня · 2 круга', pace: 1.02, sky: 'paris', laps: 2,
     city: { kind: 'paris', spans: { tunnel: [[-230,190],[-20,190]], bridge: [[-380,395],[-380,255]], bridge2: [[420,255],[420,395]] } },
     pts: [[0,560,0],[-300,560,60],[-380,460,60],[-380,190,50],[140,190,60],[220,120,50],[330,120,50],[420,200,60],[420,470,60],[340,620,50],[200,620,40],[140,560,30]] },
@@ -2529,7 +2567,8 @@ const TRACKS = [
     pts: [[0,0,0],[380,0,40],[440,60,40],[440,540,50],[380,600,40],[120,600,25],[120,480,25],[-100,480,25],[-100,600,25],[-240,600,40],[-300,540,40],[-300,60,40],[-240,0,40]] }
 ];
 let T = null, DRY = false;          // the built track; DRY: the player is under a roof, the rain is not drawn
-function trackKey(id, rev, rain) { return 'u' + id + (rev ? 'r' : '') + (rain ? 'w' : ''); }      // records are kept apart for each direction and weather
+function trackKey(id, rev, rain) { return 'u' + (TRACKS[id].kid || id) + (rev ? 'r' : '') + (rain ? 'w' : ''); }
+function lbId(i) { const t = TRACKS[i]; return t.lb === undefined ? i : t.lb; }                 // the number a track goes by on the records server      // records are kept apart for each direction and weather
 function buildTrack(id, rev) {
   const P0 = TRACKS[id].pts, P = rev ? [P0[0]].concat(P0.slice(1).reverse()) : P0, n = P.length, fine = []; LAPS = TRACKS[id].laps || 3;
   const put = function (px, pz) { const q = fine.length ? fine[fine.length-1] : null;                    // straight runs are filled in every half unit
@@ -3424,7 +3463,7 @@ function update(dt) {
 // the device that fired and applied by the device that owns the car that was hit.
 // ---------------------------------------------------------------------------
 const NET = { on: false, host: false, racing: false, code: '', me: 0, tr: null, roster: [], conn: {}, nextId: 1, track: 0, sendT: 0, results: {}, firstFin: 0 };
-const ROOM_PREFIX = 'turbodrift12-';         // bumped whenever players of the old and the new version could not race together (here: a fourth track)
+const ROOM_PREFIX = 'turbodrift13-';         // bumped whenever players of the old and the new version could not race together (here: a fourth track)
 function peerTransport() {
   let peer = null, hc = null, seq = 1, opened = false; const conns = {}; let self = null;
   const load = function (done0) { if (window.Peer) return done0(null); let lf = false; const done = function (e) { if (!lf) { lf = true; done0(e); } }; setTimeout(function () { done('load'); }, 12000);
@@ -3477,9 +3516,9 @@ function roomTransport(room) {
   const hostOf = function () { for (const p of nr.peers()) if (!p.sameTab && p.presence && p.presence.host) return p.peer; return ''; };
   const fail = function (done) { return function (e) { done(e && e.code === 'not_permitted' ? 'denied' : 'room'); }; };
   return self = { mesh: true, msg: netMsg, gone: netClosed,
-    host: function (code, done) { room.join('td12-' + code.toLowerCase()).then(function (r) { nr = r;
+    host: function (code, done) { room.join('td13-' + code.toLowerCase()).then(function (r) { nr = r;
       setTimeout(function () { if (hostOf()) { try { nr.leave(); } catch (e) {} return done('unavailable-id'); } try { nr.presence({ host: true }); } catch (e) {} me = myLabel(); listen(true); done(null); }, 900); }, fail(done)); },
-    join: function (code, done) { room.join('td12-' + code.toLowerCase()).then(function (r) { nr = r; let tries = 0;
+    join: function (code, done) { room.join('td13-' + code.toLowerCase()).then(function (r) { nr = r; let tries = 0;
       const look = function () { hostPeer = hostOf(); if (hostPeer) { me = myLabel(); listen(false); return done(null); } if (++tries > 16) { try { nr.leave(); } catch (e) {} return done('peer-unavailable'); } setTimeout(look, 300); }; look(); }, fail(done)); },
     send: function (id, o) { if (!nr) return; if (id === 0) emit(OPEN[o.t] ? '*' : hostPeer, o); else if (labels[id]) emit(labels[id], o); },
     all: function (o, except) { if (nr) emit('*', o, except > 0 ? labels[except] : ''); },
@@ -4048,9 +4087,9 @@ function lbInit() { return tg && tg.initData ? tg.initData : ''; }
 function lbCall(path, body, cb) { let done = false; const end = function (r) { if (!done) { done = true; clearTimeout(tm); cb(r); } }, tm = setTimeout(function () { end(null); }, 9000);
   try { fetch(API_URL + path, { method: 'POST', body: JSON.stringify(body) }).then(function (r) { return r.json(); }).then(function (j) { end(j && j.ok ? j : null); }, function () { end(null); }); } catch (e) { end(null); } }
 function lbSend(track, ms, car, cb) { if (!lbOn() || !lbInit()) { if (cb) cb(null); return; }
-  lbCall('/score', { track: track, ms: ms, car: car, init: lbInit() }, function (r) { if (r) { LB.data[track] = r; try { localStorage.setItem('td_lc' + track, String(ms)); } catch (e) {} } if (cb) cb(r); }); }
+  lbCall('/score', { track: lbId(track), ms: ms, car: car, init: lbInit() }, function (r) { if (r) { LB.data[track] = r; try { localStorage.setItem('td_lc' + lbId(track), String(ms)); } catch (e) {} } if (cb) cb(r); }); }
 function lbSync() {                                     // records set before the table existed, or while offline, go up once
-  if (!lbOn() || !lbInit()) return; for (let i = 0; i < TRACKS.length; i++) { const b = bestTimes[trackKey(i, false, false)]; let sent = 0; try { sent = parseInt(localStorage.getItem('td_lc' + i) || '0', 10); } catch (e) {} if (b && (!sent || b < sent)) lbSend(i, b, garage.type); } }
+  if (!lbOn() || !lbInit()) return; for (let i = 0; i < TRACKS.length; i++) { const b = bestTimes[trackKey(i, false, false)]; let sent = 0; try { sent = parseInt(localStorage.getItem('td_lc' + lbId(i)) || '0', 10); } catch (e) {} if (b && (!sent || b < sent)) lbSend(i, b, garage.type); } }
 let REGION = null; try { REGION = new Intl.DisplayNames(['ru'], { type: 'region' }); } catch (e) {}
 function ccName(cc) { if (!cc) return ''; try { return (REGION && REGION.of(cc)) || cc; } catch (e) { return cc; } }          // 'UZ' -> «Узбекистан»; the server takes the country from the player's network address
 function ccFlag(cc) { return /^[A-Z]{2}$/.test(cc || '') ? String.fromCodePoint(0x1F1E6 + cc.charCodeAt(0) - 65, 0x1F1E6 + cc.charCodeAt(1) - 65) : ''; }          // 'UZ' -> the flag: two regional-indicator letters
@@ -4058,7 +4097,7 @@ function topOpen() { if (!lbOn()) return; document.getElementById('top').classLi
 function topLoad() {
   const tabs = document.getElementById('toptabs'), tr = LB.track; tabs.innerHTML = '';
   TRACKS.forEach(function (t, i) { const b = document.createElement('button'); b.className = 'lv' + (i === tr ? ' on' : ''); b.textContent = t.name; b.addEventListener('click', function () { LB.track = i; topLoad(); }); tabs.appendChild(b); });
-  topDraw(); lbCall('/top', { track: tr, init: lbInit() }, function (r) { if (r) { LB.data[tr] = r; LB.fail[tr] = false; } else LB.fail[tr] = true; if (LB.track === tr) topDraw(); });
+  topDraw(); lbCall('/top', { track: lbId(tr), init: lbInit() }, function (r) { if (r) { LB.data[tr] = r; LB.fail[tr] = false; } else LB.fail[tr] = true; if (LB.track === tr) topDraw(); });
 }
 // the flag has a column of its own, so the flags stand in one line whatever the length of the names
 function topDraw() {

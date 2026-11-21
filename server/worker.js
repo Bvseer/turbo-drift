@@ -2,8 +2,8 @@
 // Cloudflare Worker. Needs: a D1 database bound as DB, secrets BOT_TOKEN and HOOK_SECRET.
 // Optional plain variables: GAME_URL (where the game is hosted), BOT_NAME, APP_NAME.
 
-const TRACKS = 16;                                   // Кольцо, Змейка, Шпильки, Токио, Осака, Ташкент, Париж, Мадрид, Лондон, Лос-Анджелес, Сан-Франциско, Майами, Дубай, Монако, Чикаго; room is left for more (16 in all), so that a new track needs no new server
-const MIN_MS = [90000, 75000, 114000, 97000, 92000, 91000, 86000, 108000, 91000, 84000, 95000, 90000, 107000, 85000, 102000], MIN_DEF = 60000;   // nobody drives a clean race faster than this: such a time is not taken (MIN_DEF for a track not listed yet)
+const TRACKS = 32;                                   // Кольцо, Змейка, Шпильки, Токио, Осака, Ташкент, Париж, Мадрид, Лондон, Лос-Анджелес, Сан-Франциско, Майами, Дубай, Монако, Чикаго; room is left for more (32 in all), so that a new track needs no new server
+const MIN_MS = [90000, 75000, 114000, 97000, 92000, 91000, 86000, 108000, 91000, 84000, 95000, 90000, 107000, 85000, 102000, 108000], MIN_DEF = 60000;      // the last one is Tashkent after its lap was redrawn (the game sends it as track 15)   // nobody drives a clean race faster than this: such a time is not taken (MIN_DEF for a track not listed yet)
 const MAX_MS = 20*60*1000;
 const CARS = 32;                                     // car numbers the game may send; the game itself knows their names
 const TOP = 15;
