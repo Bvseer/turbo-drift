@@ -467,7 +467,7 @@
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 62</div>
+    <div style="opacity:.5;margin-top:8px">версия 63</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -541,7 +541,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 62</div>
+  <div class="fver">Turbo Drift · версия 63</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -3900,7 +3900,15 @@ function drawMap() {
   const mx = function (x) { return S - (pad + (x - T.minX)*sc + (S - 2*pad - (T.maxX-T.minX)*sc)/2); }, mz = function (z) { return S - (pad + (z - T.minZ)*sc + (S - 2*pad - (T.maxZ-T.minZ)*sc)/2); };
   if (!T.mapImg) { const im = document.createElement('canvas'); im.width = S; im.height = S; const g = im.getContext('2d'); g.lineJoin = 'round'; g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 7; g.beginPath();
     for (let i = 0; i <= T.N; i += 3) { const j = i % T.N; if (i === 0) g.moveTo(mx(T.x[j]), mz(T.z[j])); else g.lineTo(mx(T.x[j]), mz(T.z[j])); }
-    g.closePath(); g.stroke(); T.mapImg = im; }
+    g.closePath(); g.stroke();
+    // the finish line: a chequered bar across the track, a little flag beside it
+    { const x0 = mx(T.x[0]), z0 = mz(T.z[0]); let tx = mx(T.x[4]) - x0, tz = mz(T.z[4]) - z0; const l = Math.hypot(tx, tz) || 1; tx /= l; tz /= l; const nx = -tz, nz = tx, q = 5.5;
+      g.save(); g.translate(x0, z0); g.transform(tx, tz, nx, nz, 0, 0); g.fillStyle = '#10131f'; g.fillRect(-q - 1.5, -2*q - 1.5, 2*q + 3, 4*q + 3);
+      for (let a2 = 0; a2 < 2; a2++) for (let b2 = 0; b2 < 4; b2++) { g.fillStyle = (a2 + b2) % 2 ? '#10131f' : '#fff'; g.fillRect(-q + a2*q, -2*q + b2*q, q, q); } g.restore();
+      const out = (x0 + nx*30 > 14 && x0 + nx*30 < S - 14 && z0 + nz*30 > 30 && z0 + nz*30 < S - 8) ? 1 : -1, fx = x0 + nx*out*24, fz = z0 + nz*out*24;
+      g.strokeStyle = '#fff'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(fx, fz + 9); g.lineTo(fx, fz - 13); g.stroke(); g.fillStyle = '#10131f'; g.fillRect(fx, fz - 13, 16, 12);
+      for (let a2 = 0; a2 < 4; a2++) for (let b2 = 0; b2 < 3; b2++) if ((a2 + b2) % 2 === 0) { g.fillStyle = '#fff'; g.fillRect(fx + a2*4, fz - 13 + b2*4, 4, 4); } }
+    T.mapImg = im; }
   mctx.clearRect(0, 0, S, S); mctx.drawImage(T.mapImg, 0, 0);
   for (const c of cars) { if (!c.css) c.css = 'rgb(' + c.color.map(function (v) { return Math.round(v*255); }).join(',') + ')'; mctx.fillStyle = c.css; mctx.strokeStyle = '#fff'; mctx.lineWidth = c === (spec || player) ? 4 : 2;
     mctx.beginPath(); mctx.arc(mx(c.x), mz(c.z), c === (spec || player) ? 10 : 7, 0, 7); mctx.fill(); mctx.stroke(); }
