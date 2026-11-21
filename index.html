@@ -460,7 +460,7 @@
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 50</div>
+    <div style="opacity:.5;margin-top:8px">версия 51</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -534,7 +534,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 50</div>
+  <div class="fver">Turbo Drift · версия 51</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -3049,7 +3049,7 @@ function buildMenu() {
 // World records. A small server (a Cloudflare Worker, see server/worker.js) keeps the best time of every Telegram player
 // for each track in its plain form: forward, dry, no knockout. While the address below is empty the whole thing is off.
 // ---------------------------------------------------------------------------
-const API_URL = window.__tdApi || '';
+const API_URL = window.__tdApi || 'https://turbo-drift.basirxujamuradov.workers.dev';
 const LB = { track: 0, data: {}, fail: {} };
 function lbOn() { return !!API_URL; }
 function lbInit() { return tg && tg.initData ? tg.initData : ''; }
