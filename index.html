@@ -425,7 +425,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт через 15 секунд после второго игрока, свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>H</kbd> гудок</span><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 42</div>
+    <div style="opacity:.5;margin-top:8px">версия 43</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -497,7 +497,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 42</div>
+  <div class="fver">Turbo Drift · версия 43</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -2878,8 +2878,11 @@ function toMenu() {
 function saveGarage() { try { localStorage.setItem('td_car', JSON.stringify({ type: garage.type, color: garage.color })); } catch (e) {} }
 function statBars(el, t) {
   const st = CAR_TYPES[t].st, rows = [['Скорость', (st.top - 0.92)/0.15], ['Разгон', (st.acc - 0.90)/0.22], ['Руль', (st.grip - 0.90)/0.21], ['Броня', (st.arm - 0.75)/0.75]]; el.innerHTML = '';
-  rows.forEach(function (r) { const sp = document.createElement('span'), i = document.createElement('i'), u = document.createElement('u'); u.style.width = Math.round(Math.max(0.08, Math.min(1, r[1]))*100) + '%'; i.appendChild(u); sp.appendChild(document.createTextNode(r[0])); sp.appendChild(i); el.appendChild(sp); });
+  rows.forEach(function (r) { const sp = document.createElement('span'), i = document.createElement('i'), u = document.createElement('u'); u.style.width = Math.round(Math.max(0.08, Math.min(1, r[1]))*100) + '%'; u.style.background = statColor(r[1]); i.appendChild(u); sp.appendChild(document.createTextNode(r[0])); sp.appendChild(i); el.appendChild(sp); });
 }
+// a weak side of the car reads red, an average one yellow, a strong one green; the worst and the best car in the garage mark the ends
+function statColor(v) { const t = Math.max(0, Math.min(1, (v - 0.13)/0.78)), A = t < 0.5 ? [235,64,52] : [255,210,63], B = t < 0.5 ? [255,210,63] : [52,199,89], k = t < 0.5 ? t*2 : t*2 - 1;
+  return 'rgb(' + A.map(function (a, i) { return Math.round(a + (B[i] - a)*k); }).join(',') + ')'; }
 function buildGarage() {
   if (garage.view === undefined || !(garage.view >= 0 && garage.view < CAR_TYPES.length)) garage.view = garage.type;
   const vt = garage.view, mine = owns(vt), C = CAR_TYPES[vt];
