@@ -139,6 +139,11 @@
   .carname small { display: block; font-size: 11px; font-weight: 600; opacity: .8; margin-top: 2px; white-space: nowrap; }
   .seclabel { width: min(340px, 100%); font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; opacity: .75; margin: 4px 0 8px; }
   .mpbtn { margin-bottom: 0; }
+  .mprow { display: flex; gap: 8px; padding: 0 !important; } .mprow button { flex: 1 1 0; min-width: 0; padding: 13px 4px; font-size: 16px; white-space: nowrap; } .mprow button.main { box-shadow: 0 6px 16px rgba(255,194,31,.3); }
+  body.land #menu .mprow button { padding: 8px 4px; font-size: 14.5px; }
+  #mpstart { width: min(360px, 100%); box-sizing: border-box; display: flex; flex-direction: column; align-items: center; padding: 14px 16px 16px; border-radius: 20px; background: rgba(14,22,48,.8); } #mpstart .sub { margin-bottom: 10px; font-size: 14px; } #mpstart .btns { margin-top: 0; }
+  body.wide .pubstat { font-size: 20px; } body.wide #mpstart { padding: 10px 14px 12px; } body.wide #mpstart .sub { font-size: 12.5px; margin-bottom: 7px; } body.wide #mpstart button { padding: 10px 20px; font-size: 16px; } body.wide #mpstart .joinrow { margin-top: 8px; } body.wide #mpstart .joinrow input { padding: 6px; font-size: 19px; }
+  .pubstat { font-size: 24px; font-weight: 900; color: #ffd23f; margin: 4px 0 6px; text-shadow: 0 2px 8px rgba(0,0,0,.5); } #mppub .btns { margin: 8px auto 0; }
   .tag { position: absolute; left: 0; top: 0; padding: 1px 7px; border-radius: 8px; background: rgba(10,13,24,.42); font-size: 11px; font-weight: 700; white-space: nowrap; text-shadow: none; pointer-events: none; will-change: transform, opacity; }
   .sw.taken { opacity: .22; pointer-events: none; }
   /* showroom: the chosen car stands in the middle, in the clear; choices sit either side of it */
@@ -230,6 +235,16 @@
   .wcard { width: min(440px, 100%); box-sizing: border-box; padding: 14px 18px; border-radius: 18px; background: rgba(255,255,255,.08); font-size: 15px; line-height: 1.7; text-align: left; margin-bottom: 16px; } .wcard b { color: #ffd23f; } .wcard .for-pc { text-align: center; }
   #welcome .btns { gap: 10px; } #welcome #wgo { padding: 16px 54px; font-size: 21px; } #welcome #wmenu { padding: 9px 20px; font-size: 13.5px; background: none; opacity: .75; }
   body.land #welcome h1 { font-size: 30px; } body.land #welcome .sub { font-size: 13px; margin-bottom: 8px; } body.land .wcard { font-size: 13.5px; line-height: 1.55; padding: 9px 16px; margin-bottom: 10px; } body.land #welcome #wgo { padding: 11px 46px; font-size: 18px; }
+  /* phone: no picking among small tiles while watching the road. Each bonus held is its own large button; a tap uses it. */
+  body.mob .fire, body.mob .firename { display: none !important; } body.mob .slots { display: contents; }
+  body.mob .item { position: absolute; width: 62px; height: 62px; border-radius: 50%; touch-action: none; border: 2.5px solid rgb(var(--c)); color: rgb(var(--c)); transform: none;
+    background: radial-gradient(circle at 50% 35%, rgba(var(--c),.30), rgba(10,13,24,.86) 72%); box-shadow: 0 0 18px rgba(var(--c),.5), 0 6px 16px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.25), inset 0 0 14px rgba(var(--c),.35); }
+  body.mob .item svg { width: 34px; height: 34px; filter: drop-shadow(0 0 5px rgba(var(--c),.8)); } body.mob .item.empty { display: none; } body.mob .item:active { transform: scale(.93); filter: brightness(1.3); }
+  body.mob .item i { right: -2px; bottom: -2px; min-width: 18px; height: 18px; border-radius: 9px; font: 800 12px/18px sans-serif; }
+  body.mob.tilt #it0 { right: 14px; bottom: 18px; width: 74px; height: 74px; } body.mob.tilt #it0 svg { width: 40px; height: 40px; } body.mob.tilt #it1 { right: 100px; bottom: 18px; } body.mob.tilt #it2 { right: 20px; bottom: 100px; width: 60px; height: 60px; }
+  body.mob.tilt .fireback { right: 104px; bottom: 92px; width: 50px; height: 50px; }
+  body.mob:not(.tilt) #it0 { right: 108px; bottom: 22px; width: 68px; height: 68px; } body.mob:not(.tilt) #it1 { right: 188px; bottom: 22px; } body.mob:not(.tilt) #it2 { right: 112px; bottom: 100px; width: 60px; height: 60px; }
+  body.mob:not(.tilt) .fireback { right: 194px; bottom: 94px; width: 50px; height: 50px; }
   /* watching the others after the finish */
   .specbar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); display: none; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 20px; background: rgba(10,13,24,.66); border: 1px solid rgba(255,255,255,.14); max-width: calc(100% - 16px); box-sizing: border-box; }
   body.spec .specbar { display: flex; } body.spec .hud > *:not(#tags):not(#map) { display: none !important; }
@@ -321,8 +336,8 @@
       <div class="levels opts o2" id="opts"></div>
       <div class="tracks o2" id="tracks"></div>
       <button class="track champ o2" id="champ"><span>Чемпионат<small>Три трассы подряд, очки за места</small></span><b>старт</b></button>
-      <div class="seclabel sl2 o3">С друзьями</div>
-      <button class="ghost mpbtn o3" id="mpopen">Играть с друзьями</button>
+      <div class="seclabel sl2 o3">С другими игроками</div>
+      <div class="mpbtn mprow o3"><button class="main" id="mpquick">Онлайн-гонка</button><button class="ghost" id="mpopen">С друзьями</button></div>
     </div>
   </div>
 </div>
@@ -331,7 +346,7 @@
   <h1>TURBO <span>DRIFT</span></h1>
   <div class="sub">Гонки с бонусами: обгоняй, стреляй, уходи на турбо</div>
   <div class="wcard">
-    <div class="for-mob"><b>Держи телефон горизонтально</b><br><b>Руль</b> — наклоняй телефон влево и вправо<br><b>Газ</b> — сам, справа кнопка <b>ТОРМОЗ</b><br><b>Круглая кнопка</b> — применить бонус, который подобрал на трассе</div>
+    <div class="for-mob"><b>Держи телефон горизонтально</b><br><b>Руль</b> — наклоняй телефон влево и вправо<br><b>Газ</b> — сам, для заноса и остановки кнопка <b>ТОРМОЗ</b><br><b>Круглые кнопки справа</b> — бонусы, которые подобрал на трассе: нажал — применил</div>
     <div class="for-pc"><span class="kb"><kbd>↑</kbd> газ</span><span class="kb"><kbd>←</kbd><kbd>→</kbd> руль</span><span class="kb"><kbd>↓</kbd> тормоз</span><br><span class="kb"><kbd>Пробел</kbd> применить бонус, который подобрал на трассе</span></div>
   </div>
   <div class="btns"><button class="main" id="wgo">Поехали!</button><button class="ghost" id="wmenu">Сначала посмотреть меню</button></div>
@@ -343,7 +358,7 @@
       <b>Газ</b> — автоматический, машина разгоняется сама<br>
       <b>Руль</b> — наклоняй телефон влево и вправо, как руль; положение на старте считается «прямо»<br>
       <b>ТОРМОЗ</b> — коротко нажми в повороте, чтобы пустить машину в занос; на месте — задний ход<br>
-      <b>Бонусы</b> — до трёх; маленькие плитки выбирают, круглая кнопка применяет, стрелка вниз стреляет назад
+      <b>Бонусы</b> — до трёх, у каждого своя круглая кнопка: нажал — применил; стрелка вниз пускает ракету или залп назад
     </div>
     <div style="margin-top:6px"><b>После финиша</b> можно смотреть, как доезжают остальные: кнопка «Наблюдать за гонкой»</div>
 
@@ -356,9 +371,10 @@
     <div><b>Старт</b> — <span class="for-pc">нажми газ ровно на GO</span><span class="for-mob">держи ТОРМОЗ и отпусти ровно на GO</span>: будет рывок<span class="for-pc">; раньше времени — пробуксовка</span></div>
     <div><b>Слипстрим</b> — держись прямо за соперником, машина разгонится сильнее; <b>обгон впритирку</b> без касания даёт турбо</div>
     <div><b>Графика</b> в настройках: «Лёгкая» рисует те же кадры с меньшей чёткостью — плавно и телефон греется меньше; «30 к/с» греется меньше всего, но картинка дёрганее</div>
+    <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт через 15 секунд после второго игрока, свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div class="for-pc"><span class="kb"><kbd>H</kbd> гудок</span><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в игре с друзьями</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 37</div>
+    <div class="for-pc"><span class="kb"><kbd>H</kbd> гудок</span><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
+    <div style="opacity:.5;margin-top:8px">версия 39</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -366,8 +382,10 @@
 <div class="screen hidden" id="mp">
   <h1 style="font-size:34px">Играть вместе</h1>
   <div id="mpstart">
-    <div class="sub">Создай комнату и отправь код друзьям — или введи их код</div>
-    <div class="btns"><button class="main" id="mphost">Создать комнату</button></div>
+    <div class="sub">Гонка с теми, кто сейчас в игре. Старт сам — как только вас двое или больше</div>
+    <div class="btns"><button class="main" id="mpfind">Найти соперников</button></div>
+    <div class="sub" style="margin-top:14px">Или с друзьями: создай комнату или введи их код</div>
+    <div class="btns"><button class="ghost" id="mphost">Создать комнату</button></div>
     <div class="joinrow"><input id="mpcode" maxlength="5" placeholder="КОД" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Код комнаты"><button class="ghost" id="mpjoin">Войти</button></div>
   </div>
   <div id="mplobby" style="display:none">
@@ -379,7 +397,7 @@
     </div>
     <div class="msheet">
     <div class="mcol mleft">
-      <div class="sub">Код комнаты</div>
+      <div class="sub" id="mpcodelabel">Код комнаты</div>
       <div class="roomcode" id="mproom"></div>
       <div class="btns"><button class="ghost" id="mpshare">Позвать друзей</button></div>
       <div class="plist" id="mplist"></div>
@@ -387,6 +405,7 @@
     </div>
     <div class="mcol mright">
       <div id="mphostbox"><div class="levels opts" id="mpopts"></div><div class="tracks" id="mptracks"></div><div class="btns"><button class="main" id="mpgo">Старт</button></div><div class="sub" style="margin-top:8px">С друзьями гонка идёт без ботов; если ты в комнате один, поедут боты</div></div>
+      <div id="mppub" style="display:none"><div class="pubstat" id="pubstat"></div><div class="sub" id="pubsub"></div><div class="btns"><button class="ghost" id="pubbots">Погонять с ботами, пока жду</button></div></div>
       <div class="sub" id="mpwait" style="display:none">Ждём, когда хозяин комнаты начнёт заезд…<span id="mpoptline"></span></div>
     </div>
     </div>
@@ -417,7 +436,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 37</div>
+  <div class="fver">Turbo Drift · версия 39</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -454,7 +473,7 @@ function initTelegram() {
     if (u && u.first_name) { playerName = u.first_name; document.getElementById('hello').textContent = 'Привет, ' + u.first_name + '! Жми «Играть»'; }
     const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
     if (sp && !challenge) { challenge = parseChallenge(sp); showChallenge(); }
-    { const rc = roomFromLink(sp); if (rc) { document.getElementById('welcome').classList.add('hidden'); netOpen(); document.getElementById('mpcode').value = rc; netJoin(rc); } else if (challenge) document.getElementById('welcome').classList.add('hidden'); }
+    { const rc = roomFromLink(sp); if (rc) { document.getElementById('welcome').classList.add('hidden'); netOpen(); document.getElementById('mpcode').value = rc; netJoin(rc); } else if (sp === 'online') netQuick(); else if (challenge) document.getElementById('welcome').classList.add('hidden'); }
     loadCloud();
   } catch (e) {}
 }
@@ -1960,11 +1979,11 @@ function finishRace(koPlace) {
   document.getElementById('fcoins').textContent = '+' + coins + ' · всего ' + WALLET.coins;
   if (rivalBot) { const d = finishMs - challenge.ms; v = d < 0 ? 'Ты быстрее, чем ' + challenge.name + ', на ' + fmt(-d) : challenge.name + ' быстрее на ' + fmt(d) + '. Реванш?'; }
   else if (ko) v = place === 1 ? 'Последний на трассе — победа!' : 'Выбыл';
-  else if (mp || CHAMP.on) { }
+  else if (mp || CHAMP.on) { if (mp && NET.pub) v = 'Следующий заезд начнётся сам, когда все финишируют'; }
   else if (place === 1) v = 'Победа! Отправь время друзьям';
   document.getElementById('verdict').textContent = v;
   const champMid = CHAMP.on && !mp && CHAMP.i < TRACKS.length - 1, champEnd = CHAMP.on && !mp && !champMid;
-  for (const pr of [['share', !mp && !ko && !CHAMP.on], ['again', !mp && !CHAMP.on], ['champnext', champMid], ['tomenu', !mp], ['tolobby', mp && NET.host], ['rematch', mp && NET.host], ['mpleave', mp], ['fresults', true], ['femo', mp]]) document.getElementById(pr[0]).style.display = pr[1] ? '' : 'none';
+  for (const pr of [['share', !mp && !ko && !CHAMP.on], ['again', !mp && !CHAMP.on], ['champnext', champMid], ['tomenu', !mp], ['tolobby', mp && NET.host && !NET.pub], ['rematch', mp && NET.host && !NET.pub], ['mpleave', mp], ['fresults', true], ['femo', mp]]) document.getElementById(pr[0]).style.display = pr[1] ? '' : 'none';
   document.getElementById('tomenu').textContent = champMid ? 'Выйти из чемпионата' : (champEnd ? 'В меню' : 'Выбрать трассу');
   netResults();
   setTimeout(function () { if (state === 'finished' && !spec) { document.getElementById('finish').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; if (!mp) buildMenu(); } }, ko && place > 1 ? 1100 : 1600);
@@ -2131,17 +2150,19 @@ function glowSprites() {
   return g;
 }
 function hudItems() {
-  const n = player && player.items ? player.items.length : 0; if (sel >= n) sel = Math.max(0, n - 1);
+  const n = player && player.items ? player.items.length : 0, mob = document.body.classList.contains('mob'); if (sel >= n) sel = Math.max(0, n - 1);
   const rgb = function (p) { return p.col.map(function (v) { return Math.round(v*255); }).join(','); };
   for (let k = 0; k < 3; k++) { const el = document.getElementById('it' + k), it = n > k ? player.items[k] : null;
     if (!it) { el.className = 'item empty'; el.innerHTML = '<b>' + (k + 1) + '</b>'; continue; }
-    const p = PU[it.type]; el.className = 'item' + (k === sel ? ' sel' : ''); el.style.setProperty('--c', rgb(p));
+    const p = PU[it.type]; el.className = 'item' + (k === sel && !mob ? ' sel' : ''); el.style.setProperty('--c', rgb(p));
     el.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' + p.icon + '</svg><b>' + (k + 1) + '</b>' + (p.id === 'bolt' ? '<i>' + (it.shots === undefined ? 3 : it.shots) + '</i>' : '');
     el.setAttribute('aria-label', p.name); }
   const f = document.getElementById('fire'), cur = n ? player.items[sel] : null;
   const fb = document.getElementById('fireback');
-  if (!cur) { f.className = 'fire empty'; f.innerHTML = ''; document.getElementById('firename').textContent = ''; fb.style.display = 'none'; return; }
-  const p = PU[cur.type]; f.className = 'fire'; f.style.setProperty('--c', rgb(p)); fb.style.display = p.id === 'rocket' || p.id === 'bolt' ? '' : 'none'; fb.style.setProperty('--c', rgb(p));
+  if (mob) { let back = null; for (let k = 0; k < n && !back; k++) { const q = PU[player.items[k].type]; if (q.id === 'rocket' || q.id === 'bolt') back = q; }      // the arrow fires the first rocket or volley backwards
+    fb.style.display = back ? '' : 'none'; if (back) fb.style.setProperty('--c', rgb(back)); }
+  if (!cur) { f.className = 'fire empty'; f.innerHTML = ''; document.getElementById('firename').textContent = ''; if (!mob) fb.style.display = 'none'; return; }
+  const p = PU[cur.type]; f.className = 'fire'; f.style.setProperty('--c', rgb(p)); if (!mob) { fb.style.display = p.id === 'rocket' || p.id === 'bolt' ? '' : 'none'; fb.style.setProperty('--c', rgb(p)); }
   f.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' + p.icon + '</svg><em>пробел</em>'; f.setAttribute('aria-label', 'Применить: ' + p.name);
   const fn = document.getElementById('firename'); fn.textContent = p.name; fn.style.setProperty('--c', rgb(p));
 }
@@ -2306,11 +2327,11 @@ function update(dt) {
 const NET = { on: false, host: false, racing: false, code: '', me: 0, tr: null, roster: [], conn: {}, nextId: 1, track: 0, sendT: 0, results: {}, firstFin: 0 };
 const ROOM_PREFIX = 'turbodrift8-';
 function peerTransport() {
-  let peer = null, hc = null, seq = 1, opened = false; const conns = {};
+  let peer = null, hc = null, seq = 1, opened = false; const conns = {}; let self = null;
   const load = function (done0) { if (window.Peer) return done0(null); let lf = false; const done = function (e) { if (!lf) { lf = true; done0(e); } }; setTimeout(function () { done('load'); }, 12000);
     const urls = ['https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js', 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js']; let k = 0;
     const next = function () { if (k >= urls.length) return done('load'); const sc = document.createElement('script'); sc.src = urls[k++]; sc.onload = function () { window.Peer ? done(null) : next(); }; sc.onerror = next; document.head.appendChild(sc); }; next(); };
-  return {
+  return self = { msg: netMsg, gone: netClosed,
     host: function (code, done) { load(function (err) { if (err) return done(err);
       let fin = false; const end = function (e) { if (!fin) { fin = true; done(e); } };
       try { peer = new Peer(ROOM_PREFIX + code); } catch (e) { return end('browser'); }
@@ -2318,14 +2339,14 @@ function peerTransport() {
       peer.on('error', function (e) { if (!opened) end(e && e.type || 'error'); });
       setTimeout(function () { end('blocked'); }, 12000);
       peer.on('disconnected', function () { try { peer.reconnect(); } catch (e) {} });
-      peer.on('connection', function (c) { const id = seq++; c.on('open', function () { conns[id] = c; }); c.on('data', function (d) { netMsg(id, d); }); c.on('close', function () { delete conns[id]; netClosed(id); }); c.on('error', function () {}); }); }); },
-    join: function (code, done) { let fin = false; const end = function (e) { if (!fin) { fin = true; done(e); } };
+      peer.on('connection', function (c) { const id = seq++; c.on('open', function () { conns[id] = c; }); c.on('data', function (d) { self.msg(id, d); }); c.on('close', function () { delete conns[id]; self.gone(id); }); c.on('error', function () {}); }); }); },
+    join: function (code, done, ms) { let fin = false; const end = function (e) { if (!fin) { fin = true; done(e); } };
       load(function (err) { if (err) return end(err);
         try { peer = new Peer(); } catch (e) { return end('browser'); }
         peer.on('open', function () { hc = peer.connect(ROOM_PREFIX + code, { serialization: 'json' });
-          hc.on('open', function () { end(null); }); hc.on('data', function (d) { netMsg(0, d); }); hc.on('close', function () { netClosed(0); }); hc.on('error', function () { end('connect'); }); });
+          hc.on('open', function () { end(null); }); hc.on('data', function (d) { self.msg(0, d); }); hc.on('close', function () { self.gone(0); }); hc.on('error', function () { end('connect'); }); });
         peer.on('error', function (e) { end(e && e.type || 'error'); });
-        setTimeout(function () { end('timeout'); }, 15000); }); },
+        setTimeout(function () { end('timeout'); }, ms || 15000); }); },
     send: function (id, o) { const c = id === 0 ? hc : conns[id]; try { if (c && c.open) c.send(o); } catch (e) {} },
     all: function (o, except) { for (const id in conns) if (+id !== except) { try { if (conns[id].open) conns[id].send(o); } catch (e) {} } },
     close: function () { try { if (peer) peer.destroy(); } catch (e) {} }
@@ -2334,20 +2355,20 @@ function peerTransport() {
 // Inside Claude the artifact's own live room carries the messages: everyone in the named room
 // hears everyone, so nothing is relayed through the host.
 function roomTransport(room) {
-  let nr = null, me = '', hostPeer = '', seq = 1; const offs = [], ids = {}, labels = {}, OPEN = { st: 1, use: 1, hit: 1, fin: 1, emo: 1, horn: 1 };
+  let nr = null, me = '', hostPeer = '', seq = 1, self = null; const offs = [], ids = {}, labels = {}, OPEN = { st: 1, use: 1, hit: 1, fin: 1, emo: 1, horn: 1 };
   const myLabel = function () { for (const p of nr.peers()) if (p.sameTab) return p.peer; return ''; };
   const emit = function (to, m, x) { try { nr.emit('td', { to: to, x: x || '', m: m }).catch(function (e) { if (e && e.code === 'not_permitted') mpMsg(netError('denied')); }); } catch (e) {} };
   const listen = function (isHost) {
     offs.push(nr.on('td', function (msg) { if (msg.sameTab && msg.isMe) return; const d = msg.data; if (!d || typeof d !== 'object' || !d.m) return; me = me || myLabel();
       if (d.to !== '*' && d.to !== me) return; if (d.x && d.x === me) return;
-      if (isHost) { let id = ids[msg.peer]; if (!id) { id = ids[msg.peer] = seq++; labels[id] = msg.peer; } netMsg(id, d.m); }
-      else if (msg.peer === hostPeer) netMsg(0, d.m);
-      else if (OPEN[d.m.t]) netMsg(1, d.m); }));
-    offs.push(nr.onPeers(function (ch) { for (const p of ch.left || []) { if (isHost) { const id = ids[p.peer]; if (id) { delete ids[p.peer]; netClosed(id); } } else if (p.peer === hostPeer) netClosed(0); } }));
+      if (isHost) { let id = ids[msg.peer]; if (!id) { id = ids[msg.peer] = seq++; labels[id] = msg.peer; } self.msg(id, d.m); }
+      else if (msg.peer === hostPeer) self.msg(0, d.m);
+      else if (OPEN[d.m.t]) self.msg(1, d.m); }));
+    offs.push(nr.onPeers(function (ch) { for (const p of ch.left || []) { if (isHost) { const id = ids[p.peer]; if (id) { delete ids[p.peer]; self.gone(id); } } else if (p.peer === hostPeer) self.gone(0); } }));
   };
   const hostOf = function () { for (const p of nr.peers()) if (!p.sameTab && p.presence && p.presence.host) return p.peer; return ''; };
   const fail = function (done) { return function (e) { done(e && e.code === 'not_permitted' ? 'denied' : 'room'); }; };
-  return { mesh: true,
+  return self = { mesh: true, msg: netMsg, gone: netClosed,
     host: function (code, done) { room.join('td-' + code.toLowerCase()).then(function (r) { nr = r;
       setTimeout(function () { if (hostOf()) { try { nr.leave(); } catch (e) {} return done('unavailable-id'); } try { nr.presence({ host: true }); } catch (e) {} me = myLabel(); listen(true); done(null); }, 900); }, fail(done)); },
     join: function (code, done) { room.join('td-' + code.toLowerCase()).then(function (r) { nr = r; let tries = 0;
@@ -2375,24 +2396,105 @@ function netHost() {
   const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for (let k = 0; k < 5; k++) code += A[Math.floor(Math.random()*A.length)];
   if (NET.busy) return; NET.busy = true; mpMsg('Создаю комнату…'); netTransport(function (tr) {
   tr.host(code, function (err) { NET.busy = false; if (err) { mpMsg(netError(err)); tr.close(); return; }
-    NET.on = true; NET.host = true; NET.racing = false; NET.code = code; NET.me = 0; NET.tr = tr; NET.nextId = 1; NET.conn = {}; NET.track = T.id;
+    NET.on = true; NET.host = true; NET.pub = false; NET.racing = false; NET.code = code; NET.me = 0; NET.tr = tr; NET.nextId = 1; NET.conn = {}; NET.track = T.id;
     NET.roster = [{ nid: 0, name: playerName, type: garage.type, color: garage.color }]; netLobby(); }); });
 }
 function netJoin(code) {
   code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (code.length < 4) { mpMsg('Введи код комнаты'); return; }
   if (NET.busy) return; NET.busy = true; mpMsg('Подключаюсь…'); netTransport(function (tr) {
   tr.join(code, function (err) { NET.busy = false; if (err) { mpMsg(netError(err)); tr.close(); return; }
-    NET.on = true; NET.host = false; NET.racing = false; NET.code = code; NET.tr = tr; NET.me = -1; NET.roster = [];
+    NET.on = true; NET.host = false; NET.pub = false; NET.racing = false; NET.code = code; NET.tr = tr; NET.me = -1; NET.roster = [];
     tr.send(0, { t: 'hello', name: playerName, type: garage.type, color: garage.color }); netLobby(); }); });
 }
 function netLeave() {
   if (!NET.on) return; try { netSend({ t: 'bye', nid: NET.me }); } catch (e) {}
-  const tr = NET.tr; NET.on = false; NET.racing = false; NET.tr = null; NET.roster = []; setTimeout(function () { if (tr) tr.close(); }, 200);
+  const tr = NET.tr; NET.on = false; NET.racing = false; NET.pub = false; NET.wait = null; NET.qtok = (NET.qtok || 0) + 1; NET.tr = null; NET.roster = []; setTimeout(function () { if (tr) tr.close(); }, 200);
+}
+// ---------------------------------------------------------------------------
+// Open rooms: strangers drop in and the race starts by itself. No server keeps a list of rooms, so the rooms
+// have fixed names and a newcomer walks along them: takes the first free name as its host, or knocks on the room that is there.
+// ---------------------------------------------------------------------------
+const PUB = { slots: 8, max: 6, wait: 15, cars: 4, cut: 45, skills: [0.45, 0.33, 0.25] };
+function pubCode(k) { return 'PUB' + (k < 9 ? '0' : '') + (k + 1); }
+// knock on one room: cb('in', transport, my id) | 'busy' | 'none' (nobody there) | 'dead' (no answer) | 'fail' (transport, error)
+function pubKnock(code, cb) {
+  netTransport(function (tr) { let fin = false, tm = 0; const end = function (r, a) { if (fin) return; fin = true; clearTimeout(tm); if (r !== 'in') { try { tr.close(); } catch (e) {} } cb(r, tr, a); };
+    tr.msg = function (from, m) { if (from !== 0 || !m) return; if (m.t === 'welcome') end('in', m.nid); else if (m.t === 'busy') end('busy'); };
+    tr.gone = function (from) { if (from === 0) end('none'); };
+    tr.join(code, function (err) { if (err) return end(err === 'peer-unavailable' ? 'none' : (err === 'timeout' || err === 'connect' ? 'dead' : 'fail'), err);
+      tr.send(0, { t: 'hello', name: playerName, type: garage.type, color: garage.color }); tm = setTimeout(function () { end('dead'); }, 5000); }, 10000); });
+}
+function pubOwn(tr, k) {
+  NET.on = true; NET.host = true; NET.pub = true; NET.slot = k; NET.racing = false; NET.code = pubCode(k); NET.me = 0; NET.tr = tr; NET.nextId = 1; NET.conn = {}; NET.last = {}; NET.wait = null;
+  NET.roster = [{ nid: 0, name: playerName, type: garage.type, color: garage.color }]; NET.auto = 0; NET.back = 0; NET.regroup = 0; NET.probeT = performance.now() + 15000; pubPick(); netLobby();
+}
+function pubEnter(tr, k, nid) {
+  NET.on = true; NET.host = false; NET.pub = true; NET.slot = k; NET.racing = false; NET.code = pubCode(k); NET.tr = tr; NET.me = nid; NET.roster = []; NET.seen = performance.now(); NET.wait = null; tr.msg = netMsg; tr.gone = netClosed; netLobby();
+}
+function pubPick() { let t = NET.track | 0; if (TRACKS.length > 1) while (t === (NET.track | 0)) t = Math.floor(Math.random()*TRACKS.length); NET.track = t; NET.opt = { rev: Math.random() < 0.3, rain: Math.random() < 0.2, ko: false }; }
+function netQuick(text) {
+  if (NET.busy || NET.on) return; NET.busy = true; NET.qon = true; const tok = NET.qtok = (NET.qtok || 0) + 1; document.getElementById('welcome').classList.add('hidden'); netOpen(); mpMsg(text || 'Ищу комнату с игроками…');
+  const stop = function (t) { if (NET.qtok !== tok) return; NET.busy = false; NET.qon = false; mpMsg(t); };
+  const step = function (k, hops, miss) { if (NET.qtok !== tok) return; if (k >= PUB.slots || hops > PUB.slots*2) return stop('Все открытые комнаты заняты, попробуй через минуту');
+    netTransport(function (tr) { tr.host(pubCode(k), function (err) {
+      if (NET.qtok !== tok) { tr.close(); return; }
+      if (!err) { NET.busy = false; NET.qon = false; pubOwn(tr, k); return; }
+      tr.close(); if (err !== 'unavailable-id') return stop(netError(err));
+      pubKnock(pubCode(k), function (r, tr2, a) { if (NET.qtok !== tok) { if (r === 'in') tr2.close(); return; }
+        if (r === 'in') { NET.busy = false; NET.qon = false; pubEnter(tr2, k, a); }
+        else if (r === 'none' && !miss) step(k, hops + 1, 1);          // the room closed while we knocked: its name may be free now
+        else if (r === 'fail') stop(netError(a));
+        else step(k + 1, hops + 1, 0); }); }); }); };
+  step(0, 0, 0);
+}
+function pubWait() { const now = performance.now(); return { t: 'wait', s: NET.auto && !NET.racing ? Math.max(0, Math.ceil((NET.auto - now)/1000)) : -1 }; }
+function pubStat(w) {
+  if (NET.host) w = pubWait(); NET.wait = w; const n = NET.roster.length, me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0], late = !!(me && me.late), o = NET.opt || {}, tr = TRACKS[NET.track | 0];
+  document.getElementById('pubstat').textContent = late ? 'Идёт заезд — ты в следующем' : (!n ? 'Захожу в комнату…' : n < 2 ? 'Ищем соперников…' : (w && w.s >= 0 ? 'Старт через ' + w.s + ' с' : 'Собираемся…'));
+  document.getElementById('pubsub').textContent = late ? 'Подожди финиша: комната соберётся, и поедете вместе' : (!n ? '' : n < 2 ? 'Ты первый в комнате. Зайдёт второй игрок — начнётся отсчёт' : 'Игроков: ' + n + ' из ' + PUB.max + ' · трасса «' + (tr ? tr.name : '') + '»' + (o.rev ? ', обратно' : '') + (o.rain ? ', дождь' : ''));
+  document.getElementById('pubbots').style.display = NET.host && n < 2 ? '' : 'none';
+}
+function pubBeat() { if (!NET.on || !NET.host || !NET.pub) return; const w = pubWait(); NET.tr.all(w, -1); if (!NET.racing) pubStat(w); }
+function pubLobby(award) {                              // the host brings the room back together; the next race starts by the clock
+  if (!NET.host) return; if (award) netAward();
+  if (award) {                                          // whoever stood on the grid the whole race gives the place to others
+    for (const id of Object.keys(NET.conn)) { const nid = NET.conn[id], c = carByNid(nid); if (c && c.gx !== undefined && !c.moved && !NET.results[nid]) { NET.tr.send(+id, { t: 'kick' }); netClosed(+id); } }
+    if (player && player.gx !== undefined && !player.moved && !NET.results[0]) { toMenu(); netOpen(); mpMsg('Ты не ехал в заезде — комната закрыта'); return; }
+    if (state === 'race') toast('Время вышло — заезд закончен'); }
+  specStop(false); NET.back = 0; NET.regroup = 0; NET.auto = 0; for (const p of NET.roster) delete p.late; pubPick(); NET.probeT = performance.now() + 15000;
+  NET.tr.all({ t: 'roster', list: NET.roster, track: NET.track, opt: NET.opt, pub: 1 }, -1); NET.tr.all({ t: 'lobby' }, -1); document.getElementById('finish').classList.add('hidden'); netLobby(); pubBeat();
+}
+// alone in a room that is not the first one: look into the rooms before it now and then, and move in where there are people
+function pubProbe() {
+  const tok = NET.qtok, own = NET.tr; NET.probeT = performance.now() + 20000; let j = 0;
+  const alone = function () { return NET.on && NET.qtok === tok && NET.tr === own && !NET.racing && NET.roster.length < 2; };
+  const next = function () { if (!alone() || j >= NET.slot) return; const k = j++;
+    pubKnock(pubCode(k), function (r, tr2, a) { if (r === 'in') { if (!alone()) { tr2.close(); return; } NET.on = false; NET.tr = null; try { own.close(); } catch (e) {} pubEnter(tr2, k, a); } else next(); }); };
+  next();
+}
+function pubTick() {
+  const now = performance.now(); if (!NET.on || !NET.pub || !NET.tr || now - (NET.tickT || 0) < 1000) return; NET.tickT = now;
+  if (!NET.host) { if (!NET.racing) { NET.tr.send(0, { t: 'ping' }); if (now - NET.seen > 9000) netClosed(0); } return; }
+  const n = NET.roster.length; NET.last = NET.last || {};
+  if (!NET.racing) {
+    for (const id of Object.keys(NET.conn)) if (now - (NET.last[id] || now) > 10000) netClosed(+id);          // a guest who went silent in the room
+    if (NET.roster.length < 2) NET.auto = 0; else { if (!NET.auto) NET.auto = now + PUB.wait*1000; if (NET.roster.length >= PUB.max) NET.auto = Math.min(NET.auto, now + 4000); }
+    if (NET.auto && now >= NET.auto) { netStart(); return; }
+    if (NET.roster.length < 2 && NET.slot > 0 && now > NET.probeT) pubProbe();
+  } else {
+    if (NET.regroup && now >= NET.regroup) { pubLobby(false); return; }
+    const hum = cars.filter(function (c) { return c.nid < 100; });
+    for (const c of hum) { if (c.gx === undefined) { c.gx = c.x; c.gz = c.z; } else if (!c.moved && Math.hypot(c.x - c.gx, c.z - c.gz) > 25) c.moved = true; }          // who never left the grid does not hold the others up
+    const all = !!NET.firstFin && hum.every(function (c) { return NET.results[c.nid] || !c.moved; });
+    if (!NET.back && (all || (NET.firstFin && now - NET.firstFin > PUB.cut*1000) || now - NET.began > 480000)) NET.back = now + (all ? 10000 : 5000);
+    if (NET.back && now >= NET.back) { pubLobby(true); return; }
+  }
+  pubBeat();
 }
 function netLobby() {
   specStop(false); koSetup(false); document.body.classList.remove('rain'); NET.racing = false; if (state !== 'menu') { state = 'menu'; demo = null; particles = []; skids = []; engine(0, false); document.getElementById('hud').style.display = 'none'; }
-  netOpen(); document.getElementById('mproom').textContent = NET.code;
-  document.getElementById('mphostbox').style.display = NET.host ? '' : 'none'; document.getElementById('mpwait').style.display = NET.host ? 'none' : '';
+  netOpen(); document.getElementById('mproom').textContent = NET.code; document.getElementById('mproom').style.display = document.getElementById('mpshare').style.display = NET.pub ? 'none' : ''; document.getElementById('mpcodelabel').textContent = NET.pub ? 'Открытая комната' : 'Код комнаты';
+  document.getElementById('mphostbox').style.display = NET.host && !NET.pub ? '' : 'none'; document.getElementById('mpwait').style.display = NET.host || NET.pub ? 'none' : ''; document.getElementById('mppub').style.display = NET.pub ? '' : 'none'; if (NET.pub) pubStat(NET.wait);
   const el = document.getElementById('mplist'); el.innerHTML = '';
   for (const p of NET.roster) { const d = document.createElement('div'); if (p.nid === NET.me) d.className = 'me'; const sp = document.createElement('span'), dot = document.createElement('i'), c = PAINTS[p.color] || [1,1,1];
     dot.style.background = 'rgb(' + c.map(function (v) { return Math.round(v*255); }).join(',') + ')'; sp.appendChild(dot); sp.appendChild(document.createTextNode(p.name + (p.nid === 0 ? ' ★' : ''))); if (p.nid === 0) d.title = 'Хозяин комнаты'; if (NET.roster.some(function (q) { return q.pts > 0; })) { const em = document.createElement('em'); em.textContent = (p.pts || 0) + ' очк.'; sp.appendChild(em); } const b = document.createElement('b'); b.textContent = CAR_TYPES[p.type] ? CAR_TYPES[p.type].name : ''; d.appendChild(sp); d.appendChild(b); el.appendChild(d); }
@@ -2403,7 +2505,7 @@ function netLobby() {
     PAINTS.forEach(function (p, i) { const b = document.createElement('button'); b.className = 'sw' + (i === garage.color ? ' on' : '') + (used.indexOf(i) >= 0 ? ' taken' : '');
       b.style.background = 'rgb(' + p.map(function (v) { return Math.round(Math.pow(v, 0.8)*255); }).join(',') + ')'; b.setAttribute('aria-label', 'Цвет ' + (i + 1));
       b.addEventListener('click', function () { netSetCar(garage.type, i); }); sw.appendChild(b); }); }
-  if (NET.host) { const ol = document.getElementById('mpopts'); ol.innerHTML = ''; NET.opt = NET.opt || { rev: false, rain: false, ko: false };
+  if (NET.host && !NET.pub) { const ol = document.getElementById('mpopts'); ol.innerHTML = ''; NET.opt = NET.opt || { rev: false, rain: false, ko: false };
     [['rev', 'Обратно'], ['rain', 'Дождь'], ['ko', 'Выбывание']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (NET.opt[o[0]] ? ' on' : ''); b.textContent = o[1]; b.addEventListener('click', function () { NET.opt[o[0]] = !NET.opt[o[0]]; netRoster(); }); ol.appendChild(b); });
     const tl = document.getElementById('mptracks'); tl.innerHTML = '';
     TRACKS.forEach(function (tr, i) { const b = document.createElement('button'); b.className = 'track' + (i === NET.track ? ' on' : ''); const left = document.createElement('span'); left.textContent = tr.name; const sm = document.createElement('small'); sm.textContent = tr.desc; left.appendChild(sm); b.appendChild(left);
@@ -2415,7 +2517,7 @@ function netSetCar(type, color) {                   // the player changes car or
   if (NET.host) { const me = NET.roster[0]; me.type = type; me.color = netFreeColor(color, 0); garage.color = me.color; netRoster(); }
   else { NET.tr.send(0, { t: 'car', type: type, color: color }); netLobby(); }
 }
-function netRoster() { NET.tr.all({ t: 'roster', list: NET.roster, track: NET.track, opt: NET.opt }, -1); if (!NET.racing) netLobby(); }
+function netRoster() { NET.tr.all({ t: 'roster', list: NET.roster, track: NET.track, opt: NET.opt, pub: NET.pub ? 1 : 0 }, -1); if (!NET.racing) netLobby(); }
 // The room keeps score from race to race: points for places, added up by the host when a race is over.
 function netAward() {
   if (!NET.host || NET.awarded || NET.roster.length < 2) return; NET.awarded = true;
@@ -2435,10 +2537,11 @@ function netFx(m) {
 }
 function netStart() {
   if (!NET.host || NET.racing) return;
-  const nb = NET.roster.length > 1 ? 0 : 5, L = LEVELS[level], usedC = NET.roster.map(function (p) { return p.color; }), cols = [0,1,2,3,4,5,6,7].filter(function (c) { return usedC.indexOf(c) < 0; }), bl = [];
-  for (let k = 0; k < nb; k++) bl.push({ nid: 100 + k, type: (k + 1 + NET.track*2) % CAR_TYPES.length, color: cols.length ? cols[k % cols.length] : k, skill: L.skills[4 - k] });
+  const np = NET.roster.length, nb = np > 1 ? (NET.pub ? Math.max(0, PUB.cars - np) : 0) : 5, L = LEVELS[level]; NET.auto = 0; NET.back = 0; NET.regroup = 0; NET.began = performance.now(); for (const p of NET.roster) delete p.late;
+  const usedC = NET.roster.map(function (p) { return p.color; }), cols = [0,1,2,3,4,5,6,7].filter(function (c) { return usedC.indexOf(c) < 0; }), bl = [];
+  for (let k = 0; k < nb; k++) bl.push({ nid: 100 + k, type: (k + 1 + NET.track*2) % CAR_TYPES.length, color: cols.length ? cols[k % cols.length] : k, skill: NET.pub && np > 1 ? PUB.skills[k % 3] : L.skills[4 - k] });
   const pl = NET.roster.map(function (p) { return p.nid; }); for (let i = pl.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i + 1)), t = pl[i]; pl[i] = pl[j]; pl[j] = t; }
-  const o = NET.opt || {}, m = { t: 'start', track: NET.track, rev: !!o.rev, rain: !!o.rain, ko: !!o.ko, bots: bl, order: bl.map(function (b) { return b.nid; }).concat(pl), list: NET.roster };
+  const o = NET.opt || {}, m = { t: 'start', pub: NET.pub ? 1 : 0, track: NET.track, rev: !!o.rev, rain: !!o.rain, ko: !!o.ko, bots: bl, order: bl.map(function (b) { return b.nid; }).concat(pl), list: NET.roster };
   NET.tr.all(m, -1); netBegin(m);
 }
 function netBegin(m) {
@@ -2488,8 +2591,14 @@ function netMsg(from, m) {
   if (m.t === 'emo' || m.t === 'horn') { if (NET.host) { if (NET.conn[from] === undefined) return; if (!NET.tr.mesh) NET.tr.all(m, from); } netFx(m); return; }
   if (m.t === 'ko') { if (!NET.host && NET.racing) koOut(m.nid | 0); return; }
   if (NET.host) {
-    if (m.t === 'hello') { if (NET.racing || NET.roster.length >= 6) { NET.tr.send(from, { t: 'busy', why: NET.racing ? 'race' : 'full' }); return; }
-      const nid = NET.nextId++; NET.conn[from] = nid; NET.roster.push({ nid: nid, name: String(m.name || 'Игрок').slice(0, 16), type: Math.abs(m.type | 0) % CAR_TYPES.length, color: netFreeColor(Math.abs(m.color | 0) % 8, nid) }); NET.tr.send(from, { t: 'welcome', nid: nid }); netRoster(); return; }
+    if (m.t === 'hello') { const late = NET.racing && NET.pub; if (NET.conn[from] !== undefined) return; if ((NET.racing && !late) || NET.roster.length >= 6) { NET.tr.send(from, { t: 'busy', why: NET.racing && !late ? 'race' : 'full' }); return; }
+      const nid = NET.nextId++, np = { nid: nid, name: String(m.name || 'Игрок').slice(0, 16), type: Math.abs(m.type | 0) % CAR_TYPES.length, color: netFreeColor(Math.abs(m.color | 0) % 8, nid) }; if (late) np.late = 1;
+      NET.conn[from] = nid; NET.last = NET.last || {}; NET.last[from] = performance.now(); NET.roster.push(np); NET.tr.send(from, { t: 'welcome', nid: nid }); netRoster();
+      if (NET.pub) { const now = performance.now();
+        if (late && !NET.regroup && cars.filter(function (c) { return c.nid < 100; }).length < 2) { NET.regroup = now + 3500; note('Нашёлся соперник: ' + np.name, 2600); }          // racing the bots alone: stop and start together
+        else if (!late) { if (NET.auto) NET.auto = Math.max(NET.auto, now + 6000); toast(np.name + ' в комнате'); }
+        pubBeat(); }
+      return; }
     const who = NET.conn[from]; if (who === undefined) return; NET.last = NET.last || {}; NET.last[from] = performance.now();
     if (!NET.tr.mesh && (m.t === 'st' || m.t === 'use' || m.t === 'hit' || m.t === 'fin')) NET.tr.all(m, from);          // pass it on to the other guests
     if (m.t === 'bye') { netClosed(from); return; }
@@ -2498,10 +2607,12 @@ function netMsg(from, m) {
     if (from === 0) NET.seen = performance.now();
     if (m.t === 'welcome') { NET.me = m.nid; return; }
     if (m.t === 'bye' && from === 0) { netClosed(0); return; }
-    if (m.t === 'roster') { NET.roster = m.list || []; NET.track = m.track | 0; NET.opt = m.opt || {}; if (!NET.racing) netLobby(); return; }
+    if (m.t === 'roster') { NET.roster = m.list || []; NET.track = m.track | 0; NET.opt = m.opt || {}; NET.pub = !!m.pub; if (!NET.racing) netLobby(); return; }
+    if (m.t === 'kick' && from === 0) { netLeave(); toMenu(); netOpen(); mpMsg('Ты не ехал в заезде — комната пошла дальше без тебя'); return; }
+    if (m.t === 'wait') { if (!NET.racing && NET.pub) pubStat(m); return; }
     if (m.t === 'busy') { mpMsg(m.why === 'full' ? 'В комнате уже 6 игроков' : 'В комнате идёт заезд, подожди конца'); const tr = NET.tr; NET.on = false; NET.tr = null; if (tr) tr.close(); netOpen(); mpMsg(m.why === 'full' ? 'В комнате уже 6 игроков' : 'В комнате идёт заезд, зайди после финиша'); return; }
     if (m.t === 'start') { netBegin(m); return; }
-    if (m.t === 'lobby') { for (const id of ['finish','paused']) document.getElementById(id).classList.add('hidden'); netLobby(); return; }
+    if (m.t === 'lobby') { for (const id of ['finish','paused']) document.getElementById(id).classList.add('hidden'); NET.wait = null; if (NET.pub && state === 'race') toast('Заезд закончен'); netLobby(); return; }
     if (m.t === 'left') { const c = carByNid(m.nid); if (c && NET.racing) { cars = cars.filter(function (o) { return o !== c; }); note((c.name || 'Игрок') + ' вышел'); } return; }
     if (m.t === 'res') { for (const k in m.r) NET.results[k] = m.r[k]; if (state === 'finished') netResults(); return; }
   }
@@ -2516,7 +2627,9 @@ function netMsg(from, m) {
 }
 function netClosed(from) {
   if (!NET.on) return;
-  if (!NET.host) { const was = NET.racing; netLeave(); toMenu(); netOpen(); mpMsg(was ? 'Хозяин комнаты вышел, заезд прерван' : 'Комната закрыта'); return; }
+  if (!NET.host) { const was = NET.racing, pub = NET.pub; netLeave(); toMenu(); netOpen(); mpMsg(was ? 'Хозяин комнаты вышел, заезд прерван' : 'Комната закрыта');
+    if (pub) { mpMsg('Хозяин комнаты вышел — ищу другую…'); setTimeout(function () { if (!NET.on && !NET.busy && !document.getElementById('mp').classList.contains('hidden')) netQuick('Хозяин комнаты вышел — ищу другую…'); }, 400 + Math.random()*1600); }
+    return; }
   const nid = NET.conn[from]; if (nid === undefined) return; delete NET.conn[from]; const p = NET.roster.filter(function (q) { return q.nid === nid; })[0];
   NET.roster = NET.roster.filter(function (q) { return q.nid !== nid; }); NET.tr.all({ t: 'left', nid: nid }, -1);
   if (NET.racing) { const c = carByNid(nid); if (c) { cars = cars.filter(function (o) { return o !== c; }); note((p ? p.name : 'Игрок') + ' вышел'); } }
@@ -2558,7 +2671,7 @@ let last = 0, lastRaf = 0, rafCount = 0, screenHz = 60, pausedDrawn = false, fps
 // Two ways to spare a warm phone: 'light' keeps every frame and draws fewer pixels (smooth, a little softer); 'eco' draws half the frames (sharp, but choppier).
 try { const m = localStorage.getItem('td_fps'); fpsEco = m === 'eco'; gfxLight = m === 'light'; } catch (e) {}
 function frame(t) {
-  requestAnimationFrame(frame);
+  requestAnimationFrame(frame); if (NET.on && NET.pub) pubTick();
   // the screen's refresh rate, from the shortest gaps between callbacks (late frames only make gaps longer); re-measured as the game runs
   if (lastRaf) { const d = t - lastRaf; if (d > 2 && d < 50) hzSamples.push(d);
     if (hzSamples.length >= 90) { hzSamples.sort(function (a, b) { return a - b; }); const q = hzSamples[9]; screenHz = q < 7.6 ? 144 : (q < 9.6 ? 120 : (q < 12.6 ? 90 : 60)); hzSamples.length = 0; } }
@@ -2637,7 +2750,7 @@ function pause(on) {
 document.addEventListener('click', function () { if (document.body.classList.contains('mob') && TILT.mode === 'tilt') tiltStart(); });
 document.addEventListener('visibilitychange', function () { if (document.hidden && !NET.racing) pause(true); });
 function toMenu() {
-  specStop(false); CHAMP.on = false; koSetup(false); document.body.classList.remove('rain'); if (NET.on) netLeave();
+  specStop(false); CHAMP.on = false; koSetup(false); document.body.classList.remove('rain'); if (NET.qon) { NET.qon = false; NET.busy = false; NET.qtok = (NET.qtok || 0) + 1; } if (NET.on) netLeave();
   state = 'menu'; demo = null; particles = []; skids = []; engine(0, false);
   for (const id of ['finish','paused','mp']) document.getElementById(id).classList.add('hidden');
   document.getElementById('menu').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; buildMenu();
@@ -2716,9 +2829,11 @@ function share() {
 }
 for (const d of [-1, 1]) document.getElementById(d < 0 ? 'carprev' : 'carnext').addEventListener('click', function () { garage.view = ((garage.view === undefined ? garage.type : garage.view) + d + CAR_TYPES.length) % CAR_TYPES.length; if (owns(garage.view)) { garage.type = garage.view; saveGarage(); } buildGarage(); });
 document.getElementById('buycar').addEventListener('click', buyCar); document.getElementById('champ').addEventListener('click', function () { champStart(); });
-for (let k = 0; k < 3; k++) document.getElementById('it' + k).addEventListener('click', function () { selectItem(k); });
+for (let k = 0; k < 3; k++) { const el = document.getElementById('it' + k);
+  el.addEventListener('click', function () { if (!document.body.classList.contains('mob')) selectItem(k); });
+  el.addEventListener('pointerdown', function (e) { if (!document.body.classList.contains('mob')) return; e.preventDefault(); if (state === 'race' && player.items[k]) { sel = k; useItem(player, k); } }); }      // on a phone the press itself fires: no waiting for the finger to lift
 document.getElementById('fire').addEventListener('click', function () { if (state === 'race') useItem(player, sel); });
-document.getElementById('fireback').addEventListener('click', function () { if (state === 'race') useItem(player, sel, true); });
+document.getElementById('fireback').addEventListener('click', function () { if (state !== 'race') return; let k = sel; if (document.body.classList.contains('mob')) { k = -1; for (let q = 0; q < player.items.length && k < 0; q++) { const id = PU[player.items[q].type].id; if (id === 'rocket' || id === 'bolt') k = q; } } if (k >= 0) useItem(player, k, true); });
 document.getElementById('share').addEventListener('click', share);
 document.getElementById('again').addEventListener('click', function () { startRace(T.id, !!rivalBot); });
 document.getElementById('champnext').addEventListener('click', champNext);
@@ -2733,6 +2848,8 @@ document.getElementById('play').addEventListener('click', function () { CHAMP.on
 document.getElementById('wgo').addEventListener('click', function () { FRESH = false; CHAMP.on = false; opt = { rev: false, rain: false, ko: false }; startRace(0, false); });
 document.getElementById('wmenu').addEventListener('click', welcomeClose);
 document.getElementById('mphost').addEventListener('click', netHost);
+document.getElementById('mpquick').addEventListener('click', function () { audio(); netQuick(); }); document.getElementById('mpfind').addEventListener('click', function () { netQuick(); });
+document.getElementById('pubbots').addEventListener('click', function () { if (NET.on && NET.host && NET.pub && !NET.racing && NET.roster.length < 2) netStart(); });
 document.getElementById('helpopen').addEventListener('click', function () { document.getElementById('help').classList.remove('hidden'); });
 document.getElementById('helpclose').addEventListener('click', function () { document.getElementById('help').classList.add('hidden'); });
 for (const d of [-1, 1]) document.getElementById(d < 0 ? 'mpcarprev' : 'mpcarnext').addEventListener('click', function () { if (!NET.on) return; let t = garage.type; for (let k = 0; k < CAR_TYPES.length; k++) { t = (t + d + CAR_TYPES.length) % CAR_TYPES.length; if (owns(t)) break; } netSetCar(t, garage.color); });      // in a room only the cars the player owns
@@ -2750,7 +2867,7 @@ try {
     for (let i = 0; i < 44; i++) { const x = rnd()*256, y = rnd()*230, l = 12 + rnd()*20; g.globalAlpha = 0.25 + rnd()*0.55; g.beginPath(); g.moveTo(x, y); g.lineTo(x - l*0.12, y + l); g.stroke(); } document.getElementById('rain').style.backgroundImage = 'url(' + c.toDataURL() + ')'; } catch (e) {} })();      // rain streaks, drawn once
   initGL(); makeAtlas(); CARS = CAR_TYPES.map(buildCar); buildPowerMeshes(); layout(); buildTrack(0); buildMenu();
   challenge = parseChallenge(location.hash); showChallenge();
-  { const rc = roomFromLink(location.hash); if (rc) { netOpen(); document.getElementById('mpcode').value = rc; } }
+  { const rc = roomFromLink(location.hash); if (rc) { netOpen(); document.getElementById('mpcode').value = rc; } else if (location.hash === '#online') netQuick(); }
   welcomeShow();
   const s = document.createElement('script'); s.src = 'https://telegram.org/js/telegram-web-app.js'; s.onload = initTelegram; s.onerror = function () {}; document.head.appendChild(s);
   requestAnimationFrame(frame);
