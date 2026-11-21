@@ -119,7 +119,7 @@
   .lv { flex: 1; border: 0; border-radius: 12px; padding: 9px 2px; font-size: 13px; font-weight: 800; color: #fff; background: rgba(255,255,255,.14); }
   .lv.on { background: #ffd23f; color: #1a2140; }
   .medals { display: inline-flex; gap: 3px; margin-left: 8px; vertical-align: middle; } .medals u { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.25); } .medals u.on { background: #ffd23f; }
-  .ctlsw::before { content: 'Руль' !important; } .fpssw::before { content: 'Графика' !important; } .ecosw::before { content: 'Батарея' !important; } .fpssw .lv { flex: 1 1 auto; padding-left: 7px; padding-right: 7px; } body.kbd .ctlsw { display: none; }
+  .ctlsw::before { content: 'Руль' !important; } .fpssw::before { content: 'Графика' !important; } .ecosw::before { content: 'Батарея' !important; } .sndsw::before { content: 'Звук' !important; } .fpssw .lv { flex: 1 1 auto; padding-left: 7px; padding-right: 7px; } body.kbd .ctlsw { display: none; }
   .uisw .lv { font-size: 12px; padding: 7px 2px; } .uisw::before { content: 'Интерфейс'; align-self: center; font-size: 12px; opacity: .8; margin-right: 4px; white-space: nowrap; }
   kbd { display: inline-block; min-width: 20px; padding: 2px 6px; margin: 0 2px; border-radius: 6px; border: 1px solid rgba(255,255,255,.35); border-bottom-width: 2.5px; background: rgba(10,13,24,.6); font: 700 11px/1.4 sans-serif; text-align: center; color: #fff; }
   .kb { display: inline-block; margin: 0 10px 6px 0; white-space: nowrap; }
@@ -233,7 +233,8 @@
   .kobar { position: absolute; left: 50%; top: 58px; transform: translateX(-50%); padding: 5px 14px; border-radius: 12px; background: rgba(10,13,24,.55); font-size: 14px; white-space: nowrap; } .kobar b { color: #ffd23f; font-variant-numeric: tabular-nums; margin-left: 4px; }
   .kobar.last { background: rgba(190,30,30,.78); animation: kopulse .5s ease-in-out infinite alternate; } @keyframes kopulse { to { background: rgba(255,70,60,.96); } }
   body.land .kobar { left: 12px; top: 112px; transform: none; font-size: 12.5px; padding: 4px 10px; }
-  .btn-horn { top: 182px; } body.land .btn-horn { top: 172px; } body.kbd .btn-horn { display: none; }
+  .btn-ear { top: 182px; } body.land .btn-ear { top: 172px; } body.kbd .btn-ear { top: 190px; right: 108px; }
+  .btn-ear .x { display: none; } .btn-ear.off .x { display: inline; } .btn-ear.off .w { display: none; } .btn-ear.off { color: #ff8f8f; border-color: rgba(255,120,120,.6); }
   .coins { display: inline-flex; align-items: center; gap: 6px; margin: 2px 0 6px; padding: 3px 12px 3px 5px; border-radius: 14px; background: rgba(10,13,24,.5); font-weight: 900; font-size: 14px; color: #ffd23f; font-variant-numeric: tabular-nums; }
   .coins::before, .buy::before { content: ''; width: 15px; height: 15px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff3b0, #ffc21f 55%, #c98a00); box-shadow: inset 0 0 0 1.5px rgba(120,80,0,.55); display: inline-block; }
   .stats { display: flex; gap: 10px; justify-content: center; margin-top: 5px; } .stats span { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 9.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; opacity: .92; text-shadow: 0 1px 4px rgba(0,0,0,.8); }
@@ -309,7 +310,7 @@
   </div>
   <div class="rival" id="rival" style="display:none"></div>
   <div class="kobar" id="kobar" style="display:none">Выбывание через <b id="kot">0</b></div>
-  <button class="btn-pause btn-horn" id="horn" aria-label="Гудок"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9.500v5h3.600l5.400 4.300V5.200L6.600 9.500z"/><path d="M15 8.300a5 5 0 0 1 0 7.400M17.600 5.600a9 9 0 0 1 0 12.800" fill="none" stroke="currentColor" stroke-width="1.900" stroke-linecap="round"/></svg></button>
+  <button class="btn-pause btn-ear" id="earbtn2" aria-label="Голоса других игроков" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9.500v5h3.600l5.400 4.300V5.200L6.600 9.500z"/><path class="w" d="M15 8.300a5 5 0 0 1 0 7.400M17.600 5.600a9 9 0 0 1 0 12.800" fill="none" stroke="currentColor" stroke-width="1.900" stroke-linecap="round"/><path class="x" d="M15.500 9.500l5 5M20.500 9.500l-5 5" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round"/></svg></button>
   <button class="btn-pause btn-mic micbtn" id="micbtn2" aria-label="Микрофон" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="9" y="2.500" width="6" height="11.500" rx="3"/><path d="M5.500 11a6.500 6.500 0 0 0 13 0M12 17.500V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
   <canvas id="map" width="224" height="224"></canvas>
   <button class="btn-pause" id="pause" aria-label="Пауза"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.600"/><rect x="14" y="4" width="5" height="16" rx="1.600"/></svg></button>
@@ -393,6 +394,7 @@
   <div class="levels uisw ctlsw for-mob" id="ctlsw"></div>
   <div class="levels uisw fpssw" id="fpssw"></div>
   <div class="levels uisw ecosw" id="ecosw"></div>
+  <div class="levels uisw sndsw" id="sndsw"></div>
   <div class="btns"><button class="main" id="prefsclose">Готово</button></div>
 </div>
 
@@ -436,11 +438,12 @@
     <div><b>Слипстрим</b> — держись прямо за соперником, машина разгонится сильнее; <b>обгон впритирку</b> без касания даёт турбо</div>
     <div><b>Графика</b> в настройках — от минимальной до максимальной: чем ниже, тем меньше чёткости, теней и эффектов, зато плавнее на слабом телефоне. <b>Батарея → Экономия</b> рисует вдвое меньше кадров: телефон греется меньше</div>
     <div><b>Чат</b> — кнопка 💬 в комнате и на финише: готовые фразы в одно касание<span class="for-pc">, свой текст — клавиша <kbd>T</kbd></span><span class="for-mob">, свой текст — «Написать своё»</span>. В заезде писать нельзя — там говорят голосом. Чат можно выключить</div>
-    <div><b>Голос</b> — кнопка с микрофоном в комнате, в заезде и на финише. Микрофон выключен, пока сам не включишь; чужие голоса слышно сразу. В комнате можно заглушить всех (кнопка «Голоса») или одного игрока — нажми на 🎤 возле его имени</div>
+    <div><b>Звук</b> игры выключается в настройках и на экране паузы</div>
+    <div><b>Голос</b> — кнопка с микрофоном в комнате, в заезде и на финише. Микрофон выключен, пока сам не включишь; чужие голоса слышно сразу. Заглушить всех — кнопка «Голоса» в комнате или кнопка с динамиком под паузой в заезде; одного игрока — нажми на 🎤 возле его имени в комнате</div>
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт через 15 секунд после второго игрока, свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div class="for-pc"><span class="kb"><kbd>H</kbd> гудок</span><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 47</div>
+    <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
+    <div style="opacity:.5;margin-top:8px">версия 49</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -513,13 +516,13 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 47</div>
+  <div class="fver">Turbo Drift · версия 49</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
 <div class="screen hidden" id="paused">
   <h1 style="font-size:34px">Пауза</h1>
-  <div class="btns"><button class="main" id="resume">Продолжить</button><button class="ghost" id="quit">Выйти в меню</button></div>
+  <div class="btns"><button class="main" id="resume">Продолжить</button><button class="ghost" id="psnd"></button><button class="ghost" id="quit">Выйти в меню</button></div>
 </div>
 
 <script>
@@ -682,8 +685,11 @@ function sndBuild(a) {
   S.st = { rpm: 950, gear: 1, shift: 0, thr: 0, spool: 0, thrPrev: 0, popT: 0, on: 0 };
   return S;
 }
+let sndOff = false; try { sndOff = localStorage.getItem('td_snd') === '0'; } catch (e) {}
+function sndApply() { try { if (SND && SND.out) SND.out.gain.value = sndOff ? 0 : 0.5; } catch (e) {} const b = document.getElementById('psnd'); if (b) b.textContent = sndOff ? 'Звук: выключен' : 'Звук: включён'; }
+function sndSet(off) { sndOff = !!off; try { localStorage.setItem('td_snd', sndOff ? '0' : '1'); } catch (e) {} sndApply(); if (!sndOff) audio(); }
 function audio() {
-  try { if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); SND = sndBuild(actx); }
+  try { if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); SND = sndBuild(actx); sndApply(); }
     if (actx.state === 'suspended') actx.resume(); if (SND) { SND.unlocked = true; SND.beepT = performance.now(); } } catch (e) {}
   return actx;
 }
@@ -2321,7 +2327,6 @@ function key(e, down) {
   else if (down && !e.repeat && (k === 'e' || k === 'у' || k === 'tab')) { selectItem(sel + 1); e.preventDefault(); }
   else if (down && !e.repeat && (k === 'q' || k === 'й')) selectItem(sel - 1);
   else if (down && !e.repeat && (k === '1' || k === '2' || k === '3')) selectItem(parseInt(k, 10) - 1);
-  else if (down && !e.repeat && (k === 'h' || k === 'р')) horn();
   else if (down && !e.repeat && NET.racing && k >= '5' && k <= '8') sendEmo(parseInt(k, 10) - 5);
   else if (down && (k === 'escape' || k === 'p')) pause(state === 'race' || state === 'countdown');
 }
@@ -2698,13 +2703,14 @@ function voiceMic(on) {
 }
 function voiceStop() { if (VOICE.stream) { try { VOICE.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} } VOICE.stream = null; VOICE.busy = false; for (const pid of Object.keys(VOICE.nodes)) voiceDrop(pid, true); VOICE.muted = {}; VOICE.seen = {}; voiceUI(); }
 function voiceUI() {
-  const can = voiceCan(), on = !!VOICE.stream; document.getElementById('voicerow').style.display = can ? '' : 'none'; document.getElementById('micbtn2').style.display = can && NET.racing ? '' : 'none';
+  const can = voiceCan(), on = !!VOICE.stream; document.getElementById('voicerow').style.display = can ? '' : 'none'; document.getElementById('micbtn2').style.display = can && NET.racing ? '' : 'none'; { const e2 = document.getElementById('earbtn2'); e2.style.display = can && NET.racing ? '' : 'none'; e2.classList.toggle('off', VOICE.deaf); }
   const mb = document.getElementById('micbtn'); mb.textContent = VOICE.busy ? '🎤 …' : '🎤 Микрофон'; mb.title = on ? 'Микрофон включён' : 'Микрофон выключен'; mb.classList.toggle('on', on);
   const eb = document.getElementById('earbtn'); eb.textContent = VOICE.deaf ? '🔇 Голоса' : '🔊 Голоса'; eb.title = VOICE.deaf ? 'Голоса других выключены' : 'Голоса других включены'; eb.classList.toggle('offd', VOICE.deaf); eb.classList.toggle('on', !VOICE.deaf);
   const all = document.querySelectorAll('.micbtn'); for (let i = 0; i < all.length; i++) { all[i].classList.toggle('on', on); if (all[i].parentNode && all[i].parentNode.id === 'femo') all[i].style.display = can ? '' : 'none'; }
 }
 (function () { const tog = function () { voiceMic(!VOICE.stream); }; document.getElementById('micbtn').addEventListener('click', tog); document.getElementById('micbtn2').addEventListener('click', tog);
-  document.getElementById('earbtn').addEventListener('click', function () { VOICE.deaf = !VOICE.deaf; voiceSync(); voiceUI(); toast(VOICE.deaf ? 'Голоса других игроков выключены' : 'Голоса других игроков включены'); }); })();
+  const ear = function () { VOICE.deaf = !VOICE.deaf; voiceSync(); voiceUI(); toast(VOICE.deaf ? 'Голоса других игроков выключены' : 'Голоса других игроков включены'); };
+  document.getElementById('earbtn').addEventListener('click', ear); document.getElementById('earbtn2').addEventListener('click', ear); })();
 function chatReset() { CHAT.log = []; CHAT.seen = {}; for (const id of ['chatlog', 'padlog', 'chatfeed']) document.getElementById(id).innerHTML = ''; chatClose(); padClose(); }
 (function () { const g = document.getElementById('phr'); PHRASES.forEach(function (t, i) { const b = document.createElement('button'); b.textContent = t; b.addEventListener('click', function () { if (chatSend(null, i) && chatDriving()) chatClose(); }); g.appendChild(b); });
   document.getElementById('chatx').addEventListener('click', chatClose); document.getElementById('padx').addEventListener('click', padClose);
@@ -2994,7 +3000,10 @@ function buildFpsSwitch() {
   const el = document.getElementById('fpssw'); el.innerHTML = '';
   ['min', 'mid', 'high', 'max'].forEach(function (k) { const o = GFX_SET[k], b = document.createElement('button'); b.className = 'lv' + (gfx === k ? ' on' : ''); b.textContent = o.name; b.title = o.tip;
     b.addEventListener('click', function () { gfx = k; GFX = o; try { localStorage.setItem('td_gfx', k); } catch (e) {} resize(); buildFpsSwitch(); toast(o.tip); }); el.appendChild(b); });
-  const ee = document.getElementById('ecosw'); ee.innerHTML = '';
+  const se = document.getElementById('sndsw'); se.innerHTML = '';
+  [[false, 'Включён'], [true, 'Выключен']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (sndOff === o[0] ? ' on' : ''); b.textContent = o[1];
+    b.addEventListener('click', function () { sndSet(o[0]); buildFpsSwitch(); toast(o[0] ? 'Звук игры выключен (голоса игроков остаются)' : 'Звук игры включён'); }); se.appendChild(b); });
+  sndApply(); const ee = document.getElementById('ecosw'); ee.innerHTML = '';
   [[false, 'Обычно', 'Все кадры: картинка плавная'], [true, 'Экономия', 'Вдвое меньше кадров: телефон греется меньше и дольше держит заряд, но картинка менее плавная']].forEach(function (o) {
     const b = document.createElement('button'); b.className = 'lv' + (fpsEco === o[0] ? ' on' : ''); b.textContent = o[1]; b.title = o[2];
     b.addEventListener('click', function () { fpsEco = o[0]; try { localStorage.setItem('td_eco', fpsEco ? '1' : '0'); } catch (e) {} buildFpsSwitch(); toast(o[2]); }); ee.appendChild(b); });
@@ -3041,7 +3050,7 @@ for (let k = 0; k < 3; k++) { const el = document.getElementById('it' + k);
   el.addEventListener('pointerdown', function (e) { if (!document.body.classList.contains('mob')) return; e.preventDefault(); if (state === 'race' && player.items[k]) { sel = k; useItem(player, k); } }); }      // on a phone the press itself fires: no waiting for the finger to lift
 document.getElementById('fire').addEventListener('click', function () { if (state === 'race') useItem(player, sel); });
 document.getElementById('fireback').addEventListener('click', function () { if (state !== 'race') return; let k = sel; if (document.body.classList.contains('mob')) { k = -1; for (let q = 0; q < player.items.length && k < 0; q++) { const id = PU[player.items[q].type].id; if (id === 'rocket' || id === 'bolt') k = q; } } if (k >= 0) useItem(player, k, true); });
-document.getElementById('share').addEventListener('click', share);
+document.getElementById('share').addEventListener('click', share); document.getElementById('psnd').addEventListener('click', function () { sndSet(!sndOff); buildFpsSwitch(); });
 document.getElementById('again').addEventListener('click', function () { startRace(T.id, !!rivalBot); });
 document.getElementById('champnext').addEventListener('click', champNext);
 document.getElementById('tomenu').addEventListener('click', toMenu);
@@ -3067,7 +3076,7 @@ document.getElementById('mpback').addEventListener('click', toMenu);
 document.getElementById('mpleave').addEventListener('click', toMenu);
 document.getElementById('tolobby').addEventListener('click', function () { if (!NET.host) return; netAward(); NET.tr.all({ t: 'roster', list: NET.roster, track: NET.track, opt: NET.opt }, -1); NET.tr.all({ t: 'lobby' }, -1); document.getElementById('finish').classList.add('hidden'); netLobby(); });
 document.getElementById('rematch').addEventListener('click', function () { if (!NET.host) return; netAward(); specStop(false); NET.racing = false; netStart(); });
-document.getElementById('horn').addEventListener('click', horn); emoRow(document.getElementById('femo')); emoRow(document.getElementById('mpemo'));
+ emoRow(document.getElementById('femo')); emoRow(document.getElementById('mpemo'));
 
 try {
   (function () { try { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'); g.strokeStyle = 'rgb(215,228,255)'; g.lineWidth = 1.2; let sd = 7; const rnd = function () { sd = (sd*16807) % 2147483647; return sd/2147483647; };
