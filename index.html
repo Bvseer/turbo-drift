@@ -190,7 +190,7 @@
   .mcenter .carname { text-align: center; font-size: 24px; text-shadow: 0 2px 10px rgba(0,0,0,.7); } .mcenter .carname small { font-size: 12px; }
   .mcenter .swatches { justify-content: center; margin: 6px 0 10px; padding: 7px 12px; border-radius: 22px; background: rgba(10,13,24,.5); }
   .helpbtn { margin-top: 10px; padding: 9px 22px; font-size: 14px; }
-  #help { background: rgba(14,22,48,.97); } #help .hints { width: min(560px, 100%); font-size: 14px; line-height: 1.5; text-align: left; } #help .hints > div { margin-top: 7px; } #help h1 { margin: 0 0 8px; } #help { touch-action: pan-y; padding-bottom: 0; } #help > .btns { position: sticky; bottom: 0; width: 100%; margin: 10px 0 0; padding: 10px 0 14px; align-items: center; background: linear-gradient(180deg, rgba(14,22,48,0), rgba(14,22,48,.97) 35%); } body.land #help h1 { font-size: 22px !important; }
+  #help { background: rgba(14,22,48,.97); } #help .hints { width: min(560px, 100%); font-size: 14px; line-height: 1.5; text-align: left; } #help .hints > div { margin-top: 7px; } #help h1 { margin: 0 0 8px; } .pulegend i { font-style: normal; font-weight: 800; } #help { touch-action: pan-y; padding-bottom: 0; } #help > .btns { position: sticky; bottom: 0; width: 100%; margin: 10px 0 0; padding: 10px 0 14px; align-items: center; background: linear-gradient(180deg, rgba(14,22,48,0), rgba(14,22,48,.97) 35%); } body.land #help h1 { font-size: 22px !important; }
   body.wide #menu, body.wide #mplobby { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(150px, 1fr) minmax(0, 1.05fr); column-gap: 12px; align-items: center; justify-items: center; }
   body.wide #menu { padding: 8px 16px; text-align: center; background: linear-gradient(90deg, rgba(14,22,48,.95) 0, rgba(14,22,48,.84) 27%, rgba(14,22,48,0) 37%, rgba(14,22,48,0) 63%, rgba(14,22,48,.84) 73%, rgba(14,22,48,.95) 100%); }
   body.wide #mp { justify-content: flex-start; padding: 6px 16px; background: linear-gradient(90deg, rgba(14,22,48,.95) 0, rgba(14,22,48,.84) 27%, rgba(14,22,48,0) 37%, rgba(14,22,48,0) 63%, rgba(14,22,48,.84) 73%, rgba(14,22,48,.95) 100%); }
@@ -408,15 +408,25 @@
       <b>Газ</b> — автоматический, машина разгоняется сама<br>
       <b>Руль</b> — наклоняй телефон влево и вправо, как руль; положение на старте считается «прямо»<br>
       <b>ТОРМОЗ</b> — коротко нажми в повороте, чтобы пустить машину в занос; на месте — задний ход<br>
-      <b>Бонусы</b> — до трёх, у каждого своя круглая кнопка: нажал — применил; стрелка вниз пускает ракету или залп назад
+      <b>Круглые кнопки справа</b> — подобранные бонусы, до трёх сразу: нажал — применил
     </div>
     <div style="margin-top:6px"><b>После финиша</b> можно смотреть, как доезжают остальные: кнопка «Наблюдать за гонкой»</div>
 
     <div class="for-pc">
       <span class="kb"><kbd>↑</kbd> газ</span><span class="kb"><kbd>↓</kbd> тормоз, в повороте — занос, на месте — назад</span><span class="kb"><kbd>←</kbd><kbd>→</kbd> руль</span><br>
-      <span class="kb"><kbd>Пробел</kbd> применить бонус</span><span class="kb"><kbd>Shift</kbd>+<kbd>Пробел</kbd> ракета или залп назад</span><span class="kb"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> или <kbd>Q</kbd><kbd>E</kbd> выбрать</span><span class="kb"><kbd>Esc</kbd> пауза</span><br>
+      <span class="kb"><kbd>Пробел</kbd> применить бонус</span><span class="kb"><kbd>Shift</kbd>+<kbd>Пробел</kbd> выстрелить назад</span><span class="kb"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> или <kbd>Q</kbd><kbd>E</kbd> выбрать</span><span class="kb"><kbd>Esc</kbd> пауза</span><br>
       Работают и <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
     </div>
+    <div class="pulegend"><b>Бонусы</b> — светящиеся значки на дороге, проедь через значок, чтобы подобрать:<br>
+      <i style="color:#4df224">Нитро</i> — рывок вперёд на пару секунд ·
+      <i style="color:#ff4d5e">Ракета</i> — сама наводится на машину впереди ·
+      <i style="color:#b06bff">Залп</i> — три выстрела по прямой ·
+      <i style="color:#ff8a1f">Мина</i> — остаётся на дороге за тобой ·
+      <i style="color:#ffe93b">Волна</i> — взрыв вокруг машины: бьёт соседей, сбивает чужие ракеты и мины ·
+      <i style="color:#2ff0e6">Разряд</i> — три электрических купола перед лидером ·
+      <i style="color:#5b8cff">Щит</i> — шесть секунд защиты ·
+      <i style="color:#ffffff">Ремонт</i> — чинит машину полностью.<br>
+      Ракету и залп можно пустить и назад, по тому, кто догоняет<span class="for-mob"> — кнопка со стрелкой вниз</span><span class="for-pc"> — <kbd>Shift</kbd>+<kbd>Пробел</kbd></span></div>
     <div style="margin-top:6px"><b>Долгий занос</b> заряжает турбо, оно сработает на выходе</div>
     <div><b>Старт</b> — <span class="for-pc">нажми газ ровно на GO</span><span class="for-mob">держи ТОРМОЗ и отпусти ровно на GO</span>: будет рывок<span class="for-pc">; раньше времени — пробуксовка</span></div>
     <div><b>Слипстрим</b> — держись прямо за соперником, машина разгонится сильнее; <b>обгон впритирку</b> без касания даёт турбо</div>
@@ -425,7 +435,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт через 15 секунд после второго игрока, свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>H</kbd> гудок</span><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 45</div>
+    <div style="opacity:.5;margin-top:8px">версия 46</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -497,7 +507,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 45</div>
+  <div class="fver">Turbo Drift · версия 46</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
