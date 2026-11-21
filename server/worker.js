@@ -35,7 +35,7 @@ async function whoIs(init, env) {
 
 async function setup(env, origin) {
   await env.DB.batch([
-    env.DB.prepare('CREATE TABLE IF NOT EXISTS best (track INTEGER NOT NULL, uid INTEGER NOT NULL, name TEXT NOT NULL, ms INTEGER NOT NULL, car INTEGER NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (track, uid))'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS best (track INTEGER NOT NULL, uid INTEGER NOT NULL, name TEXT NOT NULL, ms INTEGER NOT NULL, car INTEGER NOT NULL, at INTEGER NOT NULL, cc TEXT, PRIMARY KEY (track, uid))'),
     env.DB.prepare('CREATE INDEX IF NOT EXISTS best_top ON best (track, ms)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS src (k TEXT PRIMARY KEY, n INTEGER NOT NULL)')
   ]);
@@ -45,22 +45,28 @@ async function setup(env, origin) {
   return { tables: 'ok', webhook: hook };
 }
 
+// The country column came later than the table: a database made before it gets the column the first time it is needed.
+async function withCountry(env, work) {
+  try { return await work(); } catch (e) { if (!/\bcc\b/.test(String(e && e.message || e))) throw e; try { await env.DB.prepare('ALTER TABLE best ADD COLUMN cc TEXT').run(); } catch (x) {} return await work(); }
+}
 async function board(env, track, me) {
-  const rows = (await env.DB.prepare('SELECT uid, name, ms, car FROM best WHERE track = ? ORDER BY ms ASC, at ASC LIMIT ?').bind(track, TOP).all()).results || [];
+  const rows = (await withCountry(env, () => env.DB.prepare('SELECT uid, name, ms, car, cc FROM best WHERE track = ? ORDER BY ms ASC, at ASC LIMIT ?').bind(track, TOP).all())).results || [];
   const total = (await env.DB.prepare('SELECT COUNT(*) AS n FROM best WHERE track = ?').bind(track).first()).n | 0;
   let mine = null;
   if (me) { const b = await env.DB.prepare('SELECT ms, car FROM best WHERE track = ? AND uid = ?').bind(track, me.id).first();
     if (b) { const r = (await env.DB.prepare('SELECT COUNT(*) AS n FROM best WHERE track = ? AND ms < ?').bind(track, b.ms).first()).n | 0; mine = { rank: r + 1, ms: b.ms, car: b.car }; } }
-  return { ok: true, track: track, total: total, me: mine, top: rows.map((r) => ({ name: r.name, ms: r.ms, car: r.car, me: !!(me && r.uid === me.id) })) };
+  return { ok: true, track: track, total: total, me: mine, top: rows.map((r) => ({ name: r.name, ms: r.ms, car: r.car, cc: r.cc || '', me: !!(me && r.uid === me.id) })) };
 }
 
-async function score(env, q) {
+async function score(env, q, request) {
   const me = await whoIs(q.init, env); if (!me) return json({ ok: false, err: 'auth' }, 401);
   const track = q.track | 0, ms = Math.round(+q.ms), car = q.car | 0;
   if (!(track >= 0 && track < TRACKS) || !(car >= 0 && car < CARS.length) || !(ms >= MIN_MS[track] && ms <= MAX_MS)) return json({ ok: false, err: 'range' }, 400);
-  await env.DB.prepare('INSERT INTO best (track, uid, name, ms, car, at) VALUES (?1, ?2, ?3, ?4, ?5, ?6) ON CONFLICT (track, uid) DO UPDATE SET name = excluded.name, ' +
+  let cc = String(request && request.cf && request.cf.country || '').toUpperCase(); if (!/^[A-Z]{2}$/.test(cc) || cc === 'XX') cc = '';          // the country the request came from, as Cloudflare sees it
+  await withCountry(env, () => env.DB.prepare('INSERT INTO best (track, uid, name, ms, car, at, cc) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7) ON CONFLICT (track, uid) DO UPDATE SET name = excluded.name, ' +
+    "cc = CASE WHEN excluded.cc != '' THEN excluded.cc ELSE best.cc END, " +
     'car = CASE WHEN excluded.ms < best.ms THEN excluded.car ELSE best.car END, at = CASE WHEN excluded.ms < best.ms THEN excluded.at ELSE best.at END, ms = MIN(best.ms, excluded.ms)')
-    .bind(track, me.id, me.name, ms, car, Math.floor(Date.now()/1000)).run();
+    .bind(track, me.id, me.name, ms, car, Math.floor(Date.now()/1000), cc).run());
   return json(await board(env, track, me));
 }
 
@@ -86,7 +92,7 @@ export default {
       if (path === '/top' || path === '/score') {
         let q = {}; if (request.method === 'POST') { const t = await request.text(); if (t.length > 6000) return json({ ok: false, err: 'big' }, 413); try { q = JSON.parse(t) || {}; } catch (e) { return json({ ok: false, err: 'json' }, 400); } }
         else q = { track: url.searchParams.get('track') };
-        if (path === '/score') return request.method === 'POST' ? await score(env, q) : json({ ok: false, err: 'method' }, 405);
+        if (path === '/score') return request.method === 'POST' ? await score(env, q, request) : json({ ok: false, err: 'method' }, 405);
         const track = q.track | 0; if (!(track >= 0 && track < TRACKS)) return json({ ok: false, err: 'range' }, 400);
         return json(await board(env, track, await whoIs(q.init, env)));
       }
