@@ -460,7 +460,7 @@
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 56</div>
+    <div style="opacity:.5;margin-top:8px">версия 57</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -534,7 +534,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 56</div>
+  <div class="fver">Turbo Drift · версия 57</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1430,7 +1430,8 @@ function cityKit(c) {
   K.rows = function (skip) {
     for (const sd of [-1, 1]) for (let row = 0; row < 2; row++) { let i = 0;
       while (i < N) { const wide = 11 + rnd()*16, deep = 10 + rnd()*12 + row*6, gap = rnd() < 0.2 ? 3 + rnd()*8 : 0.6, j = (i + Math.round(wide/2)) % N;
-        const off = (sd > 0 ? c.wp : c.wn)[j] + 5.5 + row*(24 + rnd()*8) + deep/2, p = at(j, sd*off, 0);
+        if (i + wide + 1.5 > N) break;                                   // the row is closed: one more house would stand inside the first one
+        const off = (sd > 0 ? c.wp : c.wn)[j] + 5.5 + rnd()*1.4 + row*(24 + rnd()*8) + deep/2, p = at(j, sd*off, 0);      // every front stands a little forward or back: two walls in one plane would flicker
         let hgt = row === 0 ? 7 + rnd()*rnd()*46 : 14 + rnd()*rnd()*80; if (rnd() < 0.06) hgt += 30 + rnd()*40;
         const r = 0.42*Math.min(deep, wide); hgt = K.cap(p[0], p[2], hgt, r);
         if (!(skip && skip(j)) && K.fits(p[0], p[2], deep, wide, h[j], HW + 5.2) && K.free(p[0], p[2], r)) { K.tower(p[0], p[2], deep, wide, hgt, h[j]); K.keep(p[0], p[2], r); if (row === 0) K.signs(p[0], p[2], deep, wide, hgt, h[j], sd); }
