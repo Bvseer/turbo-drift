@@ -467,7 +467,7 @@
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 63</div>
+    <div style="opacity:.5;margin-top:8px">версия 64</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -541,7 +541,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 63</div>
+  <div class="fver">Turbo Drift · версия 64</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -832,7 +832,7 @@ const SKIES = {
   chicago:  { sun: [-0.40,0.72,-0.44], hor: [0.58,0.70,0.88], zen: [0.08,0.22,0.58], sunc: [3.0,2.9,2.7],  disc: [1.0,0.95,0.86],  lo: [0.12,0.12,0.12], hi: [0.32,0.42,0.58], gnd: [0.08,0.08,0.08], glow: 0.08, night: 0, shadow: 0.50, cover: 0.48, fogK: 0.00066, expo: 0.60 }
 };
 let SKY = SKIES.day, SUN = [0,1,0];
-let P1 = null, P2 = null, PO = null, PT = null, PS = null, PSH = null, PD = null, CUR = null, dynBuf = null, SHIELD_MESH = null;
+let P1 = null, P2 = null, PO = null, PF = null, PW = null, PT = null, PS = null, PSH = null, PD = null, CUR = null, dynBuf = null, SHIELD_MESH = null;
 
 function initGL() {
   // One vertex format, five small programs: each pixel runs only the code its kind of surface needs.
@@ -904,7 +904,9 @@ function initGL() {
       vec3 light = amb + sunc*nl;
       vec3 R = reflect(-V,N); float fr = pow(1.0 - max(dot(N,V),0.0), 5.0);
       vec3 Hh = normalize(V + sun); float nh = max(dot(N,Hh), 0.0);
-      if (vm < 0.5) col = base*light;
+      if (vm < 0.5) { col = base*light;
+        if (vm > 0.2 && near > 0.0) {                                       // 0.3: paving, its slabs a shade apart, dark joints between them
+          vec2 tq = vw.xz*0.85, tf = abs(fract(tq) - 0.5); col *= mix(1.0, (0.90 + 0.20*hash(floor(tq)))*(1.0 - 0.34*smoothstep(0.43, 0.48, max(tf.x, tf.y))), near); } }
       else if (vm < 1.5) {                                                 // ground: grass with dry patches, bare earth and rock on slopes
         float g = fbm(vw.xz*0.045)*0.62 + noise(vw.xz*0.9)*0.22; if (near > 0.0) g += noise(vw.xz*7.0)*0.16*near;
         vec3 alb = mix(vec3(0.022,0.055,0.014), vec3(0.092,0.150,0.036), g);
@@ -924,29 +926,78 @@ function initGL() {
       else if (vm < 5.5) col = base*5.0;
       else if (vm > 11.5) col = base*(light*(1.0 - night) + vec3(7.0)*night);                           // lit only after dark: lamps, windows
       else if (vm < 6.5) col = base*(0.22*light + 0.85*sky(R, 0.0)) + sunc*pow(nh, 200.0)*0.8;
-      else if (vm < 7.5) {                                                 // building front: rows of windows, a part of them lit after dark
-        if (N.y > 0.5) col = base*light*0.7;
-        else {
-          vec2 g = vec2(dot(vw.xz, vec2(-N.z, N.x))/1.9, vw.y/1.75), id = floor(g), f = fract(g);
-          float seed = floor(fract(vc.r*37.0 + vc.g*91.0 + vc.b*53.0)*61.0), f1 = smoothstep(150.0, 380.0, dist);
-          float busy = 0.20 + 0.42*fract(seed*0.37);
-          vec3 lamp = mix(vec3(1.0,0.70,0.36), vec3(0.66,0.82,1.0), step(0.62, fract(seed*0.613)));
-          col = base*(light + night*vec3(0.22,0.17,0.11)*exp(-max(vw.y, 0.0)*0.09));
-          float glowW = 0.0;
-          if (f1 < 1.0) {                                                  // near: every window, two panes each
-            float win = step(0.12, f.x)*step(f.x, 0.88)*step(0.035, abs(f.x - 0.5))*step(0.22, f.y)*step(f.y, 0.80)*(1.0 - f1);
-            float h1 = hash(id + seed), h2 = hash(id*1.31 + seed + 7.7);
-            col = mix(col, vec3(0.004,0.006,0.008)*light + air(R)*(0.08 + 0.6*fr), win*0.9);
-            glowW = win*step(1.0 - (g.y < 2.0 ? 0.75 : busy), h1)*(0.22 + 0.80*h2); }
-          if (f1 > 0.0) {                                                  // far: lit patches a few windows across, then an even glow
-            vec2 g2 = g/3.0, ff = fract(g2); float f2 = smoothstep(650.0, 1150.0, dist);
-            float w2 = step(0.14, ff.x)*step(ff.x, 0.86)*step(0.16, ff.y)*step(ff.y, 0.84);
-            glowW += f1*((1.0 - f2)*w2*step(1.0 - busy*0.85, hash(floor(g2) + seed + 3.3))*0.42 + f2*busy*0.11); }
-          col += lamp*night*glowW;
-        } }
       else if (vm < 8.5) col = base*light;
       else if (vm < 9.5) col = base*(0.55 + 1.3*night + 7.0*brake);
       else col = base*light + sky(R, 0.0)*(0.04 + 0.55*fr) + sunc*pow(nh, 260.0)*0.9;
+      gl_FragColor = vec4(film(mix(col, vfog.rgb, vfog.a)), 1.0); }`;
+  // Building fronts and water have programs of their own: they fill much of a city's picture, and no other surface has to carry their code
+  const fsFront = fsHead + fsLib + `    void main(){
+      vec3 toCam = cam - vw; float dist = length(toCam); vec3 V = toCam/dist;
+      vec3 N = normalize(vn); vec3 base = vc*vc; vec3 col;
+      float nl = max(dot(N,sun),0.0); float near = 1.0 - smoothstep(30.0, 130.0, dist);
+      vec3 amb = mix(ambLo, ambHi, N.y*0.5+0.5);
+      vec3 light = amb + sunc*nl;
+      vec3 R = reflect(-V,N); float fr = pow(1.0 - max(dot(N,V),0.0), 5.0);
+      vec3 Hh = normalize(V + sun); float nh = max(dot(N,Hh), 0.0);
+        if (N.y > 0.5) col = base*light*0.66;
+        else {
+          float u = dot(vw.xz, vec2(-N.z, N.x));
+          float seed = floor(fract(vc.r*37.0 + vc.g*91.0 + vc.b*53.0)*61.0), f1 = smoothstep(150.0, 380.0, dist);
+          float kind = fract(seed*0.2137), glassy = step(base.r*1.10 + 0.004, base.b);
+          vec2 cell = glassy > 0.5 ? vec2(1.55, 1.9) : (kind < 0.36 ? vec2(1.9, 1.75) : (kind < 0.68 ? vec2(2.7, 1.75) : vec2(1.4, 1.75)));
+          vec2 g = vec2(u, vw.y)/cell, id = floor(g), f = fract(g);
+          float busy = 0.20 + 0.42*fract(seed*0.37);
+          vec3 lamp = mix(vec3(1.0,0.70,0.36), vec3(0.66,0.82,1.0), step(0.62, fract(seed*0.613)));
+          vec3 wall = base*(0.70 + 0.30*smoothstep(0.0, 4.5, vw.y));           // the foot of a wall stands in the shade of the street
+          if (near > 0.0) wall *= 1.0 + (0.22*noise(vec2(u*0.8, vw.y*0.10)) - 0.11)*near;      // streaks of weather, close by only
+          col = wall*(light + night*vec3(0.22,0.17,0.11)*exp(-max(vw.y, 0.0)*0.09));
+          float glowW = 0.0, shop = step(vw.y, 3.3);
+          if (f1 < 1.0) {
+            float x0 = 0.12, x1 = 0.88, y0 = 0.22, y1 = 0.80, mull = step(0.035, abs(f.x - 0.5));
+            if (glassy > 0.5) { x0 = 0.035; x1 = 0.965; y0 = 0.13; y1 = 0.985; mull = 1.0; }
+            else if (kind >= 0.68) { x0 = 0.24; x1 = 0.76; y0 = 0.14; y1 = 0.84; mull = 1.0; }
+            else if (kind >= 0.36) { x0 = 0.02; x1 = 0.98; y0 = 0.34; y1 = 0.82; mull = 1.0; }
+            float win = step(x0, f.x)*step(f.x, x1)*mull*step(y0, f.y)*step(f.y, y1);
+            if (shop > 0.5) win = step(0.05, f.x)*step(f.x, 0.95)*step(0.45, vw.y)*step(vw.y, 2.75);     // street level: shop windows
+            win *= 1.0 - f1;
+            float h1 = hash(id + seed), h2 = hash(id*1.31 + seed + 7.7);
+            // each pane leans a hair its own way, so the panes of one wall catch different parts of the sky
+            vec3 Ng = N + vec3(-N.z, 0.0, N.x)*((h1 - 0.5)*0.07) + vec3(0.0, (h2 - 0.5)*0.07, 0.0);
+            vec3 Rg = reflect(-V, Ng); float fg = 1.0 - max(dot(Ng, V), 0.0), fg2 = fg*fg; fg = fg2*fg2*fg;
+            // the mirrored sky is a plain gradient here: a wall of glass fills the screen, and the full sky costs too much for that; low down it is the street that is mirrored
+            vec3 refl = mix(HOR, ZEN, clamp(Rg.y*1.3, 0.0, 1.0))*(0.30 + 0.70*clamp(Rg.y*3.0 + 0.36, 0.0, 1.0));
+            vec3 glass = mix(vec3(0.006,0.009,0.012), base*0.45, glassy*0.55)*light + refl*(mix(0.10, 0.34, glassy) + 0.66*fg);
+            if (glassy > 0.5 && night < 0.5) glass += sunc*pow(max(dot(Ng, Hh), 0.0), 260.0)*1.2;
+            glass = mix(glass, wall*light*1.25 + 0.04*light, step(0.80, h2)*0.55*(1.0 - glassy)*(1.0 - shop));      // blinds down in some
+            glass *= 1.0 - 0.42*smoothstep(y1 - 0.11, y1, f.y)*(1.0 - glassy);                                 // the head of the opening shades the pane
+            col = mix(col, glass, win*0.95);
+            // after dark: a curtain drawn part of the way, more light near the ceiling lamp, now and then the blue of a screen
+            float lit = step(1.0 - (shop > 0.5 ? 0.78 : busy), h1), part = 0.50 + 0.50*step(fract(h2*7.3)*(x1 - x0) + x0, f.x);
+            glowW = win*lit*(0.20 + 0.78*h2)*part*(0.72 + 0.45*(f.y - y0)/(y1 - y0));
+            lamp = mix(lamp, vec3(0.42,0.58,1.0), step(0.93, fract(h1*5.7))*(1.0 - shop)); }
+          if (f1 > 0.0) {                                                  // far: blocks a few windows across, then an even tone
+            vec2 g2 = g/3.0, ff = fract(g2); float f2 = smoothstep(650.0, 1150.0, dist);
+            float w2 = step(0.14, ff.x)*step(ff.x, 0.86)*step(0.16, ff.y)*step(ff.y, 0.84);
+            col = mix(col, vec3(0.010,0.014,0.020)*light + mix(HOR, ZEN, clamp(R.y*1.3, 0.0, 1.0))*(mix(0.12, 0.32, glassy) + 0.6*fr), f1*mix((1.0 - f2)*w2*0.62 + f2*0.30, 0.82, glassy));
+            glowW += f1*((1.0 - f2)*w2*step(1.0 - busy*0.85, hash(floor(g2) + seed + 3.3))*0.42 + f2*busy*0.11); }
+          col += lamp*night*glowW;
+        } 
+      gl_FragColor = vec4(film(mix(col, vfog.rgb, vfog.a)), 1.0); }`;
+  const fsWater = fsHead + fsLib + `    void main(){
+      vec3 toCam = cam - vw; float dist = length(toCam); vec3 V = toCam/dist;
+      vec3 N = normalize(vn); vec3 base = vc*vc; vec3 col;
+      float nl = max(dot(N,sun),0.0); float near = 1.0 - smoothstep(30.0, 130.0, dist);
+      vec3 amb = mix(ambLo, ambHi, N.y*0.5+0.5);
+      vec3 light = amb + sunc*nl;
+      vec3 R = reflect(-V,N); float fr = pow(1.0 - max(dot(N,V),0.0), 5.0);
+      vec3 Hh = normalize(V + sun); float nh = max(dot(N,Hh), 0.0);
+      {                                                    // 4.3: water. Two layers of ripples drift across each other; the sky lies on it, the sun glitters
+          vec2 wq = vw.xz*0.27; float wt = tm*0.34, wf = 1.0 - smoothstep(140.0, 460.0, dist);
+          float n1 = noise(wq + vec2(wt, wt*0.6)) - 0.5, n2 = noise(wq*2.9 - vec2(wt*0.9, wt*1.4)) - 0.5;
+          vec3 Nw = normalize(vec3((n1*0.24 + n2*0.12)*wf, 1.0, (n2*0.24 - n1*0.12)*wf));
+          vec3 Rw = reflect(-V, Nw); Rw.y = abs(Rw.y); float fw = 0.03 + 0.97*pow(1.0 - max(dot(Nw, V), 0.0), 5.0);
+          vec3 deep = (ZEN*0.55 + HOR*0.12)*(0.45 + 0.12*n1*wf) + ambLo*0.25;
+          col = mix(deep, air(Rw), fw) + sunc*pow(max(dot(Nw, Hh), 0.0), 240.0)*1.6; }
       gl_FragColor = vec4(film(mix(col, vfog.rgb, vfog.a)), 1.0); }`;
   const fsTree = fsHead + fsLib + `
     void main(){
@@ -975,7 +1026,7 @@ function initGL() {
     if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
     const o = { prog: pr }; names.forEach(function (n) { o[n] = gl.getUniformLocation(pr, n); }); return o; }
   const U = ['fcam','fsun','fHOR','fZEN','fgnd','fdisc','fglow','ffogK','vp','m','cam','sun','tint','brake','HOR','ZEN','sunc','disc','ambLo','ambHi','gnd','glow','night','shadowA','tm','cover','fogK','expo','wet','tex','ntex'], A = ['p','n','c','mt'];
-  PO = link(vs, fsOpaque, U, A); PT = link(vs, fsTree, U, A); PS = link(vsSky, fsSky, U, A); PSH = link(vs, fsShadow, U, A); PD = link(vs, fsDome, U, A); P1 = PO;
+  PO = link(vs, fsOpaque, U, A); PF = link(vs, fsFront, U, A); PW = link(vs, fsWater, U, A); PT = link(vs, fsTree, U, A); PS = link(vsSky, fsSky, U, A); PSH = link(vs, fsShadow, U, A); PD = link(vs, fsDome, U, A); P1 = PO;
   P2 = link(vs2, fs2, ['vp'], ['p','uv','c']);
   { // the noise table: hash of the lattice point, with the same arithmetic the shader used (single precision)
     const fr = Math.fround, fract = function (x) { return fr(x - Math.floor(x)); }, px = new Uint8Array(256*256);
@@ -1405,7 +1456,7 @@ let W = null;
 // ---------------------------------------------------------------------------
 const NEON = [[0.95,0.22,0.52],[0.18,0.82,0.95],[0.95,0.16,0.10],[1.0,0.78,0.16],[0.28,0.95,0.42],[0.92,0.92,1.0],[0.60,0.34,1.0],[1.0,0.48,0.10]];
 function cityKit(c, o) { o = o || {};
-  const mb = c.mb, at = c.at, N = c.N, x = c.x, z = c.z, h = c.h, rnd = c.rnd, HW = ROAD_W/2, WY = o.wy || -14, UPc = [0,-50,0], NITE = SKY.night > 0.6, K = { WY: WY, water: [], placed: [], clears: [], lots: [], NITE: NITE };
+  const mb = c.mb, at = c.at, N = c.N, x = c.x, z = c.z, h = c.h, rnd = c.rnd, HW = ROAD_W/2, WY = o.wy || -14, UPc = [0,-50,0], NITE = SKY.night > 0.6, K = { WY: WY, water: [], placed: [], clears: [], lots: [], NITE: NITE }; c.K = K;
   // the look of a city: wall colours, roofs, signs, how tall the rows along the road stand
   const ST = K.style = { pal: null, roof: 'flat', neon: true, signs: 1, rowH: null, land: [0.19,0.19,0.21], quay: [0.30,0.30,0.32], water: null, tight: null, cornice: false }; for (const k in (o.style || {})) ST[k] = o.style[k];
   const mul = function (c3, k) { return [c3[0]*k, c3[1]*k, c3[2]*k]; };
@@ -1431,7 +1482,7 @@ function cityKit(c, o) { o = o || {};
   const tile = function (x0, z0, x1, z1, y, col, mat) { const cuts = function (a, b) { const r = [a]; for (let v = Math.ceil((a + 0.01)/96)*96; v < b - 0.01; v += 96) r.push(v); r.push(b); return r; }, X = cuts(x0, x1), Z = cuts(z0, z1);
     for (let a = 0; a < X.length - 1; a++) for (let b = 0; b < Z.length - 1; b++) mb.quad([X[a],y,Z[b]],[X[a+1],y,Z[b]],[X[a+1],y,Z[b+1]],[X[a],y,Z[b+1]],col,mat,UPc); };
   K.land = function (x0, z0, x1, z1) { tile(x0, z0, x1, z1, -0.06, ST.land, 2); };
-  K.sea = function (x0, z0, x1, z1) { tile(x0, z0, x1, z1, WY, ST.water ? ST.water.col : [0.02,0.03,0.05], ST.water ? ST.water.mat : 4); };
+  K.sea = function (x0, z0, x1, z1) { tile(x0, z0, x1, z1, WY, ST.water ? ST.water.col : [0.02,0.03,0.05], ST.water ? ST.water.mat : 4.3); };
   // quay wall down to the water, with a string of lamps along its edge
   K.quay = function (xa, za, xb, zb, lit) { { const m = Math.max(1, Math.ceil(Math.hypot(xb-xa, zb-za)/96)); for (let k = 0; k < m; k++) { const x0 = xa + (xb-xa)*k/m, z0 = za + (zb-za)*k/m, x1 = xa + (xb-xa)*(k+1)/m, z1 = za + (zb-za)*(k+1)/m; mb.quad([x0,-0.06,z0],[x1,-0.06,z1],[x1,WY,z1],[x0,WY,z0],ST.quay,0,UPc); } }
     if (!lit) return; const len = Math.hypot(xb-xa, zb-za), n = Math.floor(len/24);
@@ -1444,7 +1495,8 @@ function cityKit(c, o) { o = o || {};
     const y0 = o.base || 0, roof = o.roof || ST.roof; let col = o.col || (ST.pal ? ST.pal(hgt) : null);
     if (!col) { const tone = 0.17 + rnd()*0.20, tint = rnd(); col = [tone*(0.90 + 0.20*tint), tone*(0.94 + 0.10*rnd()), tone*(1.10 - 0.20*tint)]; }
     mb.box(px, y0 + hgt/2, pz, deep, hgt, wide, col, 7, ry); let top = y0 + hgt;
-    if (!NITE && c.shade && !o.noShade && top < 80 && K.road(px, pz) < 170) c.shade(px, pz, deep, wide, top, ry, K);
+    const dRoad = !y0 && top < 80 ? K.road(px, pz) : 999; if (!NITE && c.shade && !o.noShade && dRoad < 170) c.shade(px, pz, deep, wide, top, ry, K);
+    if (dRoad < 95 && roof === 'flat') mb.box(px, top + 0.2, pz, deep + 0.36, 0.55, wide + 0.36, mul(col, 0.80), 0, ry);          // a cornice closes the wall at the top
     if (ST.cornice && !y0 && hgt < 26) { const cc = neon(); mb.box(px, top + 0.16, pz, deep + 0.24, 0.32, wide + 0.24, mul(cc, 0.85), 12, ry); mb.box(px, top*0.52, pz, deep + 0.16, 0.22, wide + 0.16, mul(cc, 0.6), 12, ry); }      // a line of neon along the cornice and one across the front
     if (roof === 'mansard' && hgt < 30) { mb.box(px, top + 1.2, pz, deep - 1.6, 2.4, wide - 1.6, [0.30,0.32,0.37], 0, ry); for (let k = 0; k < 2; k++) { const q = loc(px, pz, ry)((rnd() - 0.5)*deep*0.5, (rnd() - 0.5)*wide*0.7); mb.box(q[0], top + 3.0, q[1], 0.9, 1.4, 1.6, [0.55,0.36,0.26], 0, ry); } return top + 2.4; }
     if (roof === 'tile' && hgt < 30) { mb.box(px, top + 0.7, pz, deep - 1.0, 1.4, wide - 1.0, [0.62,0.34,0.22], 0, ry); return top + 1.4; }
@@ -1621,7 +1673,7 @@ function cityKit(c, o) { o = o || {};
   K.freeP = function (px, pz, r) { for (const b of K.placed) { const dx = b[0]-px, dz = b[1]-pz, rr = b[2] + r; if (dx*dx + dz*dz < rr*rr) return false; } return true; };
   K.open = function (x0, z0, x1, z1) { K.clears.push([x0,z0,x1,z1]); };
   // shallow basin with a stone rim
-  K.pond = function (x0, z0, x1, z1) { mb.quad([x0,0.05,z0],[x1,0.05,z0],[x1,0.05,z1],[x0,0.05,z1],[0.02,0.03,0.05],4,UPc); const S = [0.70,0.68,0.62], cx = (x0+x1)/2, cz = (z0+z1)/2;
+  K.pond = function (x0, z0, x1, z1) { mb.quad([x0,0.05,z0],[x1,0.05,z0],[x1,0.05,z1],[x0,0.05,z1],[0.02,0.03,0.05],4.3,UPc); const S = [0.70,0.68,0.62], cx = (x0+x1)/2, cz = (z0+z1)/2;
     mb.box(cx, 0.2, z0, x1-x0+1, 0.4, 0.8, S, 0); mb.box(cx, 0.2, z1, x1-x0+1, 0.4, 0.8, S, 0); mb.box(x0, 0.2, cz, 0.8, 0.4, z1-z0+1, S, 0); mb.box(x1, 0.2, cz, 0.8, 0.4, z1-z0+1, S, 0); };
   // trees between the kerb and the house fronts
   K.street = function (step, skipP, kinds, h0, h1) { for (let i = 4; i < N; i += step) for (const sd of [-1, 1]) { if (c.inTun[i] || c.inBr[i] || rnd() < skipP) continue; const p = at(i, sd*((sd > 0 ? c.wp : c.wn)[i] + 3.0), 0); if (K.wet(p[0], p[2], 3) || K.road(p[0], p[2]) < HW + 4.5 || !K.freeP(p[0], p[2], 1)) continue; c.tree(p[0], p[2], kinds[(rnd()*kinds.length) | 0], h0 + rnd()*h1, 0.8 + rnd()*0.3); } };
@@ -1742,7 +1794,7 @@ function cityKit(c, o) { o = o || {};
   // a cluster of tall towers around a point
   K.cluster = function (px, pz, n, rad, h0, h1, col) { for (let k = 0; k < n*3 && n > 0; k++) { const a = rnd()*6.2832, r = rnd()*rad, qx = px + Math.cos(a)*r, qz = pz + Math.sin(a)*r, s = 20 + rnd()*14; if (!K.free(qx, qz, s*0.62) || K.wet(qx, qz, s) || K.road(qx, qz) < 60) continue; K.tower(qx, qz, s, s*(0.7 + rnd()*0.6), h0 + rnd()*(h1 - h0), rnd() < 0.7 ? (rnd() - 0.5)*0.05 : 0.5, { col: col ? K.mul(col, 0.9 + rnd()*0.25) : null, roof: 'flat', noShade: true }); K.keep(qx, qz, s*0.62); n--; } };
   // ---- pieces added for the second batch of cities ----
-  K.lake = function (x0, z0, x1, z1, y) { tile(x0, z0, x1, z1, y, [0.02,0.03,0.05], 4); };
+  K.lake = function (x0, z0, x1, z1, y) { tile(x0, z0, x1, z1, y, [0.02,0.03,0.05], 4.3); };
   K.sand = function (x0, z0, x1, z1, col) { tile(x0, z0, x1, z1, 0.0, col || [0.80,0.72,0.54], 0); K.clears.push([x0,z0,x1,z1]); };
   // palm: a thin leaning trunk under a crown of drooping fronds
   K.palm = function (px, pz, hgt, y0) { y0 = y0 || 0; const tx = px + (rnd() - 0.5)*hgt*0.16, tz = pz + (rnd() - 0.5)*hgt*0.16, TR = [0.42,0.34,0.24], G = [0.15,0.40,0.13], top = y0 + hgt, ref = [tx, top - 5, tz];
@@ -1798,6 +1850,22 @@ function cityKit(c, o) { o = o || {};
     mb.quad(A, B, G, E, R, 0, ref); mb.quad(D, C, G, E, R, 0, ref); mb.tri(B, C, G, mul(col, 1.05), 0, ref); mb.tri(A, D, E, mul(col, 1.05), 0, ref); mb.box(px + d/2 + 0.6, hgt*0.32, pz, 1.2, hgt*0.64, w*0.5, mul(col, 1.08), 7, 0); K.keep(px, pz, w*0.6); };
   K.twist = function (px, pz, H, col) { for (let k = 0; k < 24; k++) mb.box(px, (k + 0.5)*H/24, pz, 20, H/24, 16, mul(col, 0.9 + (k % 2)*0.12), 7, k*0.065); mb.box(px, H + 0.6, pz, 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5); K.keep(px, pz, 16); };
   K.frame = function (px, pz, H, W2, col) { for (const o of [-W2/2, W2/2]) mb.box(px + o, H/2, pz, 7, H, 7, col, 11); mb.box(px, H - 3.5, pz, W2 + 7, 7, 7, col, 11); mb.box(px, 2, pz, W2 + 7, 4, 9, col, 11); K.keep(px, pz, W2*0.6); };
+  // what every city gets once its buildings stand: pavements, crossings with signals, bus shelters, benches, bins and planters
+  K.finish = function () { const PAVE = [0.50,0.49,0.47], side = function (i, sd) { return (sd > 0 ? c.wp : c.wn)[((i % N) + N) % N]; }, clear = function (i, m) { for (let d = -m; d <= m; d += 2) { const j = ((i + d) % N + N) % N; if (c.inTun[j] || c.inBr[j] || Math.abs(c.curv[j]) > 0.012) return false; } return true; };
+    for (let i = 0; i < N; i += 4) for (const sd of [-1, 1]) { const j = Math.min(N, i + 4); if (c.inTun[i] || c.inBr[i] || c.inTun[j % N] || c.inBr[j % N]) continue; const o0 = side(i, sd) + 5.3, o1 = side(j, sd) + 5.3, A = at(i, sd*o0, 0.014), B = at(j, sd*o1, 0.014); if (K.wet(A[0], A[2], 0.5) || K.wet(B[0], B[2], 0.5)) continue;
+      mb.quad(at(i, sd*(HW + 1.6), 0.014), A, B, at(j, sd*(HW + 1.6), 0.014), PAVE, 0.3, UPc); }
+    let n = 0;
+    for (let i0 = 150; i0 < N - 90; i0 += 250) { let i = -1; for (let d = 0; d < 110 && i < 0; d += 6) if (clear(i0 + d, 12)) i = i0 + d; if (i < 0) continue; const hh = h[i % N], WHT = [0.93,0.93,0.90];
+      for (let k = 0; k < 9; k++) { const o = -HW + 0.75 + k*(ROAD_W - 1.5)/8.6; mb.quad(at(i, o, 0.036), at(i, o + 0.62, 0.036), at(i + 3, o + 0.62, 0.036), at(i + 3, o, 0.036), WHT, 0, UPc); }
+      for (const sd of [-1, 1]) { const q = at(i - sd*2, sd*(side(i, sd) + 0.55), 0), F = loc(q[0], q[2], hh); mb.cyl(q[0], 0, q[2], 0.11, 0.09, 5.2, 6, [0.16,0.17,0.19], 0); mb.box(q[0], 4.45, q[2], 0.36, 1.15, 0.34, [0.07,0.07,0.08], 0, hh);
+        for (const f of [-1, 1]) { const l = F(0, f*0.19); mb.box(l[0], 4.83, l[1], 0.22, 0.22, 0.06, [0.22,0.03,0.03], 0, hh); mb.box(l[0], 4.47, l[1], 0.22, 0.22, 0.06, [0.24,0.17,0.03], 0, hh); mb.box(l[0], 4.11, l[1], 0.22, 0.22, 0.06, [0.20,1.0,0.42], 5, hh); } }
+      n++; }
+    for (let i = 60; i < N - 40; i += 23) { const sd = ((i/23) | 0) % 2 ? 1 : -1, j = i % N; if (c.inTun[j] || c.inBr[j] || Math.abs(c.curv[j]) > 0.02) continue; const q = at(j, sd*(side(j, sd) + 4.35), 0), hh = h[j], F = loc(q[0], q[2], hh); if (K.wet(q[0], q[2], 2) || !K.freeP(q[0], q[2], 0.9) || K.road(q[0], q[2]) < HW + 6) continue;
+      const kind = ((i/23) | 0) % 7;
+      if (kind === 3 && clear(j, 6)) { const G2 = [0.24,0.26,0.29]; mb.box(q[0], 2.5, q[2], 1.5, 0.1, 3.8, G2, 0, hh); const bk = F(sd*0.68, 0); mb.box(bk[0], 1.35, bk[1], 0.05, 2.1, 3.6, [0.08,0.10,0.13], 4, hh); for (const f of [-1.8, 1.8]) { const pp = F(sd*0.68, f); mb.box(pp[0], 1.25, pp[1], 0.09, 2.5, 0.09, G2, 0, hh); } const bn = F(sd*0.35, 0); mb.box(bn[0], 0.5, bn[1], 0.4, 0.1, 2.4, [0.46,0.33,0.20], 0, hh); const ad = F(0, 1.86); mb.box(ad[0], 1.35, ad[1], 1.3, 2.0, 0.07, NEON[(i >> 2) % NEON.length], NITE ? 12 : 0, hh); }
+      else if (kind % 3 === 0) { mb.box(q[0], 0.5, q[2], 0.45, 0.09, 1.7, [0.46,0.33,0.20], 0, hh); const bk = F(sd*0.2, 0); mb.box(bk[0], 0.86, bk[1], 0.07, 0.5, 1.7, [0.46,0.33,0.20], 0, hh); for (const f of [-0.7, 0.7]) { const l = F(0, f); mb.box(l[0], 0.24, l[1], 0.4, 0.48, 0.08, [0.14,0.15,0.17], 0, hh); } }
+      else if (kind % 3 === 1) { mb.box(q[0], 0.34, q[2], 1.3, 0.68, 1.3, [0.52,0.50,0.47], 0, hh); c.tree(q[0], q[2], rnd() < 0.5 ? 5 : 7, 1.5 + rnd()*0.5, 0.9); }
+      else { mb.cyl(q[0], 0, q[2], 0.26, 0.22, 0.85, 8, [0.12,0.26,0.18], 0, [0.05,0.05,0.06]); } } };
   return K;
 }
 const CITY_GEN = {
@@ -2251,7 +2319,7 @@ const CITY_GEN = {
 };
 function buildWorld() {
   setSky(TRACKS[T.id].sky);
-  if (W) { gl.deleteBuffer(W.opaque.buf); gl.deleteBuffer(W.trees.buf); gl.deleteBuffer(W.shadow.buf); gl.deleteBuffer(W.sky.buf); }
+  if (W) { gl.deleteBuffer(W.opaque.buf); gl.deleteBuffer(W.fronts.buf); gl.deleteBuffer(W.water.buf); gl.deleteBuffer(W.trees.buf); gl.deleteBuffer(W.shadow.buf); gl.deleteBuffer(W.sky.buf); }
   const mb = new MB(), sc = new MB(), N = T.N, x = T.x, z = T.z, h = T.h, curv = T.curv, UP = [0,-50,0];
   let seed = 4321 + T.id*97; const rnd = function () { seed = (seed*1664525 + 1013904223) >>> 0; return seed/4294967296; };
   const cx = (T.minX + T.maxX)/2, cz = (T.minZ + T.maxZ)/2;
@@ -2329,7 +2397,7 @@ function buildWorld() {
     const o0 = sd*(w[i] + back(i)), o1 = sd*(w[j] + back(j)), ref = at(i, 0, 0.5);
     sc.quad(at(i, o0, 0.34), at(j, o1, 0.34), at(j, o1, 0.62), at(i, o0, 0.62), [0.80,0.82,0.86], 6, ref);
     sc.quad(at(i, o0, 0.66), at(j, o1, 0.66), at(j, o1, 0.90), at(i, o0, 0.90), (i >> 2) % 2 ? [0.86,0.14,0.14] : [0.94,0.94,0.94], 0, ref);
-    if (i % 3 === 0) { const p = at(i, o0 + sd*0.08, 0); sc.box(p[0], 0.45, p[2], 0.12, 0.9, 0.12, [0.42,0.43,0.46], 0, h[i]); }
+    if (i % 3 === 0) { const p = at(i, o0 + sd*0.08, 0); mb.box(p[0], 0.45, p[2], 0.12, 0.9, 0.12, [0.42,0.43,0.46], 0, h[i]); }
     if (i % 18 === (sd > 0 ? 4 : 13) && !inTun[i]) { const o = sd*(w[i] + back(i) + 0.9), p = at(i, o, 0), q = at(i, o - sd*1.9, 0), mid = at(i, o - sd*0.95, 0);
       if (!near(p[0], p[2], HW + 1.5)) { sc.cyl(p[0], 0, p[2], 0.10, 0.07, 5.3, 6, [0.36,0.38,0.42], 6); sc.box(mid[0], 5.3, mid[2], 2.0, 0.09, 0.12, [0.36,0.38,0.42], 6, h[i]);
         sc.box(q[0], 5.22, q[2], 0.62, 0.12, 0.30, [1.0,0.90,0.66], 12, h[i]); lamps.push([q[0], 5.12, q[2]]); } }
@@ -2373,7 +2441,7 @@ function buildWorld() {
       for (const a of [[-1,-1],[1,-1],[1,1],[-1,1]]) { const lx = a[0]*deep/2, lz = a[1]*wide/2, X = px + cs*lx + sn*lz, Z = pz - sn*lx + cs*lz, X2 = X - kx*(top - SHADOW_Y), Z2 = Z - kz*(top - SHADOW_Y); if (K.wet(X2, Z2, 1) || K.wet(X, Z, 1)) return; B.push([X, SHADOW_Y, Z]); Tp.push([X2, SHADOW_Y, Z2]); }
       const tri = function (a, b, c2) { sh.v.push(a[0],a[1],a[2],0,1,0,0,0,0,0, b[0],b[1],b[2],0,1,0,0,0,0,0, c2[0],c2[1],c2[2],0,1,0,0,0,0,0); };
       tri(Tp[0], Tp[1], Tp[2]); tri(Tp[0], Tp[2], Tp[3]); for (let k = 0; k < 4; k++) { const j = (k+1) % 4; tri(B[k], B[j], Tp[j]); tri(B[k], Tp[j], Tp[k]); } };
-    const ctx = { mb: mb, at: at, N: N, x: x, z: z, h: h, rnd: rnd, lamps: lamps, tree: tree, nearI: nearI, inTun: inTun, inBr: inBr, TUN: TUN, BR: BR, S: SPAN, span: span, shade: shade, wp: T.wp, wn: T.wn }; CITY_GEN[CITY.kind](ctx); }
+    const ctx = { mb: mb, at: at, N: N, x: x, z: z, h: h, rnd: rnd, lamps: lamps, tree: tree, nearI: nearI, inTun: inTun, inBr: inBr, TUN: TUN, BR: BR, S: SPAN, span: span, shade: shade, wp: T.wp, wn: T.wn, curv: curv }; CITY_GEN[CITY.kind](ctx); ctx.K.finish(); }
   const scEnd = sc.v.length;
   // shadow = the scenery flattened along the sun's rays (the trees' ovals are in there already)
   for (let k = start; k < scEnd; k += 10) { const y = sc.v[k+1]; sh.v.push(sc.v[k] - kx*(y - SHADOW_Y), SHADOW_Y, sc.v[k+2] - kz*(y - SHADOW_Y), 0,1,0, 0,0,0, 0); }
@@ -2398,7 +2466,7 @@ function buildWorld() {
   const sky = new MB(); sky.box(0, 0, 0, 2, 2, 2, [0,0,0], 10);
   const all = new Float32Array(mb.v); mb.v = null;
   T.tun = CITY ? inTun : null;
-  W = { opaque: chunkify(all, 96, function (mat) { return mat < 12.5; }), trees: chunkify(all, 96, function (mat) { return mat > 12.5; }), shadow: chunkify(new Float32Array(sh.v), 96, null), sky: upload(sky), lamps: lamps, night: NIGHT };
+  W = { opaque: chunkify(all, 96, function (mat) { return mat < 12.5 && !(mat > 6.5 && mat < 7.5) && !(mat > 4.2 && mat < 4.4); }), fronts: chunkify(all, 144, function (mat) { return mat > 6.5 && mat < 7.5; }), water: chunkify(all, 192, function (mat) { return mat > 4.2 && mat < 4.4; }), trees: chunkify(all, 96, function (mat) { return mat > 12.5; }), shadow: chunkify(new Float32Array(sh.v), 96, null), sky: upload(sky), lamps: lamps, night: NIGHT };
 }
 
 // ---------------------------------------------------------------------------
@@ -2497,6 +2565,8 @@ function render() {
   }
   // 2. the world, near cells first; 3. trees; 4. sky, only where nothing covers it
   gl.uniform3fv(PO.tint, WHITE3); drawChunks(W.opaque, planes, camEye, true);
+  if (W.fronts.ranges.length || W.fronts.bigCount) { use(PF); drawChunks(W.fronts, planes, camEye, true); }
+  if (W.water.ranges.length || W.water.bigCount) { use(PW); drawChunks(W.water, planes, camEye, false); }
   use(PT); drawChunks(W.trees, planes, camEye, true, state === 'menu' ? 0 : GFX.far);
   use(PS); gl.depthMask(false); SKYM[12] = camEye[0]; SKYM[13] = camEye[1]; SKYM[14] = camEye[2]; drawMesh(W.sky, SKYM);
   // 5. shadows: every pixel is darkened once, however many shapes overlap there
@@ -3901,17 +3971,20 @@ function drawMap() {
   if (!T.mapImg) { const im = document.createElement('canvas'); im.width = S; im.height = S; const g = im.getContext('2d'); g.lineJoin = 'round'; g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 7; g.beginPath();
     for (let i = 0; i <= T.N; i += 3) { const j = i % T.N; if (i === 0) g.moveTo(mx(T.x[j]), mz(T.z[j])); else g.lineTo(mx(T.x[j]), mz(T.z[j])); }
     g.closePath(); g.stroke();
-    // the finish line: a chequered bar across the track, a little flag beside it
+    // the finish line: a chequered strip across the track
     { const x0 = mx(T.x[0]), z0 = mz(T.z[0]); let tx = mx(T.x[4]) - x0, tz = mz(T.z[4]) - z0; const l = Math.hypot(tx, tz) || 1; tx /= l; tz /= l; const nx = -tz, nz = tx, q = 5.5;
-      g.save(); g.translate(x0, z0); g.transform(tx, tz, nx, nz, 0, 0); g.fillStyle = '#10131f'; g.fillRect(-q - 1.5, -2*q - 1.5, 2*q + 3, 4*q + 3);
-      for (let a2 = 0; a2 < 2; a2++) for (let b2 = 0; b2 < 4; b2++) { g.fillStyle = (a2 + b2) % 2 ? '#10131f' : '#fff'; g.fillRect(-q + a2*q, -2*q + b2*q, q, q); } g.restore();
-      const out = (x0 + nx*30 > 14 && x0 + nx*30 < S - 14 && z0 + nz*30 > 30 && z0 + nz*30 < S - 8) ? 1 : -1, fx = x0 + nx*out*24, fz = z0 + nz*out*24;
-      g.strokeStyle = '#fff'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(fx, fz + 9); g.lineTo(fx, fz - 13); g.stroke(); g.fillStyle = '#10131f'; g.fillRect(fx, fz - 13, 16, 12);
-      for (let a2 = 0; a2 < 4; a2++) for (let b2 = 0; b2 < 3; b2++) if ((a2 + b2) % 2 === 0) { g.fillStyle = '#fff'; g.fillRect(fx + a2*4, fz - 13 + b2*4, 4, 4); } }
+      g.save(); g.translate(x0, z0); g.transform(tx, tz, nx, nz, 0, 0); g.fillStyle = '#10131f'; g.fillRect(-q - 1.5, -3*q - 1.5, 2*q + 3, 6*q + 3);
+      for (let a2 = 0; a2 < 2; a2++) for (let b2 = 0; b2 < 6; b2++) { g.fillStyle = (a2 + b2) % 2 ? '#10131f' : '#fff'; g.fillRect(-q + a2*q, -3*q + b2*q, q, q); } g.restore(); }
     T.mapImg = im; }
   mctx.clearRect(0, 0, S, S); mctx.drawImage(T.mapImg, 0, 0);
-  for (const c of cars) { if (!c.css) c.css = 'rgb(' + c.color.map(function (v) { return Math.round(v*255); }).join(',') + ')'; mctx.fillStyle = c.css; mctx.strokeStyle = '#fff'; mctx.lineWidth = c === (spec || player) ? 4 : 2;
-    mctx.beginPath(); mctx.arc(mx(c.x), mz(c.z), c === (spec || player) ? 10 : 7, 0, 7); mctx.fill(); mctx.stroke(); }
+  const me = spec || player;
+  for (const c of cars) { if (c === me) continue; if (!c.css) c.css = 'rgb(' + c.color.map(function (v) { return Math.round(v*255); }).join(',') + ')'; mctx.fillStyle = c.css; mctx.strokeStyle = 'rgba(255,255,255,.85)'; mctx.lineWidth = 1.5;
+    mctx.beginPath(); mctx.arc(mx(c.x), mz(c.z), 6, 0, 7); mctx.fill(); mctx.stroke(); }
+  // the player's own mark is drawn last and larger: a ring of light that breathes, a dark and a white rim, an arrow that shows the way the car points
+  if (me) { if (!me.css) me.css = 'rgb(' + me.color.map(function (v) { return Math.round(v*255); }).join(',') + ')'; const px = mx(me.x), pz = mz(me.z), pulse = 0.5 + 0.5*Math.sin(performance.now()/260);
+    const halo = mctx.createRadialGradient(px, pz, 8, px, pz, 24 + 5*pulse); halo.addColorStop(0, 'rgba(255,225,90,' + (0.75 - 0.25*pulse).toFixed(2) + ')'); halo.addColorStop(1, 'rgba(255,225,90,0)'); mctx.fillStyle = halo; mctx.beginPath(); mctx.arc(px, pz, 30, 0, 7); mctx.fill();
+    const ax = -Math.sin(me.h), az = -Math.cos(me.h); mctx.fillStyle = '#ffe15a'; mctx.strokeStyle = '#10131f'; mctx.lineWidth = 2; mctx.beginPath(); mctx.moveTo(px + ax*22, pz + az*22); mctx.lineTo(px + ax*10 - az*8, pz + az*10 + ax*8); mctx.lineTo(px + ax*10 + az*8, pz + az*10 - ax*8); mctx.closePath(); mctx.fill(); mctx.stroke();
+    mctx.fillStyle = me.css; mctx.beginPath(); mctx.arc(px, pz, 11, 0, 7); mctx.fill(); mctx.strokeStyle = '#10131f'; mctx.lineWidth = 6; mctx.stroke(); mctx.strokeStyle = '#fff'; mctx.lineWidth = 3.2; mctx.stroke(); }
 }
 
 // ---------------------------------------------------------------------------
