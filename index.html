@@ -119,7 +119,7 @@
   .lv { flex: 1; border: 0; border-radius: 12px; padding: 9px 2px; font-size: 13px; font-weight: 800; color: #fff; background: rgba(255,255,255,.14); }
   .lv.on { background: #ffd23f; color: #1a2140; }
   .medals { display: inline-flex; gap: 3px; margin-left: 8px; vertical-align: middle; } .medals u { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.25); } .medals u.on { background: #ffd23f; }
-  .ctlsw::before { content: 'Руль' !important; } .fpssw::before { content: 'Кадры' !important; } body.kbd .ctlsw { display: none; }
+  .ctlsw::before { content: 'Руль' !important; } .fpssw::before { content: 'Графика' !important; } body.kbd .ctlsw { display: none; }
   .uisw .lv { font-size: 12px; padding: 7px 2px; } .uisw::before { content: 'Интерфейс'; align-self: center; font-size: 12px; opacity: .8; margin-right: 4px; white-space: nowrap; }
   kbd { display: inline-block; min-width: 20px; padding: 2px 6px; margin: 0 2px; border-radius: 6px; border: 1px solid rgba(255,255,255,.35); border-bottom-width: 2.5px; background: rgba(10,13,24,.6); font: 700 11px/1.4 sans-serif; text-align: center; color: #fff; }
   .kb { display: inline-block; margin: 0 10px 6px 0; white-space: nowrap; }
@@ -205,7 +205,7 @@
   .track.champ { background: rgba(255,210,63,.16); outline: 1.5px solid rgba(255,210,63,.55); width: min(340px, 100%); margin-top: 10px; } body.wide .track.champ { margin-top: 7px; width: 100%; } body:not(.wide) .msheet .track.champ { width: min(440px, 100%); }
   body.mob .track.champ { width: min(360px, 100%); }
   .emorow { display: flex; gap: 8px; justify-content: center; margin-top: 10px; } .emorow button { width: 44px; height: 40px; border: 0; border-radius: 12px; background: rgba(255,255,255,.14); font-size: 20px; line-height: 1; padding: 0; }
-  .emotoast { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); padding: 7px 16px; border-radius: 16px; background: rgba(10,13,24,.82); border: 1px solid rgba(255,255,255,.16); font-size: 16px; font-weight: 800; white-space: nowrap; opacity: 0; transition: opacity .2s; pointer-events: none; } .emotoast.show { opacity: 1; }
+  .emotoast { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); padding: 7px 16px; border-radius: 16px; background: rgba(10,13,24,.82); border: 1px solid rgba(255,255,255,.16); font-size: 15px; font-weight: 800; max-width: calc(100% - 40px); box-sizing: border-box; text-align: center; opacity: 0; transition: opacity .2s; pointer-events: none; } .emotoast.show { opacity: 1; }
   .plist div em { font-style: normal; font-size: 12px; opacity: .8; margin-left: 8px; }
   body.land .stats { gap: 7px; margin-top: 3px; } body.land .stats i { width: 36px; height: 4px; } body.land .stats span { font-size: 8.5px; } body.land .coins { margin: 1px 0 3px; font-size: 13px; }
   body.land #menu .seclabel.sl2 { display: none; } body.land .opts { margin-bottom: 5px; } body.land .track.champ { margin-top: 5px; } body.land #menu .mpbtn { margin-top: 7px; padding: 10px; }
@@ -355,9 +355,10 @@
     <div style="margin-top:6px"><b>Долгий занос</b> заряжает турбо, оно сработает на выходе</div>
     <div><b>Старт</b> — <span class="for-pc">нажми газ ровно на GO</span><span class="for-mob">держи ТОРМОЗ и отпусти ровно на GO</span>: будет рывок<span class="for-pc">; раньше времени — пробуксовка</span></div>
     <div><b>Слипстрим</b> — держись прямо за соперником, машина разгонится сильнее; <b>обгон впритирку</b> без касания даёт турбо</div>
+    <div><b>Графика</b> в настройках: «Лёгкая» рисует те же кадры с меньшей чёткостью — плавно и телефон греется меньше; «30 к/с» греется меньше всего, но картинка дёрганее</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>H</kbd> гудок</span><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в игре с друзьями</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 36</div>
+    <div style="opacity:.5;margin-top:8px">версия 37</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -416,7 +417,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 36</div>
+  <div class="fver">Turbo Drift · версия 37</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1931,6 +1932,7 @@ function closeRacing(dt) {
 function showBig(text, ms) { const el = document.getElementById('big'); el.textContent = text; el.classList.add('show'); setTimeout(function () { el.classList.remove('show'); }, ms || 700); }
 let raceClock = 0;
 let noteTimer = 0;
+function toast(text) { const el = document.getElementById('emotoast'); el.textContent = text; el.classList.add('show'); clearTimeout(netFx.t); netFx.t = setTimeout(function () { el.classList.remove('show'); }, 3000); }      // a line over any screen, the menu too
 function note(text, ms) { const el = document.getElementById('note'); el.textContent = text; el.classList.add('show'); clearTimeout(noteTimer); noteTimer = setTimeout(function () { el.classList.remove('show'); }, ms || 1200); }
 
 function finishRace(koPlace) {
@@ -2552,8 +2554,9 @@ function drawMap() {
 // Frame pacing. A 120 Hz screen would have the game draw twice as often for no visible gain in a
 // racing camera, so fast screens are drawn every second refresh; menus and the results screen
 // run at 30 a second, a paused game is not redrawn at all. "Экономия" caps racing at 30 too.
-let last = 0, lastRaf = 0, rafCount = 0, screenHz = 60, pausedDrawn = false, fpsEco = false; const hzSamples = [];
-try { fpsEco = localStorage.getItem('td_fps') === 'eco'; } catch (e) {}
+let last = 0, lastRaf = 0, rafCount = 0, screenHz = 60, pausedDrawn = false, fpsEco = false, gfxLight = false; const hzSamples = [];
+// Two ways to spare a warm phone: 'light' keeps every frame and draws fewer pixels (smooth, a little softer); 'eco' draws half the frames (sharp, but choppier).
+try { const m = localStorage.getItem('td_fps'); fpsEco = m === 'eco'; gfxLight = m === 'light'; } catch (e) {}
 function frame(t) {
   requestAnimationFrame(frame);
   // the screen's refresh rate, from the shortest gaps between callbacks (late frames only make gaps longer); re-measured as the game runs
@@ -2603,7 +2606,7 @@ function stageBox(dt) {
 let WIDE = true, ROT = false;                                  // true while the page is drawn rotated 90° inside an upright screen
 function viewW() { return ROT ? window.innerHeight : window.innerWidth; }
 function viewH() { return ROT ? window.innerWidth : window.innerHeight; }
-function resize() { const w = Math.max(2, Math.floor(viewW()*renderScale)), h = Math.max(2, Math.floor(viewH()*renderScale)); if (canvas.width !== w) canvas.width = w; if (canvas.height !== h) canvas.height = h; }      // assigning a size, even the same one, wipes the picture and reallocates it
+function resize() { const rs = renderScale*(gfxLight ? 0.7 : 1), w = Math.max(2, Math.floor(viewW()*rs)), h = Math.max(2, Math.floor(viewH()*rs)); if (canvas.width !== w) canvas.width = w; if (canvas.height !== h) canvas.height = h; }      // assigning a size, even the same one, wipes the picture and reallocates it
 // A phone plays in landscape. The player turns the phone so its top points left; the page is rotated to match.
 function layout() {
   const b = document.body, mob = b.classList.contains('mob'); ROT = mob && window.innerHeight > window.innerWidth*1.05;
@@ -2678,9 +2681,10 @@ function buildCtlSwitch() {
     b.addEventListener('click', function () { TILT.mode = o[0]; try { localStorage.setItem('td_ctl', TILT.mode); } catch (e) {} if (o[0] === 'tilt') tiltStart(); buildCtlSwitch(); }); el.appendChild(b); });
 }
 function buildFpsSwitch() {
-  const el = document.getElementById('fpssw'); el.innerHTML = '';
-  [[false,'Плавно'], [true,'Экономия: 30 к/с, меньше греется']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (fpsEco === o[0] ? ' on' : ''); b.textContent = o[1]; if (o[0]) b.style.flex = '2.4';
-    b.addEventListener('click', function () { fpsEco = o[0]; try { localStorage.setItem('td_fps', fpsEco ? 'eco' : 'full'); } catch (e) {} buildFpsSwitch(); }); el.appendChild(b); });
+  const el = document.getElementById('fpssw'), cur = fpsEco ? 'eco' : (gfxLight ? 'light' : 'full'); el.innerHTML = '';
+  [['full', 'Полная', 'Все кадры, полная чёткость'], ['light', 'Лёгкая', 'Те же кадры, чёткость ниже: плавно и телефон греется меньше'], ['eco', '30 к/с', 'Вдвое меньше кадров: греется меньше всего, но картинка дёрганее']].forEach(function (o) {
+    const b = document.createElement('button'); b.className = 'lv' + (cur === o[0] ? ' on' : ''); b.textContent = o[1]; b.title = o[2];
+    b.addEventListener('click', function () { fpsEco = o[0] === 'eco'; gfxLight = o[0] === 'light'; try { localStorage.setItem('td_fps', o[0]); } catch (e) {} resize(); buildFpsSwitch(); toast(o[2]); }); el.appendChild(b); });
 }
 function buildMenu() {
   buildGarage(); buildLevels(); buildUISwitch(); buildCtlSwitch(); buildFpsSwitch(); buildOpts();
