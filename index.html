@@ -460,7 +460,7 @@
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 54</div>
+    <div style="opacity:.5;margin-top:8px">версия 55</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -534,7 +534,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 54</div>
+  <div class="fver">Turbo Drift · версия 55</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1075,10 +1075,10 @@ const CAR_TYPES = [
     belt: [[-1,0.80],[-0.88,0.94],[-0.3,0.96],[0.3,0.97],[0.86,0.93],[1,0.76]], cab: [-0.66,-0.32,-0.02,0.22], extra: 'scoop', stripe: true, look: { head: 'twin', tail: 'pods', grille: 'tall', doors: 2, pipes: 2, trim: 'dark', sp: 5, cp: 0.5 },
     eng: { id: 'v8cp', label: 'V8 с компрессором · 6400 об/мин', cyl: 8, sub: [[4, 0.55], [2, 0.32]], rough: 0.30, red: 6400, idle: 750, f: [110, 330, 950], bright: 0.78, rasp: 1.3, turbo: 0, sc: 1.0, pops: 1.0, gears: [72,112,150,192,250] } },
   { name: 'Спарк RS', len: 3.98, wid: 1.80, hgt: 1.45, clr: 0.14, r: 0.325, tw: 0.23, zF: 1.24, zR: -1.22, tum: 0.80,
-    belt: [[-1,0.84],[-0.92,0.96],[-0.2,0.97],[0.45,0.93],[0.85,0.82],[1,0.60]], cab: [-0.985,-0.80,0.08,0.52], extra: 'roofspoiler', look: { head: 'block', tail: 'vert', grille: 'slot', doors: 4, pipes: 2, fog: true, trim: 'dark', sp: 6 },
+    belt: [[-1,0.84],[-0.92,0.96],[-0.2,0.97],[0.45,0.93],[0.85,0.82],[1,0.60]], cab: [-0.985,-0.80,0.08,0.52], extra: 'roofspoiler', look: { head: 'block', tail: 'vert', grille: 'slot', doors: 4, pipes: 2, fog: true, trim: 'dark', sp: 6, plateF: true },
     eng: { id: 'i4t', label: 'Рядная четвёрка, турбо · 7000 об/мин', cyl: 4, sub: [], rough: 0.22, red: 7000, idle: 900, f: [170, 520, 1500], bright: 1.1, rasp: 1.0, turbo: 1.3, sc: 0, pops: 1.3, gears: [52,84,116,148,182,250] } },
   { name: 'Атлас', len: 4.65, wid: 1.96, hgt: 1.74, clr: 0.25, r: 0.40, tw: 0.28, zF: 1.42, zR: -1.38, tum: 0.84,
-    belt: [[-1,0.98],[-0.92,1.12],[-0.2,1.14],[0.45,1.12],[0.9,1.05],[1,0.84]], cab: [-0.975,-0.82,0.10,0.42], extra: 'rails', look: { head: 'block', tail: 'vert', grille: 'tall', doors: 4, pipes: 2, arch: true, fog: true, sp: 6 },
+    belt: [[-1,0.98],[-0.92,1.12],[-0.2,1.14],[0.45,1.12],[0.9,1.05],[1,0.84]], cab: [-0.975,-0.82,0.10,0.42], extra: 'rails', look: { head: 'block', tail: 'vert', grille: 'tall', doors: 4, pipes: 2, arch: true, fog: true, sp: 6, plateF: true },
     eng: { id: 'v6t', label: 'V6 битурбо · 6000 об/мин', cyl: 6, sub: [[3, 0.42]], rough: 0.26, red: 6000, idle: 700, f: [100, 300, 880], bright: 0.7, rasp: 0.9, turbo: 0.8, sc: 0, pops: 0.3, gears: [48,76,104,132,160,190,220,250] } },
   { name: 'Зефир', len: 4.05, wid: 1.76, hgt: 1.20, clr: 0.12, r: 0.32, tw: 0.23, zF: 1.22, zR: -1.16, tum: 0.74,
     belt: [[-1,0.70],[-0.86,0.86],[-0.4,0.88],[0.2,0.86],[0.75,0.76],[1,0.56]], cab: [-0.56,-0.22,0.04,0.36], extra: 'lip', look: { head: 'twin', tail: 'twin', grille: 'wide', doors: 2, pipes: 2, pipeC: true, sp: 6 },
@@ -1091,7 +1091,7 @@ const CAR_TYPES = [
     eng: { id: 'ev', label: 'Два электромотора · без передач', ev: true, cyl: 1, sub: [], rough: 0, red: 16000, idle: 0, f: [300, 900, 2600], bright: 1.2, rasp: 0.1, turbo: 0, sc: 0, pops: 0, gears: [250] } },
   { name: 'Легат V8', len: 4.98, wid: 1.92, hgt: 1.46, clr: 0.13, r: 0.345, tw: 0.27, zF: 1.50, zR: -1.46, tum: 0.78,
     belt: [[-1,0.84],[-0.92,0.98],[-0.6,0.99],[-0.2,0.98],[0.35,0.96],[0.8,0.91],[1,0.79]], cab: [-0.66,-0.40,0.06,0.40], extra: '',
-    look: { head: 'dual', tail: 'join', grille: 'slats', doors: 4, pipes: 4, fin: true, sunroof: true, diff: 1.2, sp: 10 },
+    look: { head: 'dual', tail: 'join', grille: 'slats', doors: 4, pipes: 4, fin: true, sunroof: true, diff: 1.2, sp: 10, plateF: true, cp: 0.5 },
     eng: { id: 'v8t', label: 'V8 битурбо · 7000 об/мин', cyl: 8, sub: [[4, 0.46], [2, 0.20]], rough: 0.16, red: 7000, idle: 800, f: [125, 380, 1100], bright: 0.95, rasp: 1.0, turbo: 0.9, sc: 0, pops: 0.8, gears: [56,90,124,158,194,250] } }
 ];
 // What each model is like to drive: top speed, pull, cornering grip, armour (1 = the standard car), and what it costs in coins.
@@ -1109,6 +1109,8 @@ function curve(K, t) {                                         // smooth curve t
 }
 function buildCar(S) {
   const mb = new MB(), NS = 72, half = S.len/2, DARK = [0.035,0.036,0.04], SILL = [0.07,0.07,0.08], WHITE = [1,1,1], RA = S.r*1.16, NA = 30, CY = S.r;      // RA: radius of the wheel arch
+  const L = S.look || {}, LAMP = [1.0,0.97,0.86], AMBER = [1.0,0.60,0.12], RED = [0.95,0.06,0.05], CHROME = [0.82,0.83,0.86], GUN = [0.20,0.20,0.22], MID0 = (S.cab[1] + S.cab[2])/2;
+  const headBand = L.head === 'block' ? 6 : 7, tailBand = L.tail === 'vert' ? 6 : 7;          // which strips of the side the lamps reach round onto
   const belt = function (t) { return curve(S.belt, t); };
   const ramp1 = function (a, b, x) { const u = Math.max(0, Math.min(1, (x - a)/(b - a))); return u*0.62 + sstep(0, 1, u)*0.38; };          // the screens are nearly flat panes with rounded ends
   const cabT = function (t) { const c = S.cab; return t < c[0] || t > c[3] ? 0 : (t < c[1] ? ramp1(c[0],c[1],t) : (t <= c[2] ? 1 : 1 - ramp1(c[2],c[3],t))); };
@@ -1139,11 +1141,12 @@ function buildCar(S) {
     const j2 = (j+1)%NP, band = j < HP-1 ? j : NP-1-j;
     const A = rings[i][j], B = rings[i][j2], C = rings[i+1][j2], D = rings[i+1][j], nA = nrm[i][j], nB = nrm[i][j2], nC = nrm[i+1][j2], nD = nrm[i+1][j];
     const full = st[i].ct > 0.985 && st[i+1].ct > 0.985, ramp = (st[i].ct > 0.02 || st[i+1].ct > 0.02) && !full;
+    const tm = (st[i].t + st[i+1].t)/2, cmin = Math.min(st[i].ct, st[i+1].ct), cmax = Math.max(st[i].ct, st[i+1].ct);
     let col = WHITE, mat = 3;
     if (band === 0) { col = DARK; mat = 0; } else if (band === 1) { col = SILL; mat = 0; }
-    else if (band <= 7) { }
-    else if (band === 8) { if (full || ramp) mat = 4; }
-    else if (ramp) mat = 4;
+    else if (band <= 7) { if (tm > 0.955 && band >= headBand) { col = DARK; mat = 4; } else if (tm < -0.955 && band >= tailBand && L.tail !== 'twin') { col = RED; mat = 9; } }      // the lamps are part of the skin, round the corner
+    else if (band === 8) { if (full || cmin > (tm < MID0 ? (L.cp || 0.34) : 0.34)) mat = 4; }                    // side glass begins where the pillar has risen off the wing
+    else if (ramp) { if (cmin > 0.07) mat = 4; else if (cmax > 0.07 && tm > MID0) { col = DARK; mat = 0; } }                  // screens, with a dark cowl at the foot
     else if (band === 11 && S.stripe) { col = [0.96,0.96,0.97]; mat = 11; }
     let cut = 0; if (band >= 1 && band <= 8) for (const zw of [S.zF, S.zR]) if (Math.min(A[2], D[2]) < zw + RA && Math.max(A[2], D[2]) > zw - RA && Math.min(A[1], B[1], C[1], D[1]) < CY + RA) cut = zw;
     if (!cut) { for (const q of [[A,nA],[B,nB],[C,nC],[A,nA],[C,nC],[D,nD]]) mb.sv(q[0], q[1], col, mat); continue; }
@@ -1171,78 +1174,91 @@ function buildCar(S) {
       mb.quad(P, Q, [xin, Q[1], Q[2]], [xin, P[1], P[2]], WELL, 0, [P[0], CY + (P[1]-CY)*3, zw + (P[2]-zw)*3]);
       mb.tri([xin, CY, zw], [xin, P[1], P[2]], [xin, Q[1], Q[2]], WELL, 0, [0, CY, zw]); }
   }
-  // nose and tail faces
-  for (const e of [0, NS-1]) { const ring = rings[e], s = st[e], dir = e ? 1 : -1, cen = [0, (s.yb + s.hb)/2 + 0.02, s.z + dir*0.05];
-    for (let j = 0; j < NP; j++) { const A = ring[j], B = ring[(j+1)%NP], n = [0, 0.12, dir];
-      mb.sv(A, nrm[e][j], WHITE, 3); mb.sv(B, nrm[e][(j+1)%NP], WHITE, 3); mb.sv(cen, n, WHITE, 3); } }
+  // nose and tail: the edge is rounded off, then a flat panel carries the lamps and the grille
+  const CAPZ = 0.034;
+  for (const e of [0, NS-1]) { const ring = rings[e], s = st[e], dir = e ? 1 : -1, cy0 = (s.yb + s.hb)/2 + 0.02, fn = [0, 0.06, dir], Q = ring.map(function (P) { return [P[0]*0.93, cy0 + (P[1] - cy0)*0.90, s.z + dir*0.028]; });
+    const soft = function (n) { const v = [n[0]*0.5, n[1]*0.5 + 0.03, n[2]*0.5 + dir*0.5], l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0]/l, v[1]/l, v[2]/l]; };
+    for (let j = 0; j < NP; j++) { const j2 = (j+1)%NP, band = j < HP-1 ? j : NP-1-j, nA = nrm[e][j], nB = nrm[e][j2];
+      let col = WHITE, mat = 3; if (band <= 1) { col = DARK; mat = 0; } else if (e && band >= headBand && band <= 7) { col = DARK; mat = 4; } else if (!e && L.tail !== 'twin' && band >= tailBand && band <= 7) { col = RED; mat = 9; }
+      for (const q of [[ring[j], nA], [ring[j2], nB], [Q[j2], soft(nB)], [ring[j], nA], [Q[j2], soft(nB)], [Q[j], soft(nA)]]) mb.sv(q[0], q[1], col, mat);
+      const low = band <= 1; mb.sv(Q[j], fn, low ? DARK : WHITE, low ? 0 : 3); mb.sv(Q[j2], fn, low ? DARK : WHITE, low ? 0 : 3); mb.sv([0, cy0, s.z + dir*CAPZ], fn, low ? DARK : WHITE, low ? 0 : 3); } }
   // ---- details: what turns a smooth shell into a car. S.look is the model's own styling: lamps, grille, doors, pipes, wheels.
-  const F = st[NS-1], R = st[0], L = S.look || {}, LAMP = [1.0,0.97,0.86], AMBER = [1.0,0.60,0.12], RED = [0.95,0.06,0.05], CHROME = [0.82,0.83,0.86], GUN = [0.20,0.20,0.22];
-  const fy = F.hb, ry = R.hb, fz = half + 0.03, bz = -half - 0.03, Wf = F.w, Wr = R.w, fH = fy - F.yb, rH = ry - R.yb;
+  const F = st[NS-1], R = st[0], cF = (F.yb + F.hb)/2 + 0.02, cR = (R.yb + R.hb)/2 + 0.02;
+  const FY = function (y) { return cF + (y - cF)*0.90; }, RY = function (y) { return cR + (y - cR)*0.90; };          // heights on the flat panels of the nose and the tail
+  const fy = F.hb, ry = R.hb, fz = half + CAPZ, bz = -half - CAPZ, Wf = F.w*0.93, Wr = R.w*0.93, fH = (fy - F.yb)*0.9, rH = (ry - R.yb)*0.9, fB = FY(F.yb), rB = RY(R.yb), PD = 0.014;
   const head = L.head || 'slim', tail = L.tail || 'pods', grille = L.grille || 'wide';
   const stAt = function (z, key) { let i = 0; while (i < NS-2 && st[i+1].z < z) i++; const f = Math.max(0, Math.min(1, (z - st[i].z)/(st[i+1].z - st[i].z))); return st[i][key]*(1-f) + st[i+1][key]*f; };
+  const iOf = function (t) { let b = 0, d = 9; for (let i = 0; i < NS; i++) { const q = Math.abs(st[i].t - t); if (q < d) { d = q; b = i; } } return b; };
   // a round face looking along the car: lamps, pipe ends
   const disc = function (cx, cy, cz, rr, dir, col, mat, n) { n = n || 12; for (let k = 0; k < n; k++) { const a0 = k/n*6.2832, a1 = (k+1)/n*6.2832; mb.tri([cx, cy, cz], [cx + Math.cos(a0)*rr, cy + Math.sin(a0)*rr, cz], [cx + Math.cos(a1)*rr, cy + Math.sin(a1)*rr, cz], col, mat, [cx, cy, cz - dir]); } };
-  // a thin line lying on the side of the body between two heights: the gaps round the doors
+  // thin lines lying on the skin: up the side (door gaps), and along or across the rings of the body (trims, panel gaps)
   const seam = function (sd, z, y0, y1, wdt) { const n = 7; for (let k = 0; k < n; k++) { const ya = y0 + (y1-y0)*k/n, yc = y0 + (y1-y0)*(k+1)/n, xa = sideX(ya, z) + 0.005, xc = sideX(yc, z) + 0.005;
       mb.quad([sd*xa, ya, z - wdt/2], [sd*xa, ya, z + wdt/2], [sd*xc, yc, z + wdt/2], [sd*xc, yc, z - wdt/2], DARK, 0, [0, ya, z]); } };
-  // pillars: a straight band of paint where the side glass meets the windscreen and the rear screen
-  for (const rg of [[S.cab[2], S.cab[3] - 0.012], [S.cab[1], S.cab[0] + 0.012]]) {
-    let it = 0, ib = 0, td = 9, bd = 9; for (let i = 0; i < NS; i++) { const dT = Math.abs(st[i].t - rg[0]), dB = Math.abs(st[i].t - rg[1]); if (dT < td) { td = dT; it = i; } if (dB < bd) { bd = dB; ib = i; } }
-    for (const sd of [1, -1]) { const J = function (k) { return sd > 0 ? k : NP - k; }, unit = function (p, q) { const d = [q[0]-p[0], q[1]-p[1], q[2]-p[2]], l = Math.hypot(d[0], d[1], d[2]) || 1; return [d[0]/l, d[1]/l, d[2]/l]; };
-      const Pb = rings[ib][J(9)], Pt = rings[it][J(9)], nb = nrm[ib][J(9)], nt = nrm[it][J(9)], lift = function (P, e, w, n) { return [P[0] + e[0]*w + n[0]*0.022, P[1] + e[1]*w + n[1]*0.022, P[2] + e[2]*w + n[2]*0.022]; }, pw = L.pillar || 0.05;
-      const A = lift(Pb, unit(Pb, rings[ib][J(8)]), pw, nb), B = lift(Pt, unit(Pt, rings[it][J(8)]), pw, nt), C = lift(Pt, unit(Pt, rings[it][J(10)]), pw*0.8, nt), D = lift(Pb, unit(Pb, rings[ib][J(10)]), pw*0.8, nb);
-      for (const q of [[A,nb],[B,nt],[C,nt],[A,nb],[C,nt],[D,nb]]) mb.sv(q[0], q[1], WHITE, 3); } }
+  const hseam = function (sd, z0, z1, y, wdt) { const n = 4; for (let k = 0; k < n; k++) { const za = z0 + (z1-z0)*k/n, zc = z0 + (z1-z0)*(k+1)/n; mb.quad([sd*(sideX(y - wdt/2, za) + 0.005), y - wdt/2, za], [sd*(sideX(y - wdt/2, zc) + 0.005), y - wdt/2, zc], [sd*(sideX(y + wdt/2, zc) + 0.005), y + wdt/2, zc], [sd*(sideX(y + wdt/2, za) + 0.005), y + wdt/2, za], DARK, 0, [0, y, za]); } };
+  const along = function (k, i, a, b, col, mat) { for (const sd of [1, -1]) { const J = function (q) { return sd > 0 ? q : NP - q; }, at = function (ii, kk, w) { const P = rings[ii][J(k)], T2 = rings[ii][J(kk)], d = [T2[0]-P[0], T2[1]-P[1], T2[2]-P[2]], l = Math.hypot(d[0], d[1], d[2]) || 1, n = nrm[ii][J(k)]; return [P[0] + d[0]/l*w + n[0]*0.005, P[1] + d[1]/l*w + n[1]*0.005, P[2] + d[2]/l*w + n[2]*0.005]; };
+      mb.quad(at(i, k-1, a), at(i+1, k-1, a), at(i+1, k+1, b), at(i, k+1, b), col, mat, [0, rings[i][J(k)][1] - 0.4, rings[i][J(k)][2]]); } };
+  const across = function (i, j0, j1, wdt) { const dz = Math.abs(rings[i+1][0][2] - rings[i][0][2]) || 1, f = Math.min(1, wdt/dz), lp = function (j, g) { const A = rings[i][j], B = rings[i+1][j], n = nrm[i][j]; return [A[0] + (B[0]-A[0])*g + n[0]*0.005, A[1] + (B[1]-A[1])*g + n[1]*0.005, A[2] + (B[2]-A[2])*g + n[2]*0.005]; };
+    for (let j = j0; j < j1; j++) mb.quad(lp(j, 0), lp(j+1, 0), lp(j+1, f), lp(j, f), DARK, 0, [0, rings[i][j][1] - 0.4, rings[i][j][2]]); };
+  // a bright or dark strip under the side glass, a gutter between the glass and the roof
+  for (let i = 0; i < NS-1; i++) { const cmin = Math.min(st[i].ct, st[i+1].ct), tm = (st[i].t + st[i+1].t)/2, full = cmin > 0.985;
+    if (full || cmin > (tm < MID0 ? (L.cp || 0.34) : 0.34)) along(8, i, 0.024, 0.004, L.trim === 'dark' ? GUN : CHROME, 6);
+    if (full) along(9, i, 0.010, 0.012, DARK, 0); }
+  // panel gaps: the bonnet along the wings and across the nose, the boot lid the same way
+  { const i0 = iOf(S.cab[3] + 0.03), i1 = iOf(0.935); for (let i = i0; i < i1; i++) along(9, i, 0.006, 0.006, DARK, 0); across(i1, 9, 15, 0.012);
+    if (S.cab[0] > -0.9) { const r1 = iOf(S.cab[0] - 0.03), r0 = iOf(-0.935); for (let i = r0; i < r1; i++) along(9, i, 0.006, 0.006, DARK, 0); across(r0, 9, 15, 0.012); } }
   // doors: the gaps, a handle on each
   { const zLo = S.zR + RA + 0.06, zHi = S.zF - RA - 0.06, zA = Math.min(zHi, S.cab[3]*half - 0.10), zB = ((S.cab[1] + S.cab[2])/2 - 0.05)*half, zC = Math.max(zLo, Math.min(zB - 0.55, S.cab[1]*half + 0.04));
     const cuts = L.doors === 4 ? [zA, zB, zC] : [zA, Math.max(zLo, zB - 0.06)];
     for (const sd of [-1, 1]) { for (const z of cuts) seam(sd, z, stAt(z, 'yb') + 0.13, stAt(z, 'hs') - 0.02, 0.016);
-      for (let k = 1; k < cuts.length; k++) { const z = cuts[k] + 0.17, y = stAt(z, 'hs') - 0.105; mb.box(sd*(sideX(y, z) + 0.008), y, z, 0.03, 0.026, 0.17, L.trim === 'dark' ? GUN : CHROME, 6); } } }
+      for (let k = 1; k < cuts.length; k++) { const z = cuts[k] + 0.17, y = stAt(z, 'hs') - 0.105; mb.box(sd*(sideX(y, z) + 0.008), y, z, 0.03, 0.026, 0.17, L.trim === 'dark' ? GUN : CHROME, 6); }
+      { const z = Math.min(zHi + 0.02, zA + 0.16) , y = stAt(z, 'hs') - 0.16; mb.box(sd*(sideX(y, z) + 0.004), y, z, 0.014, 0.022, 0.075, AMBER, 5); } }          // turn repeater on the wing
+    if (!L.noFuel) { const z0 = S.zR - 0.10, z1 = S.zR + 0.08, y1 = stAt(S.zR, 'hs') - 0.035, y0 = y1 - 0.15; if (y0 > CY + RA + 0.03) { seam(-1, z0, y0, y1, 0.010); seam(-1, z1, y0, y1, 0.010); hseam(-1, z0, z1, y0, 0.010); hseam(-1, z0, z1, y1, 0.010); } } }          // the fuel flap, on the left
   for (const sd of [-1, 1]) {
-    // headlights: dark glass with the light inside it
-    if (head === 'twin') { mb.box(sd*Wf*0.60, fy - 0.105, fz, Wf*0.66, 0.14, 0.06, DARK, 0);
-      for (const q of [0.40, 0.80]) { disc(sd*Wf*q, fy - 0.105, fz + 0.032, 0.060, 1, CHROME, 6); disc(sd*Wf*q, fy - 0.105, fz + 0.034, 0.046, 1, LAMP, 5); } }
-    else if (head === 'block') { mb.box(sd*Wf*0.64, fy - 0.12, fz, Wf*0.60, 0.16, 0.06, DARK, 4); mb.box(sd*Wf*0.64, fy - 0.055, fz + 0.012, Wf*0.54, 0.022, 0.05, LAMP, 5);
-      mb.box(sd*Wf*0.56, fy - 0.135, fz + 0.012, Wf*0.26, 0.07, 0.05, LAMP, 5); mb.box(sd*Wf*0.84, fy - 0.135, fz + 0.012, Wf*0.12, 0.07, 0.05, AMBER, 5); }
-    else if (head === 'dual') { mb.box(sd*Wf*0.62, fy - 0.10, fz, Wf*0.64, 0.12, 0.06, DARK, 4); for (const q of [0.062, 0.128]) mb.box(sd*Wf*0.62, fy - q, fz + 0.012, Wf*0.56, 0.02, 0.05, LAMP, 5); }
-    else { mb.box(sd*Wf*0.62, fy - 0.078, fz, Wf*0.64, 0.085, 0.06, DARK, 4); mb.box(sd*Wf*0.62, fy - 0.052, fz + 0.012, Wf*0.58, 0.02, 0.05, LAMP, 5); mb.box(sd*Wf*0.44, fy - 0.092, fz + 0.012, Wf*0.20, 0.03, 0.05, LAMP, 5); }
-    { const zw = half*0.972, ww = S.wid/2*plan(0.972), yw = fy - (head === 'block' ? 0.10 : 0.07) + (stAt(zw, 'hs') - fy)*0.6;                // the lamp runs on round the corner of the wing
-      mb.box(sd*(ww - 0.012), yw, zw, 0.06, head === 'block' ? 0.12 : 0.055, 0.19, DARK, 4, sd*0.42); mb.box(sd*(ww + 0.004), yw + 0.012, zw, 0.04, 0.018, 0.17, head === 'twin' ? AMBER : LAMP, 5, sd*0.42); }
-    // tail lamps
-    if (tail === 'twin') { mb.box(sd*Wr*0.60, ry - 0.12, bz, Wr*0.66, 0.14, 0.06, DARK, 0); for (const q of [0.40, 0.80]) { disc(sd*Wr*q, ry - 0.12, bz - 0.032, 0.062, -1, GUN, 6); disc(sd*Wr*q, ry - 0.12, bz - 0.034, 0.048, -1, RED, 9); } }
-    else if (tail === 'vert') { mb.box(sd*Wr*0.86, ry - 0.20, bz, Wr*0.24, 0.30, 0.06, DARK, 4); mb.box(sd*Wr*0.86, ry - 0.19, bz - 0.012, Wr*0.17, 0.24, 0.05, RED, 9); }
-    else if (tail === 'bar') { mb.box(sd*Wr*0.62, ry - 0.105, bz, Wr*0.70, 0.075, 0.06, DARK, 4); mb.box(sd*Wr*0.62, ry - 0.105, bz - 0.012, Wr*0.64, 0.034, 0.05, RED, 9); }
-    else if (tail === 'slim') { mb.box(sd*Wr*0.62, ry - 0.11, bz, Wr*0.66, 0.085, 0.06, DARK, 4); mb.box(sd*Wr*0.62, ry - 0.092, bz - 0.012, Wr*0.60, 0.022, 0.05, RED, 9); mb.box(sd*Wr*0.80, ry - 0.128, bz - 0.012, Wr*0.22, 0.022, 0.05, RED, 9); }
-    else { mb.box(sd*Wr*0.64, ry - 0.125, bz, Wr*0.62, 0.13, 0.06, DARK, 4); mb.box(sd*Wr*0.64, ry - 0.125, bz - 0.012, Wr*0.54, 0.085, 0.05, RED, 9); mb.box(sd*Wr*0.42, ry - 0.125, bz - 0.014, Wr*0.10, 0.085, 0.05, [0.9,0.9,0.88], 0); }
-    if (tail === 'join') mb.box(sd*Wr*0.20, ry - 0.125, bz - 0.006, Wr*0.40, 0.022, 0.05, CHROME, 6);          // a bright strip joins the two lamps
-    if (tail !== 'twin') { const zw = -half*0.972, ww = S.wid/2*plan(-0.972), yw = ry - 0.11 + (stAt(zw, 'hs') - ry)*0.6; mb.box(sd*(ww - 0.012), yw, zw, 0.06, tail === 'vert' ? 0.22 : 0.06, 0.19, DARK, 4, -sd*0.36); mb.box(sd*(ww + 0.004), yw, zw, 0.04, tail === 'vert' ? 0.17 : 0.026, 0.17, RED, 9, -sd*0.36); }
+    // headlights: a pane of dark glass set flush in the panel, the lights behind it
+    if (head === 'twin') { mb.box(sd*Wf*0.60, FY(fy - 0.105), fz, Wf*0.70, 0.135, PD, DARK, 0);
+      for (const q of [0.40, 0.80]) { disc(sd*Wf*q, FY(fy - 0.105), fz + 0.009, 0.060, 1, CHROME, 6); disc(sd*Wf*q, FY(fy - 0.105), fz + 0.011, 0.046, 1, LAMP, 5); } }
+    else if (head === 'block') { mb.box(sd*Wf*0.64, FY(fy - 0.12), fz, Wf*0.66, 0.15, PD, DARK, 4); mb.box(sd*Wf*0.64, FY(fy - 0.055), fz + 0.004, Wf*0.60, 0.02, PD, LAMP, 5);
+      mb.box(sd*Wf*0.56, FY(fy - 0.135), fz + 0.004, Wf*0.28, 0.065, PD, LAMP, 5); mb.box(sd*Wf*0.86, FY(fy - 0.135), fz + 0.004, Wf*0.14, 0.065, PD, AMBER, 5); }
+    else if (head === 'dual') { mb.box(sd*Wf*0.63, FY(fy - 0.10), fz, Wf*0.70, 0.115, PD, DARK, 4); for (const q of [0.062, 0.128]) mb.box(sd*Wf*0.63, FY(fy - q), fz + 0.004, Wf*0.62, 0.018, PD, LAMP, 5); }
+    else { mb.box(sd*Wf*0.63, FY(fy - 0.078), fz, Wf*0.70, 0.08, PD, DARK, 4); mb.box(sd*Wf*0.63, FY(fy - 0.052), fz + 0.004, Wf*0.64, 0.018, PD, LAMP, 5); mb.box(sd*Wf*0.44, FY(fy - 0.092), fz + 0.004, Wf*0.22, 0.028, PD, LAMP, 5); }
+    // tail lamps, the same way
+    if (tail === 'twin') { mb.box(sd*Wr*0.60, RY(ry - 0.12), bz, Wr*0.70, 0.135, PD, DARK, 0); for (const q of [0.40, 0.80]) { disc(sd*Wr*q, RY(ry - 0.12), bz - 0.009, 0.062, -1, GUN, 6); disc(sd*Wr*q, RY(ry - 0.12), bz - 0.011, 0.048, -1, RED, 9); } }
+    else if (tail === 'vert') { mb.box(sd*Wr*0.88, RY(ry - 0.20), bz, Wr*0.22, 0.30, PD, DARK, 4); mb.box(sd*Wr*0.88, RY(ry - 0.19), bz - 0.004, Wr*0.16, 0.24, PD, RED, 9); mb.box(sd*Wr*0.88, RY(ry - 0.30), bz - 0.006, Wr*0.16, 0.035, PD, [0.92,0.92,0.90], 0); }
+    else if (tail === 'bar') { mb.box(sd*Wr*0.63, RY(ry - 0.085), bz, Wr*0.72, 0.07, PD, DARK, 4); mb.box(sd*Wr*0.63, RY(ry - 0.085), bz - 0.004, Wr*0.66, 0.03, PD, RED, 9); }
+    else if (tail === 'slim') { mb.box(sd*Wr*0.63, RY(ry - 0.09), bz, Wr*0.70, 0.085, PD, DARK, 4); mb.box(sd*Wr*0.63, RY(ry - 0.07), bz - 0.004, Wr*0.64, 0.02, PD, RED, 9); mb.box(sd*Wr*0.80, RY(ry - 0.105), bz - 0.004, Wr*0.26, 0.02, PD, RED, 9); }
+    else { mb.box(sd*Wr*0.65, RY(ry - 0.105), bz, Wr*0.68, 0.12, PD, DARK, 4); mb.box(sd*Wr*0.68, RY(ry - 0.105), bz - 0.004, Wr*0.54, 0.08, PD, RED, 9); mb.box(sd*Wr*0.40, RY(ry - 0.105), bz - 0.006, Wr*0.10, 0.08, PD, [0.92,0.92,0.90], 0); }
+    if (tail === 'join') mb.box(sd*Wr*0.16, RY(ry - 0.105), bz - 0.002, Wr*0.32, 0.02, PD, CHROME, 6);          // a bright strip joins the two lamps
     // mirrors: a body-coloured shell on a stalk, glass facing back
-    { const tA = S.cab[3] - 0.13, zm = tA*half, ym = stAt(zm, 'hs') + 0.03, sA = sideX(stAt(zm, 'hs') - 0.03, zm); mb.box(sd*(sA - 0.01), ym - 0.02, zm, 0.12, 0.03, 0.05, DARK, 0);
-      mb.box(sd*(sA + 0.07), ym + 0.01, zm, 0.14, 0.085, 0.085, WHITE, 3, sd*0.25); mb.box(sd*(sA + 0.082), ym + 0.01, zm - 0.046, 0.11, 0.062, 0.008, [0.5,0.55,0.6], 4, sd*0.25); }
+    { const zm = (S.cab[3] - (S.cab[3] - S.cab[2])*0.42)*half, hsm = stAt(zm, 'hs'), ym = hsm + 0.055, sA = sideX(hsm - 0.02, zm); mb.box(sd*(sA + 0.005), ym - 0.02, zm, 0.09, 0.03, 0.05, DARK, 0);
+      mb.box(sd*(sA + 0.085), ym + 0.012, zm, 0.14, 0.085, 0.08, WHITE, 3, sd*0.22); mb.box(sd*(sA + 0.094), ym + 0.012, zm - 0.043, 0.11, 0.062, 0.008, [0.5,0.55,0.6], 4, sd*0.22); }
     const tB = (S.cab[1] + S.cab[2])/2 - 0.05, wB = S.wid/2*plan(tB);                              // pillar between the side windows
     mb.quad([sd*wB*0.945, belt(tB)-0.01, tB*half-0.05], [sd*wB*0.945, belt(tB)-0.01, tB*half+0.05], [sd*wB*S.tum*1.005, S.hgt-0.085, tB*half+0.05], [sd*wB*S.tum*1.005, S.hgt-0.085, tB*half-0.05], DARK, 11, [0,0.6,tB*half]);
+    for (const zw of [S.zF, S.zR]) for (let k = 0; k < 16; k++) { const a0 = 0.10 + k/16*2.94, a1 = 0.10 + (k+1)/16*2.94, pl = function (a, rr) { const y = CY + Math.sin(a)*rr, z = zw + Math.cos(a)*rr; return [sd*(sideX(Math.min(y, stAt(z, 'hs') - 0.02), z) + 0.006), y, z]; };          // a lip round every arch
+      mb.quad(pl(a0, RA + 0.002), pl(a1, RA + 0.002), pl(a1, RA + 0.022), pl(a0, RA + 0.022), DARK, 0, [0, CY, zw]); }
+    hseam(sd, S.zR + RA + 0.05, S.zF - RA - 0.05, stAt(0, 'yb') + 0.135, 0.012);          // the foot of the doors
     if (L.arch) for (const zw of [S.zF, S.zR]) for (let k = 0; k < 14; k++) { const a0 = 0.18 + k/14*2.78, a1 = 0.18 + (k+1)/14*2.78, pt = function (a, rr) { const y = CY + Math.sin(a)*rr, z = zw + Math.cos(a)*rr; return [sd*(sideX(Math.min(y, stAt(z, 'hs') - 0.03), z) + 0.012), y, z]; };      // cladding round the arches of an off-roader
       mb.quad(pt(a0, RA), pt(a1, RA), pt(a1, RA + 0.075), pt(a0, RA + 0.075), SILL, 0, [0, CY, zw]); }
   }
-  if (head === 'bar') mb.box(0, fy - 0.052, fz + 0.012, Wf*0.72, 0.016, 0.05, LAMP, 5);          // light bars across the whole width
-  if (tail === 'bar') { mb.box(0, ry - 0.105, bz, Wr*0.60, 0.05, 0.06, DARK, 4); mb.box(0, ry - 0.105, bz - 0.012, Wr*0.60, 0.022, 0.05, RED, 9); }
+  if (head === 'bar') mb.box(0, FY(fy - 0.052), fz + 0.004, Wf*0.64, 0.014, PD, LAMP, 5);          // light bars across the whole width
+  if (tail === 'bar') { mb.box(0, RY(ry - 0.085), bz, Wr*0.60, 0.045, PD, DARK, 4); mb.box(0, RY(ry - 0.085), bz - 0.004, Wr*0.60, 0.02, PD, RED, 9); }
   // the nose: grille, intakes, splitter
-  { const gy = F.yb + fH*0.40;
-    if (grille === 'tall') { mb.box(0, F.yb + fH*0.50, fz, Wf*0.92, fH*0.52, 0.05, DARK, 0); for (let k = 0; k < 4; k++) mb.box(0, F.yb + fH*(0.32 + k*0.12), fz + 0.012, Wf*0.86, 0.018, 0.05, L.trim === 'dark' ? GUN : CHROME, 6); }
-    else if (grille === 'slats') { mb.box(0, F.yb + fH*0.50, fz, Wf*0.80, fH*0.46, 0.05, DARK, 0); for (let k = -4; k <= 4; k++) mb.box(k*Wf*0.085, F.yb + fH*0.50, fz + 0.012, 0.016, fH*0.40, 0.05, CHROME, 6);
-      mb.box(0, F.yb + fH*0.74, fz + 0.014, Wf*0.84, 0.02, 0.05, CHROME, 6); mb.box(0, F.yb + fH*0.26, fz + 0.014, Wf*0.84, 0.02, 0.05, CHROME, 6); }
-    else if (grille === 'slot') { mb.box(0, fy - 0.075, fz, Wf*0.56, 0.05, 0.05, DARK, 0); mb.box(0, F.yb + fH*0.30, fz, Wf*1.20, fH*0.36, 0.05, DARK, 0); mb.box(0, F.yb + fH*0.30, fz + 0.012, Wf*1.10, 0.016, 0.05, GUN, 6); }
-    else if (grille === 'none') { mb.box(0, F.yb + fH*0.20, fz, Wf*1.00, fH*0.16, 0.05, DARK, 0); }
-    else if (grille === 'intakes') { for (const sd of [-1, 1]) { mb.box(sd*Wf*0.62, F.yb + fH*0.30, fz, Wf*0.56, fH*0.40, 0.05, DARK, 0); mb.box(sd*Wf*0.62, F.yb + fH*0.30, fz + 0.012, Wf*0.50, 0.016, 0.05, GUN, 6); } mb.box(0, F.yb + fH*0.22, fz, Wf*0.50, fH*0.20, 0.05, DARK, 0); }
-    else { mb.box(0, gy, fz, Wf*1.10, fH*0.40, 0.05, DARK, 0); mb.box(0, gy, fz + 0.012, Wf*1.00, 0.018, 0.05, L.trim === 'dark' ? GUN : CHROME, 6); }
-    for (const sd of [-1, 1]) if (grille !== 'intakes' && grille !== 'none') mb.box(sd*Wf*0.84, F.yb + 0.085, fz, Wf*0.26, 0.06, 0.06, DARK, 0);          // small openings at the corners
-    for (const sd of [-1, 1]) if (L.fog) disc(sd*Wf*0.84, F.yb + 0.085, fz + 0.032, 0.03, 1, AMBER, 5, 8);
+  { const trimC = L.trim === 'dark' ? GUN : CHROME, G = function (x, f, w, h, col, mat, lift) { mb.box(x, fB + fH*f, fz + (lift || 0), w, h, PD, col, mat); };
+    if (grille === 'tall') { G(0, 0.46, Wf*0.92, fH*0.50, DARK, 0); for (let k = 0; k < 4; k++) G(0, 0.28 + k*0.12, Wf*0.86, 0.016, trimC, 6, 0.004); G(0, 0.46, Wf*0.96, fH*0.54, trimC, 6, -0.004); }
+    else if (grille === 'slats') { G(0, 0.47, Wf*0.84, fH*0.50, CHROME, 6, -0.003); G(0, 0.47, Wf*0.79, fH*0.44, DARK, 0); for (let k = -4; k <= 4; k++) mb.box(k*Wf*0.085, fB + fH*0.47, fz + 0.004, 0.014, fH*0.42, PD, CHROME, 6); }
+    else if (grille === 'slot') { mb.box(0, FY(fy - 0.075), fz, Wf*0.50, 0.04, PD, DARK, 0); G(0, 0.27, Wf*1.20, fH*0.34, DARK, 0); G(0, 0.27, Wf*1.10, 0.014, GUN, 6, 0.004); G(0, 0.36, Wf*1.10, 0.014, GUN, 6, 0.004); }
+    else if (grille === 'none') { G(0, 0.20, Wf*1.00, fH*0.15, DARK, 0); G(0, 0.20, Wf*0.90, 0.012, GUN, 6, 0.004); }
+    else if (grille === 'intakes') { for (const sd of [-1, 1]) { G(sd*Wf*0.62, 0.28, Wf*0.56, fH*0.38, DARK, 0); G(sd*Wf*0.62, 0.28, Wf*0.50, 0.014, GUN, 6, 0.004); } G(0, 0.20, Wf*0.50, fH*0.18, DARK, 0); }
+    else { G(0, 0.36, Wf*1.12, fH*0.40, DARK, 0); G(0, 0.36, Wf*1.02, 0.016, trimC, 6, 0.004); G(0, 0.28, Wf*1.02, 0.012, GUN, 6, 0.004); G(0, 0.44, Wf*1.02, 0.012, GUN, 6, 0.004); }
+    for (const sd of [-1, 1]) if (grille !== 'intakes' && grille !== 'none') mb.box(sd*Wf*0.84, fB + 0.075, fz, Wf*0.26, 0.055, PD, DARK, 0);          // small openings at the corners
+    for (const sd of [-1, 1]) if (L.fog) disc(sd*Wf*0.84, fB + 0.075, fz + 0.009, 0.028, 1, AMBER, 5, 8);
     mb.box(0, F.yb - 0.005, half - 0.06, Wf*2.0*(L.split || 0.86), 0.028, 0.30, DARK, 0); }                    // splitter under the nose
-  // the tail: plate, diffuser, pipes
-  mb.box(0, R.yb + rH*0.40, bz, 0.50, 0.12, 0.04, DARK, 0); mb.box(0, R.yb + rH*0.40, bz - 0.006, 0.44, 0.10, 0.04, [0.92,0.92,0.90], 0);
+  // the tail: the gap under the boot lid, plate, diffuser, pipes
+  mb.box(0, rB + rH*0.60, bz, Wr*1.86, 0.010, PD, DARK, 0);
+  mb.box(0, rB + rH*0.40, bz, 0.50, 0.12, PD, DARK, 0); mb.box(0, rB + rH*0.40, bz - 0.004, 0.44, 0.10, PD, [0.92,0.92,0.90], 0);
   { const dw = Wr*(L.diff || 1.1); mb.box(0, R.yb + 0.02, -half + 0.05, dw, 0.13, 0.20, DARK, 0); const nf = L.diff > 1.3 ? 5 : 3; for (let k = 0; k < nf; k++) mb.box((k - (nf-1)/2)*dw/(nf + 0.4), R.yb + 0.02, -half - 0.02, 0.018, 0.12, 0.14, GUN, 6);
-    const np = L.pipes === undefined ? 2 : L.pipes, py = R.yb + 0.085, sp = L.pipeC ? 0.11 : dw*0.42;
+    const np = L.pipes === undefined ? 2 : L.pipes, py = R.yb + 0.085, sp = dw*0.42;
     for (let k = 0; k < np; k++) { const half2 = np/2, sdx = k < half2 ? -1 : 1, kk = k < half2 ? k : k - half2, px = L.pipeC ? (k - (np-1)/2)*0.13 : sdx*(sp + kk*0.125);
-      disc(px, py, bz - 0.024, 0.052, -1, CHROME, 6, 10); disc(px, py, bz - 0.026, 0.036, -1, [0.02,0.02,0.02], 0, 10); mb.box(px, py, bz + 0.02, 0.09, 0.09, 0.10, GUN, 6); } }
+      mb.box(px, py, -half - 0.01, 0.10, 0.10, 0.12, GUN, 6); disc(px, py, -half - 0.072, 0.052, -1, CHROME, 6, 10); disc(px, py, -half - 0.074, 0.037, -1, [0.02,0.02,0.02], 0, 10); } }
   if (S.extra === 'wing') { const y = belt(-0.86);
     for (const sd of [-1, 1]) { mb.box(sd*S.wid*0.30, y + 0.14, -half + 0.34, 0.05, 0.30, 0.16, DARK, 0); mb.box(sd*S.wid*0.47, y + 0.30, -half + 0.30, 0.03, 0.14, 0.40, WHITE, 3); }
     mb.box(0, y + 0.30, -half + 0.30, S.wid*0.94, 0.035, 0.34, WHITE, 3); }
@@ -1251,6 +1267,9 @@ function buildCar(S) {
   if (S.extra === 'roofspoiler') mb.box(0, S.hgt - 0.02, S.cab[1]*half - 0.02, S.wid*0.72, 0.035, 0.30, DARK, 11);
   if (S.extra === 'rails') { for (const sd of [-1, 1]) mb.box(sd*S.wid*0.5*S.tum*0.80, S.hgt + 0.035, (S.cab[1]+S.cab[2])/2*half, 0.05, 0.05, (S.cab[2]-S.cab[1])*half*0.92, [0.5,0.5,0.52], 6);
     mb.box(0, F.yb + 0.02, half + 0.02, F.w*1.5, 0.12, 0.08, [0.45,0.45,0.47], 6); mb.box(0, R.yb + 0.02, -half - 0.02, R.w*1.5, 0.12, 0.08, [0.45,0.45,0.47], 6); }
+  for (const sd of [-1, 1]) { const zc = (S.cab[3] - 0.012)*half, yc = stAt(zc, 'hb') + 0.085; mb.box(sd*S.wid*0.13 + S.wid*0.02, yc, zc, S.wid*0.24, 0.012, 0.022, DARK, 0, 0.05); }          // wipers at rest on the cowl
+  { const zt = (S.cab[1] - 0.004)*half, yt = S.hgt - 0.012 - 0.05*Math.pow((S.cab[1] - MID0)/((S.cab[2] - S.cab[1])/2 + 0.2), 2); mb.box(0, yt, zt - 0.02, S.wid*0.20, 0.014, 0.03, RED, 9); }          // high brake light at the top of the rear screen
+  if (L.plateF) { mb.box(0, fB + fH*0.16, fz + 0.004, 0.46, 0.10, PD, [0.92,0.92,0.90], 0); }
   if (L.sunroof) { const z1 = (S.cab[2] - 0.04)*half, z0 = Math.max((S.cab[1] + 0.06)*half, z1 - 0.62), xs = S.wid/2*S.tum*0.50, ys = S.hgt + 0.012; mb.quad([-xs, ys, z0], [xs, ys, z0], [xs, ys, z1], [-xs, ys, z1], DARK, 4, [0, 0, 0]); }
   if (L.fin) { const z0 = (S.cab[1] + 0.03)*half, yf = S.hgt - 0.012, A = [0, yf, z0 + 0.26], B = [0.035, yf, z0], C = [-0.035, yf, z0], D = [0, yf + 0.085, z0 + 0.02]; mb.tri(A, B, D, DARK, 0, [0, yf, z0 + 0.1]); mb.tri(A, C, D, DARK, 0, [0, yf, z0 + 0.1]); mb.tri(B, C, D, DARK, 0, [0, yf, z0 + 0.1]); }
   for (let k = 0; k < mb.v.length; k += 10) { mb.v[k] *= U; mb.v[k+1] *= U; mb.v[k+2] *= U; }
