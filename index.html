@@ -293,9 +293,9 @@
   body.mob .item svg { width: 34px; height: 34px; filter: drop-shadow(0 0 5px rgba(var(--c),.8)); } body.mob .item.empty { display: none; } body.mob .item:active { transform: scale(.93); filter: brightness(1.3); }
   body.mob .item i { right: -2px; bottom: -2px; min-width: 18px; height: 18px; border-radius: 9px; font: 800 12px/18px sans-serif; }
   body.mob.tilt #it0 { right: 14px; bottom: 18px; width: 74px; height: 74px; } body.mob.tilt #it0 svg { width: 40px; height: 40px; } body.mob.tilt #it1 { right: 100px; bottom: 18px; } body.mob.tilt #it2 { right: 20px; bottom: 100px; width: 60px; height: 60px; }
-  body.mob.tilt .fireback { right: 104px; bottom: 92px; width: 50px; height: 50px; }
+  body.mob.tilt .fireback { right: 102px; bottom: 92px; width: 58px; height: 58px; } body.mob .fireback svg { width: 27px; height: 27px; }
   body.mob:not(.tilt) #it0 { right: 108px; bottom: 22px; width: 68px; height: 68px; } body.mob:not(.tilt) #it1 { right: 188px; bottom: 22px; } body.mob:not(.tilt) #it2 { right: 112px; bottom: 100px; width: 60px; height: 60px; }
-  body.mob:not(.tilt) .fireback { right: 194px; bottom: 94px; width: 50px; height: 50px; } body.mob .fireback { touch-action: none; }
+  body.mob:not(.tilt) .fireback { right: 192px; bottom: 94px; width: 58px; height: 58px; } body.mob .fireback { touch-action: none; }
   /* watching the others after the finish */
   .specbar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); display: none; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 20px; background: rgba(10,13,24,.66); border: 1px solid rgba(255,255,255,.14); max-width: calc(100% - 16px); box-sizing: border-box; }
   body.spec .specbar { display: flex; } body.spec .hud > *:not(#tags):not(#map) { display: none !important; }
@@ -467,7 +467,7 @@
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 64</div>
+    <div style="opacity:.5;margin-top:8px">версия 65</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -541,7 +541,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 64</div>
+  <div class="fver">Turbo Drift · версия 65</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -3300,7 +3300,7 @@ function updatePowerups(dt) {
   // collecting
   for (const p of pickups) { p.spin += dt*2.4; if (p.t > 0) { p.t -= dt; if (p.t <= 0) p.type = randomPower(); continue; }
     for (const c of cars) { if (c.net || c.rival || c.done || c.wreck > 0 || c.items.length >= (c.bot ? 1 : 3)) continue;
-      if (Math.abs(tdiff(carS(c), p.i)) < 1.8 && Math.abs(c.lat - p.lat) < 2.0) { c.items.push({ type: p.type }); p.t = 5; c.held = 0; if (c === player && c.items.length === 1) sel = 0;
+      if (Math.abs(tdiff(carS(c), p.i)) < 1.8 && Math.abs(c.lat - p.lat) < 2.0) { c.items.push({ type: p.type }); p.t = 5; c.held = 0; if (c === player) { slotFix(); if (c.items.length === 1) sel = 0; }
         if (c === player) { note(PU[p.type].name); beep(880, 0.12, 'triangle', 0.06, 1320); haptic('light'); hudItems(); } break; } } }
   // timers
   for (const c of cars) { if (c.net) continue; if (c.shield > 0) c.shield -= dt; if (c.stun > 0) c.stun -= dt;
@@ -3354,12 +3354,16 @@ function glowSprites() {
     if (c.wreck > 0) g.push({ x: c.x, y: 0.8, z: c.z, c: [1,0.45,0.1], size: 1.4, a: 0.5 }); }
   return g;
 }
+// Every bonus keeps the slot it landed in until it is used: nothing jumps under the finger when a neighbour is spent. A new one takes the lowest free slot.
+function slotFix() { if (!player || !player.items) return; const used = [false, false, false]; for (const it of player.items) if (it.slot !== undefined && it.slot < 3 && !used[it.slot]) used[it.slot] = true; else it.slot = undefined;
+  for (const it of player.items) if (it.slot === undefined) { let k = 0; while (k < 2 && used[k]) k++; it.slot = k; used[k] = true; } }
+function slotIndex(k) { if (!player || !player.items) return -1; for (let q = 0; q < player.items.length; q++) if (player.items[q].slot === k) return q; return -1; }
 function hudItems() {
-  const n = player && player.items ? player.items.length : 0, mob = document.body.classList.contains('mob'); if (sel >= n) sel = Math.max(0, n - 1);
+  slotFix(); const n = player && player.items ? player.items.length : 0, mob = document.body.classList.contains('mob'); if (sel >= n) sel = Math.max(0, n - 1);
   const rgb = function (p) { return p.col.map(function (v) { return Math.round(v*255); }).join(','); };
-  for (let k = 0; k < 3; k++) { const el = document.getElementById('it' + k), it = n > k ? player.items[k] : null;
+  for (let k = 0; k < 3; k++) { const el = document.getElementById('it' + k), qi = slotIndex(k), it = qi >= 0 ? player.items[qi] : null;
     if (!it) { el.className = 'item empty'; el.innerHTML = '<b>' + (k + 1) + '</b>'; continue; }
-    const p = PU[it.type]; el.className = 'item' + (k === sel && !mob ? ' sel' : ''); el.style.setProperty('--c', rgb(p));
+    const p = PU[it.type]; el.className = 'item' + (qi === sel && !mob ? ' sel' : ''); el.style.setProperty('--c', rgb(p));
     el.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' + p.icon + '</svg><b>' + (k + 1) + '</b>' + (p.id === 'bolt' ? '<i>' + (it.shots === undefined ? 3 : it.shots) + '</i>' : '');
     el.setAttribute('aria-label', p.name); }
   const f = document.getElementById('fire'), cur = n ? player.items[sel] : null;
@@ -3372,6 +3376,8 @@ function hudItems() {
   const fn = document.getElementById('firename'); fn.textContent = p.name; fn.style.setProperty('--c', rgb(p));
 }
 function selectItem(k) { if (!player || !player.items.length) return; sel = ((k % player.items.length) + player.items.length) % player.items.length; hudItems(); beep(660, 0.04, 'sine', 0.03); }
+function selectSlot(k) { const q = slotIndex(k); if (q >= 0) selectItem(q); }                                  // keys 1-3 and a click pick the bonus that lies in that slot
+function selectStep(d) { if (!player || !player.items.length) return; slotFix(); const cur = player.items[sel] ? player.items[sel].slot : 0; for (let s = 1; s <= 3; s++) { const q = slotIndex(((cur + d*s) % 3 + 3) % 3); if (q >= 0) { selectItem(q); return; } } }
 
 // ---------------------------------------------------------------------------
 // Input
@@ -3446,9 +3452,9 @@ function key(e, down) {
   else if (k === 'arrowup' || k === 'w' || k === 'ц') { keys.gas = down; e.preventDefault(); }
   else if (down && !e.repeat && (k === ' ' || k === 'f' || k === 'а')) { if (state === 'race') useItem(player, sel, e.shiftKey); e.preventDefault(); }
   else if (down && !e.repeat && (k === 'x' || k === 'ч')) { if (state === 'race') useItem(player, sel, true); }
-  else if (down && !e.repeat && (k === 'e' || k === 'у' || k === 'tab')) { selectItem(sel + 1); e.preventDefault(); }
-  else if (down && !e.repeat && (k === 'q' || k === 'й')) selectItem(sel - 1);
-  else if (down && !e.repeat && (k === '1' || k === '2' || k === '3')) selectItem(parseInt(k, 10) - 1);
+  else if (down && !e.repeat && (k === 'e' || k === 'у' || k === 'tab')) { selectStep(1); e.preventDefault(); }
+  else if (down && !e.repeat && (k === 'q' || k === 'й')) selectStep(-1);
+  else if (down && !e.repeat && (k === '1' || k === '2' || k === '3')) selectSlot(parseInt(k, 10) - 1);
   else if (down && !e.repeat && NET.racing && k >= '5' && k <= '8') sendEmo(parseInt(k, 10) - 5);
   else if (down && (k === 'escape' || k === 'p')) pause(state === 'race' || state === 'countdown');
 }
@@ -4216,8 +4222,8 @@ document.getElementById('setupgo').addEventListener('click', playGo);
 document.getElementById('topopen').addEventListener('click', topOpen); document.getElementById('topclose').addEventListener('click', function () { document.getElementById('top').classList.add('hidden'); }); document.getElementById('topopen').style.display = lbOn() ? '' : 'none';
 document.getElementById('prefsopen').addEventListener('click', function () { document.getElementById('prefs').classList.remove('hidden'); }); document.getElementById('prefsclose').addEventListener('click', function () { document.getElementById('prefs').classList.add('hidden'); });
 for (let k = 0; k < 3; k++) { const el = document.getElementById('it' + k);
-  el.addEventListener('click', function () { if (!document.body.classList.contains('mob')) selectItem(k); });
-  el.addEventListener('pointerdown', function (e) { if (!document.body.classList.contains('mob')) return; e.preventDefault(); if (state === 'race' && player.items[k]) { sel = k; useItem(player, k); } }); }      // on a phone the press itself fires: no waiting for the finger to lift
+  el.addEventListener('click', function () { if (!document.body.classList.contains('mob')) selectSlot(k); });
+  el.addEventListener('pointerdown', function (e) { if (!document.body.classList.contains('mob')) return; e.preventDefault(); const q = slotIndex(k); if (state === 'race' && q >= 0) { sel = q; useItem(player, q); } }); }      // on a phone the press itself fires: no waiting for the finger to lift
 document.getElementById('fire').addEventListener('click', function () { if (state === 'race') useItem(player, sel); });
 // the shot backwards. On a phone the press itself fires, as with the other buttons: a tap made while another finger holds the steering strip never becomes a "click"
 { const fbk = document.getElementById('fireback'), shootBack = function () { if (state !== 'race') return; let k = sel; if (document.body.classList.contains('mob')) { k = -1; for (let q = 0; q < player.items.length && k < 0; q++) { const id = PU[player.items[q].type].id; if (id === 'rocket' || id === 'bolt') k = q; } } if (k >= 0) useItem(player, k, true); };
