@@ -337,7 +337,7 @@
     <div><b>Слипстрим</b> — держись прямо за соперником, машина разгонится сильнее; <b>обгон впритирку</b> без касания даёт турбо</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>H</kbd> гудок</span><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в игре с друзьями</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 31</div>
+    <div style="opacity:.5;margin-top:8px">версия 32</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -1436,8 +1436,29 @@ function buildTrack(id, rev) {
   for (let i = 0; i < N; i++) if (Math.abs(curv[i]) > 0.02) for (let d = -5; d <= 5; d++) { const j = ((i+d) % N + N) % N; (curv[i] > 0 ? wn : wp)[j] = ROAD_W/2 + 6.2; }
   for (const w of [wp, wn]) for (let pass = 0; pass < 2; pass++) { for (let i = 0; i < 2*N; i++) { const a = i % N, b = (i+1) % N; w[b] = Math.max(w[b], w[a] - 0.4); } for (let i = 2*N; i > 0; i--) { const a = i % N, b = (i+N-1) % N; w[b] = Math.max(w[b], w[a] - 0.4); } }
   T = { id: id, rev: !!rev, key: trackKey(id, rev, RAIN), N: N, x: x, z: z, h: h, curv: curv, vp: vp, wp: wp, wn: wn, minX: minX, maxX: maxX, minZ: minZ, maxZ: maxZ };
+  raceLine();
   skids = []; particles = [];
   buildWorld();
+}
+// The line a good driver takes: out wide, across the inside, out wide again. Found by letting a string along the road
+// straighten itself between the road edges, coarse to fine; T.rk is the curvature of the result.
+function raceLine() {
+  const N = T.N, W = AIP.w, o = new Float32Array(N), cx = new Float32Array(N), sz = new Float32Array(N);
+  for (let i = 0; i < N; i++) { cx[i] = Math.cos(T.h[i]); sz[i] = -Math.sin(T.h[i]); }
+  for (const pr of [[16, 260], [8, 160], [4, 100], [2, 60], [1, 30]]) { const k = pr[0];
+    for (let it = 0; it < pr[1]; it++) for (let i = 0; i < N; i += k) { const a = (i - k + N) % N, b = (i + k) % N;
+      const mx = (T.x[a] + cx[a]*o[a] + T.x[b] + cx[b]*o[b])/2, mz = (T.z[a] + sz[a]*o[a] + T.z[b] + sz[b]*o[b])/2;
+      o[i] = Math.max(-W, Math.min(W, o[i] + ((mx - T.x[i])*cx[i] + (mz - T.z[i])*sz[i] - o[i])*0.7)); }
+    if (k > 1) for (let i = 0; i < N; i++) { const r = i % k; if (!r) continue; const a = i - r, b = a + k < N ? a + k : 0; o[i] = o[a] + (o[b] - o[a])*r/k; }
+  }
+  // the taut string has corners where it touches the inside; rounding them off lets the car carry speed through
+  for (let pass = 0; pass < AIP.sm; pass++) { const q = Float32Array.from(o), H = AIP.smw; let acc = 0; for (let d = -H; d <= H; d++) acc += q[(d + N) % N];
+    for (let i = 0; i < N; i++) { o[i] = Math.max(-AIP.wmax, Math.min(AIP.wmax, acc/(2*H + 1))); acc += q[(i + H + 1) % N] - q[(i - H + N) % N]; } }
+  const rx = new Float32Array(N), rz = new Float32Array(N), rk = new Float32Array(N), D = 5;
+  for (let i = 0; i < N; i++) { rx[i] = T.x[i] + cx[i]*o[i]; rz[i] = T.z[i] + sz[i]*o[i]; }
+  for (let i = 0; i < N; i++) { const a = (i - D + N) % N, b = (i + D) % N, h1 = Math.atan2(rx[i]-rx[a], rz[i]-rz[a]), h2 = Math.atan2(rx[b]-rx[i], rz[b]-rz[i]);
+    rk[i] = wrap(h2 - h1)/Math.max(0.5, (Math.hypot(rx[i]-rx[a], rz[i]-rz[a]) + Math.hypot(rx[b]-rx[i], rz[b]-rz[i]))/2); }
+  T.rl = o; T.rk = rk;
 }
 
 // ---------------------------------------------------------------------------
@@ -1554,9 +1575,80 @@ function autopilot(c) {
   const want = Math.atan2(T.x[j]-c.x, T.z[j]-c.z), d = wrap(want - c.h);
   return { steer: Math.max(-1, Math.min(1, d*3.2)), brake: c.vf > T.vp[(c.idx + 5) % N]*1.03 + 1 };
 }
-// computer opponents ride the centreline at a share of the ideal speed
-function newBot(color, skill, lane, name, type) { const b = newCar(color, type); b.bot = true; if (name === 'Бот') name = CAR_TYPES[type || 0].name; b.skill = skill; b.lane = lane; b.s = 0; b.v = 0; b.name = name; b.seed = Math.random()*6; return b; }
-function stepBot(b, dt) {
+// Computer opponents drive the same cars through the same physics as the player. What differs is the driver:
+// how much of the grip he dares to use, how late he brakes, how hard he comes out of a corner, how fast he reacts.
+// skill runs from 0 (a careful beginner) to 1 (drives at the limit of the car).
+const AIP = { sag: 99, v0: 2, v1: 0.06, bmax: 0.92, w: 3.2, lmax: 1.80, wide: 0.75, sm: 0, smw: 8, wmax: 5.0, edge: 4.7, edgeK: 1 };
+function driverOf(skill) { const q = Math.max(0, Math.min(1, skill));
+  return { lat: 0.46 + (AIP.lmax - 0.46)*q, wide: AIP.wide + (1 - AIP.wide)*q, brake: 0.42 + (AIP.bmax - 0.42)*q, acc: 0.62 + 0.38*q, top: Math.min(1, 0.86 + 0.47*q), react: 0.55 - 0.5*q, launch: Math.max(0, q - 0.45)*1.5 }; }
+// the speed this driver in this car carries at every point of the racing line
+function lineSpeed(K, P) {
+  const N = T.N, v = new Float32Array(N), mu = RAIN ? 0.86 : 1, aL = GRIP*K.grip*mu*P.lat, top = V_MAX*K.top*P.top;
+  for (let i = 0; i < N; i++) v[i] = Math.min(top, Math.sqrt(aL/Math.max(1e-4, Math.abs(T.rk[i]))));
+  for (let pass = 0; pass < 2; pass++) {
+    for (let i = N-1; i >= 0; i--) { const n = v[(i+1)%N]; v[i] = Math.min(v[i], Math.sqrt(n*n + 2*BRAKE*mu*P.brake)); }
+    for (let i = 0; i < N; i++) { const q = v[(i+N-1)%N]; v[i] = Math.min(v[i], Math.sqrt(q*q + 2*accelAt(q/K.top)*K.acc*mu*P.acc)); }
+  }
+  return v;
+}
+function newBot(color, skill, lane, name, type) { const b = newCar(color, type); b.bot = true; if (name === 'Бот') name = CAR_TYPES[type || 0].name; b.skill = skill; b.lane = lane; b.s = 0; b.v = 0; b.name = name; b.seed = Math.random()*6;
+  b.ai = { ofs: 0, abs: null, think: Math.random()*0.1, stuck: 0, wrong: 0, cap: 99, go: 0 }; return b; }
+function botReady(b) {                                  // once the track and the weather are known
+  if (b.rival) return; const P = b.drv = driverOf(b.skill); b.vpl = lineSpeed(b.K, P);
+  b.ai.go = Math.max(0.02, P.react*(0.6 + Math.random()*0.8)); b.ai.launch = Math.random() < P.launch; b.ai.ofs = b.lat - T.rl[b.idx]*P.wide; b.ai.abs = null;
+}
+// looking at the cars around: go round the one in the way, or sit behind it when there is no room
+function botLook(b) {
+  const A = b.ai, W = AIP.wmax - 0.6, u = Math.max(0, b.vf), s = Math.sin(b.h), co = Math.cos(b.h); let abs = null, cap = 99, tow = false, side = false;
+  for (const o of cars) { if (o === b || o.rival) continue;
+    const dx = o.x - b.x, dz = o.z - b.z, lz = dx*s + dz*co, lx = dx*co - dz*s, ov = o.done || o.wreck > 0 ? 0 : Math.max(0, o.vf || 0), close = u - ov;
+    if (lz > 2.7 && lz < 26 && Math.abs(lx) < 1.45 + lz*0.03 && u > 14 && ov > 8) tow = true;
+    if (Math.abs(lz) < 5.2 && Math.abs(lx) < 3.0) {                                           // alongside: hold a lane next to it, do not turn in on it
+      const sd = b.lat > o.lat ? 1 : -1; let t = o.lat + sd*2.6; if (Math.abs(t) > W) t = sd*W; if (!side || Math.abs(t - b.lat) > Math.abs(abs - b.lat)) abs = t; side = true;
+      if (lz > 1.5 && Math.abs(lx) < 1.9) cap = Math.min(cap, ov + (lz - 3.6)*1.6); continue; }
+    if (lz > 2 && lz < 12 && Math.abs(lx) < 1.7) cap = Math.min(cap, ov + (lz - 4.2)*1.6);                                         // right behind another car: no faster than the gap allows
+    if (side || lz < 2 || lz > 7 + Math.max(0, close)*1.5 || close < -1 || Math.abs(lx) > 2.3) continue;
+    const here = T.rl[o.idx]*b.drv.wide, left = o.lat - 2.6, right = o.lat + 2.6, okL = left > -W, okR = right < W;      // go round on the side nearer the racing line, if the road is wide enough there
+    if (okL && okR) abs = Math.abs(left - here) < Math.abs(right - here) ? left : right; else if (okL) abs = left; else if (okR) abs = right;
+  }
+  A.abs = abs; A.cap = cap;
+  b.draft = tow ? Math.min(1.6, b.draft + 0.1) : Math.max(0, b.draft - 0.25);
+}
+function botInput(b, dt) {                                // what the driver does with the wheel and the pedals right now
+  const A = b.ai, N = T.N, u = Math.max(0, b.vf);
+  A.think -= dt; if (A.think <= 0) { A.think = 0.1; botLook(b); }
+  let km = 0; for (let q = 0; q < 24; q += 3) km = Math.max(km, Math.abs(T.rk[(b.idx + q) % N]));
+  const look = Math.round(Math.max(5, Math.min(8 + u*0.36, Math.sqrt((Math.abs(A.ofs) > 0.6 ? 6 : AIP.sag)/Math.max(1e-4, km))))), j = (b.idx + look) % N, W = AIP.wmax;      // eyes far ahead on a straight, close in a tight corner, or the car would cut across the grass
+  const line = T.rl[j]*b.drv.wide, want = A.abs === null || A.abs === undefined ? 0 : A.abs - line; A.ofs += Math.max(-4.5*dt, Math.min(4.5*dt, want - A.ofs));
+  const off = Math.max(-W, Math.min(W, line + A.ofs + (1 - b.skill)*(1 - Math.min(1, km*30))*Math.sin((b.idx + b.lap*N)*0.05 + b.seed)*0.5));      // the less sure the driver, the more the car wanders on the straights
+  const tx = T.x[j] + Math.cos(T.h[j])*off, tz = T.z[j] - Math.sin(T.h[j])*off;
+  let steer = wrap(Math.atan2(tx - b.x, tz - b.z) - b.h)*3.2, brake = false, gas = true;
+  if (Math.abs(b.lat) > AIP.edge) steer -= (b.lat > 0 ? 1 : -1)*(Math.abs(b.lat) - AIP.edge)*AIP.edgeK;      // wheels at the edge of the asphalt: ease back, the grass is not part of the track
+  steer = Math.max(-1, Math.min(1, steer));
+  let vt = b.vpl[(b.idx + Math.round(AIP.v0 + u*AIP.v1)) % N]*(Math.abs(A.ofs) > 1.2 ? 0.96 : 1); vt = Math.min(vt, A.cap);
+  if (b.boost > 0) vt *= 1.06;
+  let hot = u > vt + 1;
+  if (!hot && u > b.vpl[b.idx] + 2) for (let d = 6; d <= 66; d += 6) { const v2 = b.vpl[(b.idx + d) % N]; if (u*u > v2*v2 + 2*BRAKE*0.62*d) { hot = true; break; } }      // carrying more speed than the line allows (turbo, a tow): brake while there is still room
+  if (hot) { if (b.brk || Math.abs(b.st) < 0.17) brake = true; else gas = false; } else if (u > vt) gas = false;         // the brake goes on with the wheel straight: on a turned wheel it would kick the tail out
+  if (b.stun > 0.6) gas = false;                                                              // just been hit: a moment off the throttle
+  if (b.done) { gas = false; brake = u > 0.5; }
+  else if ((state !== 'race' && state !== 'finished') || raceClock < A.go) { gas = false; brake = false; steer = 0; }
+  else if (A.launch) { A.launch = false; b.boost = Math.max(b.boost, 1.15); }
+  return { steer: steer, brake: brake, gas: gas };
+}
+function botDrive(b, dt) {
+  const A = b.ai, u = Math.max(0, b.vf), I = botInput(b, dt);
+  const n = Math.max(1, Math.ceil(dt*120)); for (let q = 0; q < n; q++) stepCar(b, I.steer, I.brake, dt/n, I.gas);
+  b.v = b.vf; b.gasOn = I.gas && !I.brake; b.nitro = b.boost;
+  // out of trouble: a car that is stopped, or pointing the wrong way, is put back on the road
+  if (!b.done && !(b.wreck > 0) && raceClock > A.go + 2) {
+    A.stuck = u < 3 ? A.stuck + dt : 0; A.wrong = Math.cos(b.h - T.h[b.idx]) < -0.2 ? A.wrong + dt : 0;
+    if (A.stuck > 2.2 || A.wrong > 1.4) { respawn(b); A.stuck = 0; A.wrong = 0; A.ofs = -T.rl[b.idx]*b.drv.wide; }
+  }
+}
+function stepBot(b, dt) { if (b.rival) stepRail(b, dt); else botDrive(b, dt); }
+// the challenge rival is a clock, not a driver: it runs on rails and finishes in exactly the time it stands for
+function stepRail(b, dt) {
   const v0 = b.v, N = T.N;
   if (b.done) { b.v = Math.max(0, b.v - 12*dt); }
   else if (b.wreck > 0) b.v = 0;
@@ -1588,19 +1680,31 @@ function placeBot(b) {
   b.x = T.x[i] + (T.x[j]-T.x[i])*k + Math.cos(hx)*off; b.z = T.z[i] + (T.z[j]-T.z[i])*k - Math.sin(hx)*off;
   b.h = wrap(hx + T.curv[i]*9); b.vf = b.v; b.idx = i; b.lap = 1 + Math.floor((b.s - b.s0)/N + 1e-6); b.sliding = Math.abs(T.curv[i]) > 0.035 && b.v > 18;
 }
-// contact between the player and the other cars: no driving through each other
+// Contact between cars: no driving through each other. Two cars that both run on the physics trade speed like equals;
+// a car steered from another device, or the rival on rails, is a moving wall for the player.
 let bumpT = 0;
+function bumpPair(a, b) {
+  const s = Math.sin(a.h), co = Math.cos(a.h), dx = b.x - a.x, dz = b.z - a.z, lz = dx*s + dz*co, lx = dx*co - dz*s;
+  const px = 1.12 - Math.abs(lx), pz = 2.45 - Math.abs(lz); if (px <= 0 || pz <= 0) return false;
+  let nx, nz, pen; if (px < pz) { const sg = lx > 0 ? 1 : -1; nx = co*sg; nz = -s*sg; pen = px; } else { const sg = lz > 0 ? 1 : -1; nx = s*sg; nz = co*sg; pen = pz; }      // the axis the cars touch along, from a to b
+  a.x -= nx*pen*0.5; a.z -= nz*pen*0.5; b.x += nx*pen*0.5; b.z += nz*pen*0.5;
+  const rel = (a.vx - b.vx)*nx + (a.vz - b.vz)*nz; if (rel > 0) { const j = rel*0.6; a.vx -= nx*j; a.vz -= nz*j; b.vx += nx*j; b.vz += nz*j; }
+  return true;
+}
 function collide(dt) {
   if (bumpT > 0) bumpT -= dt;
   const s = Math.sin(player.h), co = Math.cos(player.h);
+  for (let i = 0; i < bots.length; i++) { const a = bots[i]; if (a.rival || a.wreck > 0) continue; for (let k = i + 1; k < bots.length; k++) { const b = bots[k]; if (!b.rival && !(b.wreck > 0)) bumpPair(a, b); } }
   for (const b of cars) {
-    if (b === player || b.rival || b.wreck > 0 || player.wreck > 0) continue; if (b.net) b.v = b.vf;
+    if (b === player || b.rival || b.wreck > 0 || player.wreck > 0) continue;
+    if (b.bot) { if (bumpPair(player, b) && bumpT <= 0) { bumpT = 0.35; sfx('thud', 0.8); haptic('medium'); } continue; }
+    b.v = b.vf;
     const dx = b.x - player.x, dz = b.z - player.z, lz = dx*s + dz*co, lx = dx*co - dz*s;          // the other car in the player's frame
     const px = 1.12 - Math.abs(lx), pz = 2.45 - Math.abs(lz); if (px <= 0 || pz <= 0) continue;
     let u = player.vx*s + player.vz*co, v = player.vx*co - player.vz*s;
-    if (px < pz) { const sg = lx > 0 ? 1 : -1; player.x -= co*sg*px*0.6; player.z += s*sg*px*0.6; if (v*sg > 0) v *= -0.3; b.push = (b.push || 0) + sg*px*0.8*(Math.cos(T.h[b.idx] - player.h) > 0 ? 1 : -1); }
-    else if (lz > 0) { player.x -= s*pz*0.5; player.z -= co*pz*0.5; if (u > b.v) { const d = u - b.v; u = b.v + d*0.15; b.v += d*0.35; } }
-    else { if (b.v > u) { const d = b.v - u; b.v = u + d*0.2; u += d*0.4; } }
+    if (px < pz) { const sg = lx > 0 ? 1 : -1; player.x -= co*sg*px*0.6; player.z += s*sg*px*0.6; if (v*sg > 0) v *= -0.3; }
+    else if (lz > 0) { player.x -= s*pz*0.5; player.z -= co*pz*0.5; if (u > b.v) u = b.v + (u - b.v)*0.15; }
+    else { if (b.v > u) u += (b.v - u)*0.4; }
     player.vx = s*u + co*v; player.vz = co*u - s*v;
     if (bumpT <= 0) { bumpT = 0.35; sfx('thud', 0.8); haptic('medium'); }
   }
@@ -1620,10 +1724,10 @@ function skillForTime(ms) {
 let state = 'menu';            // menu | countdown | race | finished | paused
 let player, bots = [], cars = [], raceT = 0, countT = 0, lapStart = 0, bestLap = 0, finishMs = 0, place = 1;
 const LEVELS = [
-  { name: 'Новичок',  skills: [0.74,0.78,0.81,0.84,0.87], think: 0.9 },
-  { name: 'Любитель', skills: [0.84,0.87,0.90,0.92,0.945], think: 0.55 },
-  { name: 'Профи',    skills: [0.90,0.93,0.955,0.98,1.0], think: 0.35 },
-  { name: 'Легенда',  skills: [0.95,0.975,1.0,1.02,1.04], think: 0.22 }
+  { name: 'Новичок',  skills: [0.00,0.03,0.06,0.09,0.12], think: 0.9 },
+  { name: 'Любитель', skills: [0.15,0.19,0.23,0.27,0.31], think: 0.55 },
+  { name: 'Профи',    skills: [0.34,0.39,0.44,0.50,0.56], think: 0.35 },
+  { name: 'Легенда',  skills: [0.62,0.72,0.82,0.91,1.0], think: 0.22 }
 ];
 let level = 1, wins = {};
 try { const l = parseInt(localStorage.getItem('td_level') || '1', 10); if (l >= 0 && l < 4) level = l; wins = JSON.parse(localStorage.getItem('td_wins') || '{}') || {}; } catch (e) {}
@@ -1694,7 +1798,8 @@ let challenge = null, rivalBot = null, camH = 0, camX = 0, camZ = 0, lastShown =
 function gridPlace(c, slot) {      // slot 0 is pole position, just behind the line
   const N = T.N, i = ((N - 5 - slot*4.4) % N + N) % N | 0, side = (slot % 2 ? 1 : -1)*2.4;
   c.x = T.x[i] + Math.cos(T.h[i])*side; c.z = T.z[i] - Math.sin(T.h[i])*side; c.h = T.h[i]; c.idx = i; c.lap = 0;
-  if (c.bot) { c.s = N*40 + i; c.s0 = N*41; c.lane = side; c.laneT = side; }
+  c.lat = side; c.vx = 0; c.vz = 0; c.vf = 0; c.r = 0; c.st = 0;
+  if (c.rival) { c.s = N*40 + i; c.s0 = N*41; c.lane = side; c.laneT = side; }
 }
 function setupRace(trackId, useChallenge) {
   if (NET.on && !NET.racing) netLeave();
@@ -1708,7 +1813,7 @@ function setupRace(trackId, useChallenge) {
   rivalBot = null;
   if (useChallenge && challenge && challenge.track === trackId) { rivalBot = newBot(PAINTS[cols[6]], skillForTime(challenge.ms), 0, challenge.name, types[3]); rivalBot.rival = true; bots.push(rivalBot); }
   cars = bots.concat([player]);
-  bots.forEach(function (b, k) { gridPlace(b, k); placeBot(b); b.lap = 0; });
+  bots.forEach(function (b, k) { gridPlace(b, k); if (b.rival) placeBot(b); b.lap = 0; botReady(b); });
   gridPlace(player, bots.length);
   resetRaceState(); koSetup(opt.ko && !ch && !CHAMP.on); ghostSetup();
   const r = document.getElementById('rival');
@@ -1732,7 +1837,7 @@ function beginCountdown() {
   for (const id of ['menu','finish','paused','mp']) document.getElementById(id).classList.add('hidden');
   document.getElementById('hud').style.display = 'block'; document.getElementById('linkbox').style.display = 'none';
 }
-function progress(c) { return c.bot ? c.s - c.s0 + T.N : c.lap*T.N + c.idx; }
+function progress(c) { return c.rival ? c.s - c.s0 + T.N : c.lap*T.N + c.idx; }
 // After the finish the player may ride along with whoever is still racing: the camera, the sound and the map follow that car.
 let spec = null, specAuto = false, specHold = 0, specTick = 0;
 function ranking() { const rows = cars.slice(); rows.sort(function (a, b) { const ta = NET.results[a.nid], tb = NET.results[b.nid]; return ta || tb ? (ta || 1e12) - (tb || 1e12) : progress(b) - progress(a); }); return rows; }      // finished by time, the rest by how far they are
@@ -1862,7 +1967,7 @@ function buildPowerMeshes() {
   DOME_MESH = upload(dm);
 }
 function tdiff(a, b) { const N = T.N; let d = (a - b) % N; if (d > N/2) d -= N; if (d < -N/2) d += N; return d; }
-function carS(c) { return c.bot ? c.s : c.idx; }
+function carS(c) { return c.rival ? c.s : c.idx; }
 function tpoint(s, lat, y) { const N = T.N, f = Math.floor(s), i = ((f % N) + N) % N, j = (i+1) % N, k = s - f, h = T.h[i];
   return [T.x[i] + (T.x[j]-T.x[i])*k + Math.cos(h)*lat, y, T.z[i] + (T.z[j]-T.z[i])*k - Math.sin(h)*lat]; }
 function randomPower(forCar) { let tot = 0; for (const p of PU) tot += p.w; let r = Math.random()*tot; for (let i = 0; i < PU.length; i++) { r -= PU[i].w; if (r <= 0) return i; } return 0; }
@@ -1883,12 +1988,12 @@ function hitCar(c, dmg, slow, by, col) {
     if (by === player) { note('Попадание!'); beep(520, 0.12, 'square', 0.05, 900); haptic('light'); } return true; }
   if (c.shield > 0) { c.shield = Math.max(0, c.shield - 2); burst(c.x, c.z, [0.25,0.5,1], 14); if (c === player) { note('Щит выдержал'); beep(900, 0.15, 'triangle', 0.06); } return true; }
   c.hp -= dmg/(c.K ? c.K.arm : 1); burst(c.x, c.z, col || [1,0.6,0.2], 16, true);
-  if (c.bot) { c.v *= slow; c.stun = 1.1; }
-  else { c.vx *= slow; c.vz *= slow; c.h = wrap(c.h + (Math.random() < 0.5 ? -1 : 1)*(0.35 + Math.random()*0.3)); c.boost = 0; c.charge = 0; }
+  if (c.bot) c.stun = 1.1;
+  { c.vx *= slow; c.vz *= slow; c.h = wrap(c.h + (Math.random() < 0.5 ? -1 : 1)*(0.35 + Math.random()*0.3)); c.boost = 0; c.charge = 0; }
   if (c === player) { flashT = 0.35; haptic('heavy'); sfx('boom', 1); note('В тебя попали!'); }
   else if (player && Math.hypot(c.x - player.x, c.z - player.z) < 90) sfx('boom', 0.6/(1 + Math.hypot(c.x - player.x, c.z - player.z)/25));
   else if (by === player) { note('Попадание!'); beep(520, 0.12, 'square', 0.05, 900); haptic('light'); }
-  if (c.hp <= 0) { c.wreck = 1.7; c.hp = 0; burst(c.x, c.z, [1,0.4,0.1], 26, true); if (c.bot) c.v = 0; else { c.vx = 0; c.vz = 0; } if (c === player) note('Машина разбита'); else if (by === player) note('Соперник выбит!'); }
+  if (c.hp <= 0) { c.wreck = 1.7; c.hp = 0; burst(c.x, c.z, [1,0.4,0.1], 26, true); c.vx = 0; c.vz = 0; c.v = 0; if (c === player) note('Машина разбита'); else if (by === player) note('Соперник выбит!'); }
   return true;
 }
 function carAhead(c, maxDist) {                     // nearest car in front of c along the track
@@ -1904,7 +2009,7 @@ function useItem(c, slot, back) {
   const it = c.items[slot || 0]; if (!it) return;
   const id = PU[it.type].id, s = carS(c), mine = c === player, shots0 = shots.length;
   let keep = false;
-  if (id === 'nitro') { if (c.bot) c.nitro = 2.4; else { c.boost = 2.4; } if (mine) sfx('whoosh', 0.7); }
+  if (id === 'nitro') { c.boost = 2.4; if (mine) sfx('whoosh', 0.7); }
   else if (id === 'rocket') { const tg = back ? carBehind(c, 120) : carAhead(c, 170); shots.push({ kind: 'rocket', s: s + (back ? -2.6 : 2), lat: c.lat, v: back ? Math.min(-14, Math.max(0, c.vf) - 46) : 64, owner: c, target: tg, life: 5, col: PU[it.type].col }); if (mine) sfx('whoosh', 1); }
   else if (id === 'bolt') { it.shots = (it.shots === undefined ? 3 : it.shots) - 1; keep = it.shots > 0;
     shots.push({ kind: 'bolt', s: s + (back ? -2.6 : 2), lat: c.lat, v: back ? Math.min(-16, Math.max(0, c.vf) - 56) : Math.max(0, c.vf) + 62, owner: c, life: back ? 2.2 : 1.25, col: PU[it.type].col }); if (mine) sfx('zap', 1); }
@@ -1935,8 +2040,8 @@ function updatePowerups(dt) {
       if (Math.abs(tdiff(carS(c), p.i)) < 1.8 && Math.abs(c.lat - p.lat) < 2.0) { c.items.push({ type: p.type }); p.t = 5; c.held = 0; if (c === player && c.items.length === 1) sel = 0;
         if (c === player) { note(PU[p.type].name); beep(880, 0.12, 'triangle', 0.06, 1320); haptic('light'); hudItems(); } break; } } }
   // timers
-  for (const c of cars) { if (c.net) continue; if (c.shield > 0) c.shield -= dt; if (c.stun > 0) c.stun -= dt; if (c.nitro > 0) c.nitro -= dt;
-    if (c.wreck > 0) { c.wreck -= dt; if (c.wreck <= 0) { c.hp = 100; if (!c.bot) respawn(c); burst(c.x, c.z, [0.6,0.9,1], 8); } } }
+  for (const c of cars) { if (c.net) continue; if (c.shield > 0) c.shield -= dt; if (c.stun > 0) c.stun -= dt;
+    if (c.wreck > 0) { c.wreck -= dt; if (c.wreck <= 0) { c.hp = 100; if (!c.rival) respawn(c); burst(c.x, c.z, [0.6,0.9,1], 8); } } }
   // shots
   const live = [];
   for (const q of shots) {
@@ -2122,8 +2227,8 @@ function update(dt) {
       if (player.lap > LAPS) finishRace(); else { note(player.lap === LAPS ? 'Последний круг!' : 'Круг ' + fmt(lapMs)); beep(700, 0.2, 'triangle', 0.06); }
     } else if (state === 'race' && player.lap > lapBefore && lapBefore === 0) lapStart = raceT;
     if (RAIN && player.vf > 12 && particles.length < 70) smoke(player, [0.78,0.82,0.88], dt);
-    for (const b of bots) { stepBot(b, dt); if (RAIN && b.v > 14 && particles.length < 60) smoke(b, [0.78,0.82,0.88], dt); if (!b.done && b.s - b.s0 >= LAPS*T.N) { b.done = true; netFinished(b.nid, Math.round((raceClock - (b.v > 1 ? (b.s - b.s0 - LAPS*T.N)/b.v : 0))*1000)); } if (b.sliding && particles.length < 50) smoke(b, [0.93,0.93,0.95], dt); else if (b.nitro > 0) smoke(b, [1,0.62,0.18], dt, true); }
-    if (state === 'race') { collide(dt); closeRacing(dt); ghostFrame(dt); } else specFrame(dt);
+    for (const b of bots) { stepBot(b, dt); if (RAIN && b.v > 14 && particles.length < 60) smoke(b, [0.78,0.82,0.88], dt); if (!b.done && (b.rival ? b.s - b.s0 >= LAPS*T.N : b.lap > LAPS)) { b.done = true; netFinished(b.nid, Math.round((raceClock - (b.v > 1 ? (b.rival ? b.s - b.s0 - LAPS*T.N : b.idx)/b.v : 0))*1000)); } if (b.sliding && particles.length < 50) smoke(b, [0.93,0.93,0.95], dt); else if (b.nitro > 0) smoke(b, [1,0.62,0.18], dt, true); }
+    if (state === 'race') { collide(dt); closeRacing(dt); ghostFrame(dt); } else { for (let i = 0; i < bots.length; i++) { const a = bots[i]; if (a.rival || a.wreck > 0) continue; for (let k = i + 1; k < bots.length; k++) { const b = bots[k]; if (!b.rival && !(b.wreck > 0)) bumpPair(a, b); } } specFrame(dt); }
     koFrame(dt);
     updatePowerups(dt);
   }
@@ -2301,7 +2406,7 @@ function netBegin(m) {
     else { const c = newCar(PAINTS[b.color] || PAINTS[0], b.type); c.net = true; c.nid = b.nid; c.name = CAR_TYPES[b.type || 0].name; cars.push(c); } }
   for (const p of m.list) { if (p.nid === NET.me) continue; const c = newCar(PAINTS[p.color] || PAINTS[0], p.type); c.net = true; c.nid = p.nid; c.name = p.name; cars.push(c); }
   cars.push(player);
-  m.order.forEach(function (nid, slot) { const c = carByNid(nid); if (!c) return; gridPlace(c, slot); if (c.bot) { placeBot(c); c.lap = 0; } c.sn = null; });
+  m.order.forEach(function (nid, slot) { const c = carByNid(nid); if (!c) return; gridPlace(c, slot); if (c.bot) { c.lap = 0; botReady(c); } c.sn = null; });
   resetRaceState(); koSetup(!!m.ko); beginCountdown();
 }
 // state of every car this device drives: [id, x, z, heading, forward speed, side speed, lap, sample, offset, wheel, flags, shield, health]
@@ -2431,7 +2536,7 @@ function camera(dt) {
     if (stageBox(dt)) { camEye = [player.x + Math.sin(a)*4.6, 1.25 + Math.sin(menuT*0.5)*0.25, player.z + Math.cos(a)*4.6]; camLook = [player.x, 0.45, player.z]; camFov = 44; return; }
     camEye = [player.x + Math.sin(a)*D, 1.25 + Math.sin(menuT*0.5)*0.25, player.z + Math.cos(a)*D]; camLook = [player.x, portrait ? -0.95 : 0.15, player.z]; camFov = portrait ? 62 : 44; return;
   }
-  const P = (state === 'finished' && spec) || player, slip = P.bot ? 0 : Math.atan2(P.vl || 0, Math.max(6, P.vf));               // in a slide the camera follows the travel, so the car is seen sideways
+  const P = (state === 'finished' && spec) || player, slip = P.rival ? 0 : Math.atan2(P.vl || 0, Math.max(6, P.vf));               // in a slide the camera follows the travel, so the car is seen sideways
   camH = wrap(camH + wrap(P.h + slip*0.7 - camH)*Math.min(1, dt*4.6)); camX += (P.x - camX)*Math.min(1, dt*14); camZ += (P.z - camZ)*Math.min(1, dt*14);
   const boost = P.boost > 0 || (P !== player && P.nitro > 0) ? 1 : 0, D = portrait ? 5.7 : 5.1, H = portrait ? 2.9 : 2.15;
   camShake = Math.max(0, camShake - dt*2.2); const shake = (boost ? (Math.random() - 0.5)*0.05 : 0) + (Math.random() - 0.5)*camShake;
