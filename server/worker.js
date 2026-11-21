@@ -2,8 +2,8 @@
 // Cloudflare Worker. Needs: a D1 database bound as DB, secrets BOT_TOKEN and HOOK_SECRET.
 // Optional plain variables: GAME_URL (where the game is hosted), BOT_NAME, APP_NAME.
 
-const TRACKS = 3;                                    // Кольцо, Змейка, Шпильки
-const MIN_MS = [90000, 75000, 114000];               // nobody drives a clean race faster than this: such a time is not taken
+const TRACKS = 16;                                   // Кольцо, Змейка, Шпильки, Токио; room is left for the cities to come, so that a new track needs no new server
+const MIN_MS = [90000, 75000, 114000, 97000], MIN_DEF = 60000;   // nobody drives a clean race faster than this: such a time is not taken (MIN_DEF for a track not listed yet)
 const MAX_MS = 20*60*1000;
 const CARS = 32;                                     // car numbers the game may send; the game itself knows their names
 const TOP = 15;
@@ -61,7 +61,7 @@ async function board(env, track, me) {
 async function score(env, q, request) {
   const me = await whoIs(q.init, env); if (!me) return json({ ok: false, err: 'auth' }, 401);
   const track = q.track | 0, ms = Math.round(+q.ms), car = q.car | 0;
-  if (!(track >= 0 && track < TRACKS) || !(car >= 0 && car < CARS) || !(ms >= MIN_MS[track] && ms <= MAX_MS)) return json({ ok: false, err: 'range' }, 400);
+  if (!(track >= 0 && track < TRACKS) || !(car >= 0 && car < CARS) || !(ms >= (MIN_MS[track] || MIN_DEF) && ms <= MAX_MS)) return json({ ok: false, err: 'range' }, 400);
   let cc = String(request && request.cf && request.cf.country || '').toUpperCase(); if (!/^[A-Z]{2}$/.test(cc) || cc === 'XX') cc = '';          // the country the request came from, as Cloudflare sees it
   await withCountry(env, () => env.DB.prepare('INSERT INTO best (track, uid, name, ms, car, at, cc) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7) ON CONFLICT (track, uid) DO UPDATE SET name = excluded.name, ' +
     "cc = CASE WHEN excluded.cc != '' THEN excluded.cc ELSE best.cc END, " +
