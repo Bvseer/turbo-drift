@@ -467,7 +467,7 @@
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 61</div>
+    <div style="opacity:.5;margin-top:8px">версия 62</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -541,7 +541,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 61</div>
+  <div class="fver">Turbo Drift · версия 62</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1924,7 +1924,7 @@ const CITY_GEN = {
     { const px = -404, pz = 384, GD = [0.80,0.68,0.46]; mb.box(px, 5.5, pz, 58, 11, 48, GD, 0); mb.box(px, 5.6, pz, 58.3, 6.5, 40, [0.08,0.10,0.14], 4); mb.box(px, 12, pz, 68, 1.6, 58, WH, 0); for (let k = 0; k < 15; k++) { mb.box(px - 29.4, 5.5, pz - 22.4 + k*3.2, 0.8, 11, 0.9, GD, 0); mb.box(px + 29.4, 5.5, pz - 22.4 + k*3.2, 0.8, 11, 0.9, GD, 0); }
       for (const o of [-27, 27]) for (const q of [-22, 22]) mb.cyl(px + o*1.12, 0, pz + q*1.14, 0.7, 0.7, 11.4, 8, WH, 0); mb.box(-399, 8, 324, 5, 3, 76, [0.30,0.40,0.50], 7); K.keep(px, pz, 38); }
     // the banks: five towers in a row between the park and the south road
-    [[-654,66,GLS[2]],[-603,60,GLS[4]],[-552,90,GLS[0]],[-501,63,GLS[3]],[-450,68,GLS[1]]].forEach(function (b) { mb.box(b[0], b[1]/2, 124, 25, b[1], 23, b[2], 7); mb.box(b[0], b[1] + 1.6, 124, 21, 3.2, 19, K.mul(b[2], 0.7), 7); mb.box(b[0], 3, 124, 31, 6, 29, K.mul(b[2], 0.8), 7); mb.box(b[0], b[1] + 3.7, 124, 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5); if (b[1] < 80) c.shade(b[0], 124, 25, 23, b[1], 0, K); K.keep(b[0], 124, 16); });
+    [[-622,66,GLS[2]],[-576,60,GLS[4]],[-530,90,GLS[0]],[-484,63,GLS[3]],[-438,68,GLS[1]]].forEach(function (b) { mb.box(b[0], b[1]/2, 124, 25, b[1], 23, b[2], 7); mb.box(b[0], b[1] + 1.6, 124, 21, 3.2, 19, K.mul(b[2], 0.7), 7); mb.box(b[0], 3, 124, 31, 6, 29, K.mul(b[2], 0.8), 7); mb.box(b[0], b[1] + 3.7, 124, 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5); if (b[1] < 80) c.shade(b[0], 124, 25, 23, b[1], 0, K); K.keep(b[0], 124, 16); });
     // the tallest tower north of the road, on the axis of the avenue that comes from the old centre: a blade of blue glass that swells and narrows again, two round towers beside it on one base
     { const px = -520, pz = 548, H = 155, n = 10, B = [0.24,0.38,0.54]; K.open(-612,492,-428,612); mb.box(px, 4, pz, 156, 8, 58, [0.30,0.36,0.42], 7);
       for (let k = 0; k < n; k++) { const t0 = (k + 0.5)/n, sw = (0.92 + 0.16*Math.sin(3.1416*t0*0.85))*(t0 > 0.78 ? 1 - (t0 - 0.78)*1.5 : 1); mb.box(px + 2.6*Math.sin(3.1416*t0), 8 + (H - 8)*t0, pz, 27*sw, (H - 8)/n, 22*sw, K.mul(B, k % 2 ? 1.0 : 1.08), 7, 0.06*k); }
@@ -2205,7 +2205,7 @@ const CITY_GEN = {
     for (const xx of [112, 182, 252]) { mb.box(xx, WY + 0.45, 150, 2.4, 0.7, 98, [0.80,0.78,0.72], 0); for (let k = 0; k < 9; k++) for (const sd of [-1, 1]) if (rnd() < 0.85) K.yacht(xx + sd*7.2, 106 + k*10.4, 1.5708, 0.72 + rnd()*0.2); }
     for (const y of [[318,90,0,1.9],[318,150,0,2.2],[520,120,0.3,2.6],[560,330,1.2,2.2],[200,-120,1.4,2.4],[-20,-150,1.9,2.0]]) K.yacht(y[0], y[1], y[2], y[3]);
     K.pond(-78, 108, -34, 186); K.grove(46, -88, 32, 372, 58, 6, 3); K.grove(40, -88, 204, 372, 278, 6, 3); K.grove(20, 396, 40, 436, 228, 6, 3);
-    for (const sx of [100, 170, 240]) K.stand(sx, -2, 0, 56); mb.box(330, 2.6, 46, 80, 5.2, 9, [0.92,0.92,0.92], 0); mb.box(330, 5.5, 46, 82, 0.5, 11, [0.80,0.16,0.14], 0);
+    for (const sx of [100, 170, 240]) K.stand(sx, -2, 0, 56); mb.box(262, 2.6, 46, 80, 5.2, 9, [0.92,0.92,0.92], 0); mb.box(262, 5.5, 46, 82, 0.5, 11, [0.80,0.16,0.14], 0);
     // the tunnel by the sea with a hotel standing over it
     { const WO = K.tunnel(S.tunnel[0], S.tunnel[1], { blocks: false, conc: [0.80,0.76,0.66] }), im = (S.tunnel[0] + (S.tunnel[1] >> 1)) % N, p = at(im, 0, 0); mb.box(p[0] - 8, 7.9 + 17, p[2], 2*WO + 30, 34, S.tunnel[1] - 24, [0.92,0.88,0.78], 7, 0); mb.box(p[0] - 8, 42.4, p[2], 2*WO + 28, 1.4, S.tunnel[1] - 26, [0.62,0.34,0.22], 0, 0); for (let zz = -80; zz <= 80; zz += 20) K.keep(p[0] - 8, p[2] + zz, 22); }
     // the casino behind its garden and fountain
