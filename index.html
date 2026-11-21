@@ -337,7 +337,7 @@
     <div><b>Слипстрим</b> — держись прямо за соперником, машина разгонится сильнее; <b>обгон впритирку</b> без касания даёт турбо</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>H</kbd> гудок</span><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в игре с друзьями</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 32</div>
+    <div style="opacity:.5;margin-top:8px">версия 33</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -1611,7 +1611,7 @@ function botLook(b) {
     const here = T.rl[o.idx]*b.drv.wide, left = o.lat - 2.6, right = o.lat + 2.6, okL = left > -W, okR = right < W;      // go round on the side nearer the racing line, if the road is wide enough there
     if (okL && okR) abs = Math.abs(left - here) < Math.abs(right - here) ? left : right; else if (okL) abs = left; else if (okR) abs = right;
   }
-  A.abs = abs; A.cap = cap;
+  A.abs = abs; A.cap = Math.max(3, cap);                                                     // never a dead stop behind a parked car: creep up and nudge past
   b.draft = tow ? Math.min(1.6, b.draft + 0.1) : Math.max(0, b.draft - 0.25);
 }
 function botInput(b, dt) {                                // what the driver does with the wheel and the pedals right now
@@ -2058,20 +2058,22 @@ function updatePowerups(dt) {
     if (!dead) live.push(q);
   }
   shots = live;
-  // computer drivers decide when to use what they hold
+  // Computer drivers decide when to use what they hold. They race the people, not each other: a weapon is kept for a
+  // human driver within reach, and only now and then spent on another computer car (the better the drivers, the more rarely).
   for (const b of bots) { if (b.rival || b.done || b.wreck > 0 || !b.items.length) continue;
+    if (!b.held) b.vsBots = !b.bot || Math.random() < [0.7, 0.5, 0.3, 0.15][level];
     b.held = (b.held || 0) + dt; b.think = (b.think || 0) - dt; if (b.think > 0) continue; b.think = LEVELS[level].think;
-    const id = PU[b.items[0].type].id, ahead = carAhead(b, 80); let fire = false;
+    const id = PU[b.items[0].type].id, ahead = carAhead(b, 80), ok = function (o) { return !!o && (!o.bot || b.vsBots); }, weapon = id === 'rocket' || id === 'bolt' || id === 'mine' || id === 'wave' || id === 'shock'; let fire = false;
     if (id === 'nitro') fire = T.vp[(b.idx + 22) % N] > 29 && b.held > 0.6;
-    else if (id === 'rocket') fire = !!ahead && b.held > 1.8;
-    else if (id === 'bolt') fire = !!ahead && progress(ahead) - progress(b) < 28 && Math.abs(ahead.lat - b.lat) < 1.6;
-    else if (id === 'mine') { for (const o of cars) { const d = progress(b) - progress(o); if (o !== b && !o.rival && d > 4 && d < 20) fire = true; } }
-    else if (id === 'wave') { for (const o of cars) if (o !== b && !o.rival && Math.hypot(o.x-b.x, o.z-b.z) < 8) fire = true; }
-    else if (id === 'shock') fire = b.held > 1.5 && !!ahead;
-    else if (id === 'shield') { for (const q of shots) if (q.kind === 'rocket' && q.target === b && Math.abs(tdiff(b.s, q.s)) < 30) fire = true; if (b.held > 6) fire = true; }
+    else if (id === 'rocket') fire = ok(ahead) && b.held > 1.8;
+    else if (id === 'bolt') fire = ok(ahead) && progress(ahead) - progress(b) < 28 && Math.abs(ahead.lat - b.lat) < 1.6;
+    else if (id === 'mine') { for (const o of cars) { const d = progress(b) - progress(o); if (o !== b && !o.rival && d > 4 && d < 20 && ok(o)) fire = true; } }
+    else if (id === 'wave') { for (const o of cars) if (o !== b && !o.rival && Math.hypot(o.x-b.x, o.z-b.z) < 8 && ok(o)) fire = true; }
+    else if (id === 'shock') { let lead = null; for (const o of cars) if (!o.rival && !o.done && (!lead || progress(o) > progress(lead))) lead = o; fire = b.held > 1.5 && !!ahead && lead !== b && ok(lead); }
+    else if (id === 'shield') { for (const q of shots) if (q.kind === 'rocket' && q.target === b && Math.abs(tdiff(carS(b), q.s)) < 30) fire = true; if (b.held > 6) fire = true; }
     else if (id === 'repair') fire = b.hp < 70 || b.held > 9;
-    if (b.held > 14) fire = true;
-    let backFire = false; if (!fire && (id === 'rocket' || id === 'bolt') && !ahead && b.held > 2.5) { const bh = carBehind(b, id === 'bolt' ? 22 : 45); if (bh && (id === 'rocket' || Math.abs(bh.lat - b.lat) < 1.6)) { fire = true; backFire = true; } }
+    let backFire = false; if (!fire && (id === 'rocket' || id === 'bolt') && !ahead && b.held > 2.5) { const bh = carBehind(b, id === 'bolt' ? 22 : 45); if (ok(bh) && (id === 'rocket' || Math.abs(bh.lat - b.lat) < 1.6)) { fire = true; backFire = true; } }
+    if (!fire && b.held > 14) { if (weapon && !b.vsBots) { b.items.shift(); b.held = 0; continue; } fire = true; }      // nobody to use it on: let it go and pick up another
     if (fire) useItem(b, 0, backFire);
   }
   if (flashT > 0) flashT -= dt;
