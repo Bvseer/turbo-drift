@@ -143,6 +143,26 @@
   body.land #menu .mprow button { padding: 8px 4px; font-size: 14.5px; }
   #mpstart { width: min(360px, 100%); box-sizing: border-box; display: flex; flex-direction: column; align-items: center; padding: 14px 16px 16px; border-radius: 20px; background: rgba(14,22,48,.8); } #mpstart .sub { margin-bottom: 10px; font-size: 14px; } #mpstart .btns { margin-top: 0; }
   body.wide .pubstat { font-size: 20px; } body.wide #mpstart { padding: 10px 14px 12px; } body.wide #mpstart .sub { font-size: 12.5px; margin-bottom: 7px; } body.wide #mpstart button { padding: 10px 20px; font-size: 16px; } body.wide #mpstart .joinrow { margin-top: 8px; } body.wide #mpstart .joinrow input { padding: 6px; font-size: 19px; }
+  /* chat: lines that fade over any screen, a panel with ready phrases, an upright pad for typing on a phone */
+  .chatfeed { position: fixed; left: 50%; top: 78px; transform: translateX(-50%); width: min(420px, 70%); display: flex; flex-direction: column; align-items: center; gap: 4px; pointer-events: none; z-index: 40; }
+  .chatfeed.side { left: 14px; top: 122px; transform: none; align-items: flex-start; width: 44%; } body.kbd .chatfeed.side { top: 156px; width: 32%; }
+  .chatfeed div { padding: 4px 10px; border-radius: 10px; background: rgba(10,13,24,.74); font-size: 13px; font-weight: 600; text-align: left; max-width: 100%; box-sizing: border-box; overflow-wrap: anywhere; transition: opacity .35s; } .chatfeed div.gone { opacity: 0; }
+  .chatfeed b, .chatlog b { font-weight: 800; margin-right: 6px; }
+  .chatbox { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(400px, calc(100% - 24px)); max-height: calc(100% - 16px); box-sizing: border-box; padding: 10px 12px 12px; border-radius: 18px; background: rgba(14,20,40,.95); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 12px 40px rgba(0,0,0,.5); display: flex; flex-direction: column; gap: 8px; z-index: 60; overflow-y: auto; }
+  .chatbox.hidden, .chatpad.hidden { display: none; }
+  .chathead { display: flex; align-items: center; gap: 8px; font-size: 15px; } .chathead b { flex: 1; text-align: left; } .chathead button { border: 0; border-radius: 10px; background: rgba(255,255,255,.14); color: #fff; font-size: 12px; font-weight: 700; padding: 7px 11px; }
+  .chatlog { max-height: 92px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; text-align: left; font-size: 13px; font-weight: 600; touch-action: pan-y; } .chatlog:empty { display: none; } .chatlog div { overflow-wrap: anywhere; }
+  .phr { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } .phr button { border: 0; border-radius: 12px; padding: 11px 6px; font-size: 14px; font-weight: 800; color: #fff; background: rgba(255,255,255,.14); } .phr button:active { background: #ffd23f; color: #1a2140; }
+  .chatrow { display: flex; gap: 6px; } .chatrow input { flex: 1; min-width: 0; border: 2px solid rgba(255,255,255,.3); border-radius: 12px; background: rgba(10,13,24,.6); color: #fff; font-size: 16px; font-weight: 600; padding: 8px 10px; outline: none; -webkit-user-select: text; user-select: text; }
+  .chatrow button { border: 0; border-radius: 12px; padding: 0 14px; font-size: 16px; font-weight: 900; background: #ffd23f; color: #1a2140; } .chatrow button.dim { background: rgba(255,255,255,.16); color: #fff; }
+  .chatbox.slim { left: 14px; top: auto; bottom: 64px; transform: none; width: min(360px, 44%); padding: 8px; } .chatbox.slim .chathead, .chatbox.slim .chatlog, .chatbox.slim .phr { display: none; }
+  .chatbox.off .phr, .chatbox.off .chatrow, .chatbox.off .chatlog, .chatbox.off #chatwrite { display: none !important; } body.mob .chatbox .chatrow { display: none; } body.kbd #chatwrite { display: none !important; }
+  .chatpad { position: absolute; left: 0; top: 0; transform-origin: 0 0; box-sizing: border-box; padding: 10px; background: rgba(10,14,30,.97); z-index: 70; display: flex; flex-direction: column; gap: 8px; } .chatpad .chatrow { height: 46px; } .chatpad .chatlog { max-height: none; flex: 1 1 0; min-height: 0; font-size: 15px; }
+  /* while driving: only the phrases, in a low strip under the speedometer, so the car stays in sight */
+  .chatbox.drive { top: 74px; transform: translateX(-50%); width: min(560px, calc(100% - 224px)); padding: 8px; background: rgba(14,20,40,.8); } .chatbox.drive .chathead, .chatbox.drive .chatlog { display: none; }
+  .chatbox.drive .phr { grid-template-columns: repeat(4, 1fr); } .chatbox.drive .phr button { padding: 12px 2px; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } body.kbd .chatbox.drive { top: 110px; }
+  .btn-chat { right: 60px; }
+  body.land .emorow { gap: 6px; } body.land .emorow button { width: 34px; }
   .pubstat { font-size: 24px; font-weight: 900; color: #ffd23f; margin: 4px 0 6px; text-shadow: 0 2px 8px rgba(0,0,0,.5); } #mppub .btns { margin: 8px auto 0; }
   .tag { position: absolute; left: 0; top: 0; padding: 1px 7px; border-radius: 8px; background: rgba(10,13,24,.42); font-size: 11px; font-weight: 700; white-space: nowrap; text-shadow: none; pointer-events: none; will-change: transform, opacity; }
   .sw.taken { opacity: .22; pointer-events: none; }
@@ -275,6 +295,7 @@
   <div class="rival" id="rival" style="display:none"></div>
   <div class="kobar" id="kobar" style="display:none">Выбывание через <b id="kot">0</b></div>
   <button class="btn-pause btn-horn" id="horn" aria-label="Гудок"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9.500v5h3.600l5.400 4.300V5.200L6.600 9.500z"/><path d="M15 8.300a5 5 0 0 1 0 7.400M17.600 5.600a9 9 0 0 1 0 12.800" fill="none" stroke="currentColor" stroke-width="1.900" stroke-linecap="round"/></svg></button>
+  <button class="btn-pause btn-chat" id="chatbtn" aria-label="Чат" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4.500h16a1.500 1.500 0 0 1 1.500 1.500v9.500a1.500 1.500 0 0 1-1.500 1.500h-8.300l-4.700 3.600v-3.600H4a1.500 1.500 0 0 1-1.500-1.500V6A1.500 1.500 0 0 1 4 4.500z"/></svg></button>
   <canvas id="map" width="224" height="224"></canvas>
   <button class="btn-pause" id="pause" aria-label="Пауза"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.600"/><rect x="14" y="4" width="5" height="16" rx="1.600"/></svg></button>
   <div class="hpbar"><i id="hp"></i></div>
@@ -371,13 +392,24 @@
     <div><b>Старт</b> — <span class="for-pc">нажми газ ровно на GO</span><span class="for-mob">держи ТОРМОЗ и отпусти ровно на GO</span>: будет рывок<span class="for-pc">; раньше времени — пробуксовка</span></div>
     <div><b>Слипстрим</b> — держись прямо за соперником, машина разгонится сильнее; <b>обгон впритирку</b> без касания даёт турбо</div>
     <div><b>Графика</b> в настройках: «Лёгкая» рисует те же кадры с меньшей чёткостью — плавно и телефон греется меньше; «30 к/с» греется меньше всего, но картинка дёрганее</div>
+    <div><b>Чат</b> — кнопка 💬 в комнате, в заезде и на финише: готовые фразы в одно касание<span class="for-pc">, свой текст — клавиша <kbd>T</kbd></span><span class="for-mob">, свой текст — «Написать своё» (не во время езды)</span>. Чат можно выключить</div>
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт через 15 секунд после второго игрока, свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>H</kbd> гудок</span><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 39</div>
+    <div style="opacity:.5;margin-top:8px">версия 40</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
+
+<div class="chatfeed" id="chatfeed"></div>
+<div class="chatbox hidden" id="chatbox">
+  <div class="chathead"><b>Чат комнаты</b><button id="chatmute">выключить чат</button><button id="chatx" aria-label="Закрыть">✕</button></div>
+  <div class="chatlog" id="chatlog"></div>
+  <div class="phr" id="phr"></div>
+  <div class="chatrow for-pc"><input id="chatin" maxlength="80" placeholder="Сообщение — Enter" autocomplete="off" spellcheck="false" aria-label="Сообщение"><button id="chatgo" aria-label="Отправить">➤</button></div>
+  <button class="ghost" id="chatwrite">Написать своё</button>
+</div>
+<div class="chatpad hidden" id="chatpad"><div class="chatrow"><input id="padin" maxlength="80" placeholder="Сообщение" autocomplete="off" enterkeyhint="send" aria-label="Сообщение"><button id="padgo" aria-label="Отправить">➤</button><button id="padx" class="dim" aria-label="Закрыть">✕</button></div><div class="chatlog" id="padlog"></div></div>
 
 <div class="screen hidden" id="mp">
   <h1 style="font-size:34px">Играть вместе</h1>
@@ -436,7 +468,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 39</div>
+  <div class="fver">Turbo Drift · версия 40</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1872,7 +1904,7 @@ function setupRace(trackId, useChallenge) {
   if (rivalBot) { r.style.display = 'block'; r.textContent = 'Соперник: ' + challenge.name + ' — ' + fmt(challenge.ms); } else r.style.display = 'none';
 }
 function resetRaceState() {
-  specStop(false); hudReset();
+  specStop(false); hudReset(); chatClose(); padClose(); document.getElementById('chatbtn').style.display = NET.racing ? '' : 'none';
   NET.results = {}; NET.firstFin = 0; raceClock = 0; if (!NET.racing) { player.nid = 0; bots.forEach(function (b, k) { b.nid = 100 + k; }); }
   raceT = 0; bestLap = 0; lapStart = 0; finishMs = 0; particles = []; skids = []; player.draft = 0; GHOST.play = null; GHOST.car = null; GHOST.rec = []; document.body.classList.toggle('rain', RAIN); setupPickups(); hudItems(); camH = player.h; camX = player.x; camZ = player.z; demo = null;
   document.getElementById('speed').textContent = '0'; document.getElementById('boost').style.width = '0%'; document.getElementById('status').innerHTML = ''; keys.gas = keys.brake = keys.left = keys.right = false; gasBtn = brakeBtn = false;
@@ -2227,10 +2259,13 @@ window.addEventListener('touchstart', function () { if (uiMode === 'auto' && !do
   for (const ev of ['pointerup','pointercancel']) gs.addEventListener(ev, function () { gasBtn = false; gs.classList.remove('on'); });
 })();
 function key(e, down) {
-  if (e.target && e.target.tagName === 'INPUT') { if (down && e.key === 'Enter') netJoin(e.target.value); return; }      // typing a room code
+  if (e.target && e.target.tagName === 'INPUT') { const ti = e.target.id;          // typing a room code or a chat line
+    if (ti === 'chatin' || ti === 'padin') { if (down && e.key === 'Enter') chatType(e.target); else if (down && e.key === 'Escape') { chatClose(); padClose(); } }
+    else if (down && e.key === 'Enter') netJoin(e.target.value); return; }
   const k = (e.key || '').toLowerCase();
   if (down && !e.repeat && k === 'enter' && state === 'menu' && !NET.on) { const vis = function (id) { return !document.getElementById(id).classList.contains('hidden'); };
     if (vis('welcome')) { document.getElementById('wgo').click(); return; } if (vis('menu') && !vis('help') && !vis('mp')) { document.getElementById('play').click(); return; } }
+  if (down && !e.repeat && NET.on && (k === 't' || k === 'е' || (k === 'enter' && chatDriving())) && document.getElementById('chatbox').classList.contains('hidden')) { chatOpen(chatDriving()); e.preventDefault(); return; }
   if (spec) { if (down && !e.repeat) { if (k === 'arrowleft' || k === 'a' || k === 'ф') specStep(-1); else if (k === 'arrowright' || k === 'd' || k === 'в') specStep(1); else if (k === 'escape' || k === 'enter' || k === ' ') specStop(true); } if (k.indexOf('arrow') === 0 || k === ' ') e.preventDefault(); return; }
   if (down && uiMode === 'auto' && (k.indexOf('arrow') === 0 || 'wasdцфыв'.indexOf(k) >= 0)) applyUI('pc');
   if (k === 'arrowleft' || k === 'a' || k === 'ф') keys.left = down; else if (k === 'arrowright' || k === 'd' || k === 'в') keys.right = down;
@@ -2355,7 +2390,7 @@ function peerTransport() {
 // Inside Claude the artifact's own live room carries the messages: everyone in the named room
 // hears everyone, so nothing is relayed through the host.
 function roomTransport(room) {
-  let nr = null, me = '', hostPeer = '', seq = 1, self = null; const offs = [], ids = {}, labels = {}, OPEN = { st: 1, use: 1, hit: 1, fin: 1, emo: 1, horn: 1 };
+  let nr = null, me = '', hostPeer = '', seq = 1, self = null; const offs = [], ids = {}, labels = {}, OPEN = { st: 1, use: 1, hit: 1, fin: 1, emo: 1, horn: 1, chat: 1 };
   const myLabel = function () { for (const p of nr.peers()) if (p.sameTab) return p.peer; return ''; };
   const emit = function (to, m, x) { try { nr.emit('td', { to: to, x: x || '', m: m }).catch(function (e) { if (e && e.code === 'not_permitted') mpMsg(netError('denied')); }); } catch (e) {} };
   const listen = function (isHost) {
@@ -2408,7 +2443,7 @@ function netJoin(code) {
 }
 function netLeave() {
   if (!NET.on) return; try { netSend({ t: 'bye', nid: NET.me }); } catch (e) {}
-  const tr = NET.tr; NET.on = false; NET.racing = false; NET.pub = false; NET.wait = null; NET.qtok = (NET.qtok || 0) + 1; NET.tr = null; NET.roster = []; setTimeout(function () { if (tr) tr.close(); }, 200);
+  chatReset(); const tr = NET.tr; NET.on = false; NET.racing = false; NET.pub = false; NET.wait = null; NET.qtok = (NET.qtok || 0) + 1; NET.tr = null; NET.roster = []; setTimeout(function () { if (tr) tr.close(); }, 200);
 }
 // ---------------------------------------------------------------------------
 // Open rooms: strangers drop in and the race starts by itself. No server keeps a list of rooms, so the rooms
@@ -2526,7 +2561,55 @@ function netAward() {
 }
 const EMO = ['👍', '😂', '😡', '🔥'];
 let emoT = 0, hornT = 0;
-function emoRow(el) { if (el.childNodes.length) return; EMO.forEach(function (e, i) { const b = document.createElement('button'); b.textContent = e; b.setAttribute('aria-label', 'Реакция'); b.addEventListener('click', function () { sendEmo(i); }); el.appendChild(b); }); }
+function emoRow(el) { if (el.childNodes.length) return; EMO.forEach(function (e, i) { const b = document.createElement('button'); b.textContent = e; b.setAttribute('aria-label', 'Реакция'); b.addEventListener('click', function () { sendEmo(i); }); el.appendChild(b); });
+  const c = document.createElement('button'); c.textContent = '💬'; c.setAttribute('aria-label', 'Чат'); c.addEventListener('click', function () { chatOpen(false); }); el.appendChild(c); }
+// ---------------------------------------------------------------------------
+// Chat. Ready phrases are one tap away (the only way to talk while steering a phone); free text is typed
+// on a PC keyboard, or on a phone in a pad that stands upright even though the game is drawn turned.
+// ---------------------------------------------------------------------------
+const PHRASES = ['Привет!', 'Удачи!', 'Хорошая гонка!', 'Ещё разок?', 'Вот это да!', 'Прости!', 'Спасибо!', 'Догоняй!'];
+const CHAT = { log: [], out: 0, seen: {}, off: false };
+try { CHAT.off = localStorage.getItem('td_chat') === '0'; } catch (e) {}
+function chatClean(t) {                                 // one line, no control characters, the rudest words masked
+  t = String(t == null ? '' : t).replace(/[\u0000-\u001f\u007f\u200b-\u200f\u2028-\u202e]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80);
+  return t.replace(/[a-zа-яё]+/gi, function (w) { const l = w.toLowerCase(); return /ху[йея]|пизд|бля[дт]|fuck|nigg|(?:за|вы|до|на|разъ|отъ|долбо|у)[ёе]б/.test(l) || /^(?:[ёе]б[аулнтои]|ху[июё]|сук[аи]$|бля+$)/.test(l) ? w[0] + '***' : w; });
+}
+function chatDriving() { return state === 'race' || state === 'countdown'; }
+function chatSend(x, q) {
+  const now = performance.now(), m = { t: 'chat', nid: NET.me }; if (!NET.on || CHAT.off || now - CHAT.out < 1200) return false;
+  if (q >= 0) m.q = q | 0; else { m.x = chatClean(x); if (!m.x) return false; }
+  CHAT.out = now; netSend(m); chatIn(m); return true;
+}
+function chatIn(m) {
+  if (CHAT.off || !NET.on) return; const nid = m.nid | 0, now = performance.now(); if (nid !== NET.me) { if (now - (CHAT.seen[nid] || 0) < 500) return; CHAT.seen[nid] = now; }
+  const text = m.q !== undefined ? PHRASES[m.q | 0] : chatClean(m.x); if (!text) return; const p = NET.roster.filter(function (q) { return q.nid === nid; })[0];
+  const e = { name: p ? p.name : 'Игрок', col: p && PAINTS[p.color] ? PAINTS[p.color] : [1,1,1], text: text }; CHAT.log.push(e); if (CHAT.log.length > 40) CHAT.log.shift();
+  for (const id of ['chatlog', 'padlog']) { const el = document.getElementById(id); el.appendChild(chatLine(e)); while (el.children.length > 40) el.removeChild(el.firstChild); el.scrollTop = 1e6; }
+  const f = document.getElementById('chatfeed'), d = chatLine(e); f.className = 'chatfeed' + (chatDriving() || (state === 'finished' && document.getElementById('finish').classList.contains('hidden')) ? ' side' : '');
+  f.appendChild(d); while (f.children.length > 4) f.removeChild(f.firstChild); setTimeout(function () { d.classList.add('gone'); setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 400); }, 6500);
+}
+function chatLine(e) { const d = document.createElement('div'), b = document.createElement('b'); b.textContent = e.name; b.style.color = 'rgb(' + e.col.map(function (v) { return Math.round(110 + Math.pow(v, 0.8)*145); }).join(',') + ')'; d.appendChild(b); d.appendChild(document.createTextNode(e.text)); return d; }
+function chatOpen(slim) {
+  if (!NET.on) return; const b = document.getElementById('chatbox'), mob = document.body.classList.contains('mob'); slim = !!slim && !mob && !CHAT.off;
+  b.classList.remove('hidden'); b.classList.toggle('slim', slim); b.classList.toggle('drive', chatDriving() && !slim && !CHAT.off); b.classList.toggle('off', CHAT.off); clearTimeout(CHAT.shut); if (chatDriving() && mob) CHAT.shut = setTimeout(chatClose, 6000); document.getElementById('chatmute').textContent = CHAT.off ? 'включить чат' : 'выключить чат';
+  document.getElementById('chatwrite').style.display = chatDriving() ? 'none' : ''; document.getElementById('chatlog').scrollTop = 1e6;
+  if (!mob && !CHAT.off) { for (const k in keys) keys[k] = false; const i = document.getElementById('chatin'); i.value = ''; try { i.focus(); } catch (e) {} }
+}
+function chatClose() { const b = document.getElementById('chatbox'); if (b.classList.contains('hidden')) return; b.classList.add('hidden'); try { document.getElementById('chatin').blur(); } catch (e) {} }
+function chatType(i) { const pad = i.id === 'padin'; if (!i.value.trim()) { if (pad) padClose(); else if (chatDriving()) chatClose(); return; } if (chatSend(i.value, -1)) { i.value = ''; if (pad) padClose(); else if (chatDriving()) chatClose(); } }
+function padOpen() { chatClose(); const p = document.getElementById('chatpad'), i = document.getElementById('padin'); p.classList.remove('hidden'); padLayout(); i.value = ''; document.getElementById('padlog').scrollTop = 1e6; try { i.focus(); } catch (e) {} }
+function padClose() { const p = document.getElementById('chatpad'); if (p.classList.contains('hidden')) return; try { document.getElementById('padin').blur(); } catch (e) {} p.classList.add('hidden'); }
+function padLayout() {                                  // undo the page's quarter turn, so the keyboard and the line being typed face the same way
+  const p = document.getElementById('chatpad'); if (p.classList.contains('hidden')) return; const vv = window.visualViewport, iw = window.innerWidth, ih = Math.min(window.innerHeight, vv ? vv.height : 1e9);
+  p.style.width = iw + 'px'; p.style.height = ih + 'px'; p.style.transform = ROT ? 'rotate(-90deg) translateX(-' + iw + 'px)' : '';
+}
+function chatReset() { CHAT.log = []; CHAT.seen = {}; for (const id of ['chatlog', 'padlog', 'chatfeed']) document.getElementById(id).innerHTML = ''; chatClose(); padClose(); }
+(function () { const g = document.getElementById('phr'); PHRASES.forEach(function (t, i) { const b = document.createElement('button'); b.textContent = t; b.addEventListener('click', function () { if (chatSend(null, i) && chatDriving()) chatClose(); }); g.appendChild(b); });
+  document.getElementById('chatx').addEventListener('click', chatClose); document.getElementById('padx').addEventListener('click', padClose);
+  document.getElementById('chatgo').addEventListener('click', function () { chatType(document.getElementById('chatin')); }); document.getElementById('padgo').addEventListener('click', function () { chatType(document.getElementById('padin')); });
+  document.getElementById('chatwrite').addEventListener('click', padOpen); document.getElementById('chatbtn').addEventListener('click', function () { if (document.getElementById('chatbox').classList.contains('hidden')) chatOpen(false); else chatClose(); });
+  document.getElementById('chatmute').addEventListener('click', function () { CHAT.off = !CHAT.off; try { localStorage.setItem('td_chat', CHAT.off ? '0' : '1'); } catch (e) {} if (CHAT.off) { document.getElementById('chatfeed').innerHTML = ''; chatClose(); } else chatOpen(false); });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', padLayout); })();
 function sendEmo(i) { const now = performance.now(); if (!NET.on || now - emoT < 700) return; emoT = now; const m = { t: 'emo', nid: NET.me, e: i }; netSend(m); netFx(m); }
 function horn() { const now = performance.now(); if (now - hornT < 600 || (state !== 'race' && state !== 'countdown' && state !== 'finished')) return; hornT = now; audio(); const m = { t: 'horn', nid: NET.me }; if (NET.racing) netSend(m); hornSound(1); }
 function hornSound(v) { beep(392, 0.42, 'sawtooth', 0.05*v); beep(494, 0.42, 'sawtooth', 0.045*v); }
@@ -2588,7 +2671,7 @@ function netResults() {
 }
 function netMsg(from, m) {
   if (!m || typeof m !== 'object' || !NET.on) return;
-  if (m.t === 'emo' || m.t === 'horn') { if (NET.host) { if (NET.conn[from] === undefined) return; if (!NET.tr.mesh) NET.tr.all(m, from); } netFx(m); return; }
+  if (m.t === 'emo' || m.t === 'horn' || m.t === 'chat') { if (NET.host) { if (NET.conn[from] === undefined) return; if (m.t === 'chat') m.nid = NET.conn[from]; if (!NET.tr.mesh) NET.tr.all(m, from); } if (m.t === 'chat') chatIn(m); else netFx(m); return; }
   if (m.t === 'ko') { if (!NET.host && NET.racing) koOut(m.nid | 0); return; }
   if (NET.host) {
     if (m.t === 'hello') { const late = NET.racing && NET.pub; if (NET.conn[from] !== undefined) return; if ((NET.racing && !late) || NET.roster.length >= 6) { NET.tr.send(from, { t: 'busy', why: NET.racing && !late ? 'race' : 'full' }); return; }
@@ -2727,7 +2810,7 @@ function layout() {
   b.classList.toggle('rot', ROT); b.classList.toggle('land', mob); b.classList.toggle('wide', wide); WIDE = wide; b.classList.toggle('tiny', mob ? Math.max(iw, ih) < 760 : (wide && iw < 860)); stageTick = 0;
   if (ROT) { b.style.width = window.innerHeight + 'px'; b.style.height = window.innerWidth + 'px'; b.style.transform = 'translateX(' + window.innerWidth + 'px) rotate(90deg)'; }
   else { b.style.width = ''; b.style.height = ''; b.style.transform = ''; }
-  resize();
+  padLayout(); resize();
 }
 // Resolution follows the device: drops when frames keep arriving late, and creeps back up (at most
 // twice) after ten smooth seconds, so one hiccup does not leave the picture soft for good.
