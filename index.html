@@ -93,6 +93,12 @@
   .track { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 0; border-radius: 16px; padding: 14px 16px; color: #fff; text-align: left;
     background: rgba(255,255,255,.14); font-size: 17px; font-weight: 800; }
   .track small { display: block; font-size: 12px; font-weight: 600; opacity: .8; margin-top: 3px; }
+  /* many tracks: three small cards in a row, the description of the chosen one in a line below */
+  .tracks.many { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+  .tracks.many .track, body.wide .tracks.many .track, body.land #menu .tracks.many .track, body:not(.wide) .msheet .tracks.many .track { flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; padding: 8px 10px; border-radius: 13px; font-size: 14.5px; min-width: 0; }
+  .tracks.many .track small { display: none; } .tracks.many .track b { font-size: 11.5px; } .tracks.many .track > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; } .tracks.many .medals { display: flex; margin: 3px 0 2px; gap: 3px; } .tracks.many .medals u { width: 6px; height: 6px; }
+  .tdesc { font-size: 12px; font-weight: 600; opacity: .8; margin: 6px 0 0; text-align: center; min-height: 15px; width: 100%; }
+  #toptabs { flex-wrap: wrap; } #toptabs .lv { flex: 1 0 30%; }
   .track b { font-variant-numeric: tabular-nums; font-size: 14px; color: #ffd23f; white-space: nowrap; }
   .track:active, button.main:active, button.ghost:active { transform: translateY(2px); }
   .challenge { width: min(340px, 100%); box-sizing: border-box; background: rgba(255,210,63,.16); border: 2px solid #ffd23f; border-radius: 16px; padding: 14px; margin-bottom: 14px; font-size: 15px; line-height: 1.45; }
@@ -288,7 +294,7 @@
   body.mob.tilt #it0 { right: 14px; bottom: 18px; width: 74px; height: 74px; } body.mob.tilt #it0 svg { width: 40px; height: 40px; } body.mob.tilt #it1 { right: 100px; bottom: 18px; } body.mob.tilt #it2 { right: 20px; bottom: 100px; width: 60px; height: 60px; }
   body.mob.tilt .fireback { right: 104px; bottom: 92px; width: 50px; height: 50px; }
   body.mob:not(.tilt) #it0 { right: 108px; bottom: 22px; width: 68px; height: 68px; } body.mob:not(.tilt) #it1 { right: 188px; bottom: 22px; } body.mob:not(.tilt) #it2 { right: 112px; bottom: 100px; width: 60px; height: 60px; }
-  body.mob:not(.tilt) .fireback { right: 194px; bottom: 94px; width: 50px; height: 50px; }
+  body.mob:not(.tilt) .fireback { right: 194px; bottom: 94px; width: 50px; height: 50px; } body.mob .fireback { touch-action: none; }
   /* watching the others after the finish */
   .specbar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); display: none; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 20px; background: rgba(10,13,24,.66); border: 1px solid rgba(255,255,255,.14); max-width: calc(100% - 16px); box-sizing: border-box; }
   body.spec .specbar { display: flex; } body.spec .hud > *:not(#tags):not(#map) { display: none !important; }
@@ -383,8 +389,8 @@
   <div class="setupgrid">
     <div class="scol">
       <div class="seclabel">Трасса</div>
-      <div class="tracks" id="tracks"></div>
-      <button class="track champ" id="champ"><span>Чемпионат<small>Все трассы подряд, очки за места</small></span><b>× 4</b></button>
+      <div class="tracks" id="tracks"></div><div class="tdesc" id="tdesc"></div>
+      <button class="track champ" id="champ"><span>Чемпионат<small>Все трассы подряд, очки за места</small></span><b>× 9</b></button>
     </div>
     <div class="scol">
       <div class="seclabel">Соперники</div>
@@ -460,7 +466,7 @@
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 57</div>
+    <div style="opacity:.5;margin-top:8px">версия 59</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -534,7 +540,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 57</div>
+  <div class="fver">Turbo Drift · версия 59</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -808,7 +814,13 @@ const SKIES = {
   dusk:  { sun: [0.76,0.21,0.40],  hor: [0.80,0.42,0.22], zen: [0.07,0.11,0.32], sunc: [2.7,1.25,0.50],  disc: [1.0,0.50,0.18], lo: [0.07,0.06,0.08],    hi: [0.24,0.19,0.28],   gnd: [0.06,0.04,0.03],    glow: 0.90, night: 0.25, shadow: 0.52, cover: 0.45, fogK: 0.00085, expo: 0.78 },
   night: { sun: [-0.36,0.70,0.46], hor: [0.014,0.024,0.06], zen: [0.001,0.002,0.009], sunc: [0.16,0.20,0.32], disc: [0.55,0.60,0.75], lo: [0.014,0.016,0.026], hi: [0.035,0.046,0.085], gnd: [0.004,0.005,0.008], glow: 0.0,  night: 1,    shadow: 0.34, cover: 0.56, fogK: 0.0011,  expo: 1.9 },
   // a city night: the haze glows with the lights below, the last of the sunset lies in the west
-  tokyo: { sun: [-0.78,0.40,0.10], hor: [0.042,0.030,0.066], zen: [0.004,0.005,0.020], sunc: [0.14,0.17,0.30], disc: [0.85,0.46,0.34], lo: [0.020,0.020,0.034], hi: [0.050,0.056,0.095], gnd: [0.006,0.006,0.010], glow: 0.40, night: 1,    shadow: 0.22, cover: 0.58, fogK: 0.00085, expo: 1.9 }
+  tokyo: { sun: [-0.78,0.40,0.10], hor: [0.042,0.030,0.066], zen: [0.004,0.005,0.020], sunc: [0.14,0.17,0.30], disc: [0.85,0.46,0.34], lo: [0.020,0.020,0.034], hi: [0.050,0.056,0.095], gnd: [0.006,0.006,0.010], glow: 0.40, night: 1,    shadow: 0.22, cover: 0.58, fogK: 0.00085, expo: 1.9 },
+  // the blue hour: the sun is gone, the sky still holds its colour, every lamp is already on
+  osaka: { sun: [0.70,0.30,-0.35], hor: [0.17,0.105,0.14], zen: [0.012,0.020,0.070], sunc: [0.42,0.32,0.36], disc: [1.0,0.50,0.30], lo: [0.030,0.030,0.045], hi: [0.090,0.100,0.160], gnd: [0.010,0.010,0.014], glow: 0.70, night: 0.7, shadow: 0.25, cover: 0.50, fogK: 0.0009, expo: 1.5 },
+  paris:    { sun: [-0.62,0.42,0.30], hor: [0.74,0.66,0.62], zen: [0.16,0.28,0.58], sunc: [3.0,2.45,1.75], disc: [1.0,0.80,0.52], lo: [0.11,0.10,0.10], hi: [0.34,0.38,0.50], gnd: [0.08,0.08,0.07], glow: 0.45, night: 0, shadow: 0.50, cover: 0.52, fogK: 0.00080, expo: 0.62 },
+  london:   { sun: [0.30,0.80,-0.40], hor: [0.62,0.66,0.70], zen: [0.36,0.42,0.50], sunc: [1.5,1.5,1.5],   disc: [0.8,0.8,0.8],    lo: [0.20,0.21,0.22], hi: [0.52,0.56,0.62], gnd: [0.09,0.09,0.09], glow: 0.05, night: 0, shadow: 0.26, cover: 0.24, fogK: 0.00110, expo: 0.66 },
+  madrid:   { sun: [0.40,0.82,-0.30], hor: [0.50,0.66,0.92], zen: [0.04,0.16,0.62], sunc: [3.5,3.2,2.7],   disc: [1.0,0.94,0.80],  lo: [0.11,0.11,0.09], hi: [0.30,0.42,0.64], gnd: [0.09,0.08,0.06], glow: 0.08, night: 0, shadow: 0.56, cover: 0.72, fogK: 0.00050, expo: 0.58 },
+  tashkent: { sun: [-0.35,0.78,0.42], hor: [0.62,0.72,0.88], zen: [0.08,0.22,0.62], sunc: [3.3,3.0,2.5],   disc: [1.0,0.93,0.78],  lo: [0.11,0.11,0.09], hi: [0.32,0.42,0.60], gnd: [0.09,0.08,0.06], glow: 0.12, night: 0, shadow: 0.52, cover: 0.66, fogK: 0.00058, expo: 0.60 }
 };
 let SKY = SKIES.day, SUN = [0,1,0];
 let P1 = null, P2 = null, PO = null, PT = null, PS = null, PSH = null, PD = null, CUR = null, dynBuf = null, SHIELD_MESH = null;
@@ -1383,13 +1395,20 @@ let W = null;
 // which keeps them where they are when the lap is driven the other way round.
 // ---------------------------------------------------------------------------
 const NEON = [[0.95,0.22,0.52],[0.18,0.82,0.95],[0.95,0.16,0.10],[1.0,0.78,0.16],[0.28,0.95,0.42],[0.92,0.92,1.0],[0.60,0.34,1.0],[1.0,0.48,0.10]];
-function cityKit(c) {
-  const mb = c.mb, at = c.at, N = c.N, x = c.x, z = c.z, h = c.h, rnd = c.rnd, HW = ROAD_W/2, WY = -14, UPc = [0,-50,0], K = { WY: WY, water: [], placed: [] };
+function cityKit(c, o) { o = o || {};
+  const mb = c.mb, at = c.at, N = c.N, x = c.x, z = c.z, h = c.h, rnd = c.rnd, HW = ROAD_W/2, WY = o.wy || -14, UPc = [0,-50,0], NITE = SKY.night > 0.6, K = { WY: WY, water: [], placed: [], clears: [], NITE: NITE };
+  // the look of a city: wall colours, roofs, signs, how tall the rows along the road stand
+  const ST = K.style = { pal: null, roof: 'flat', neon: true, signs: 1, rowH: null, land: [0.19,0.19,0.21], quay: [0.30,0.30,0.32] }; for (const k in (o.style || {})) ST[k] = o.style[k];
+  const mul = function (c3, k) { return [c3[0]*k, c3[1]*k, c3[2]*k]; };
+  // light that does not depend on the hour (a tunnel): after dark the "lit at night" material, by day a plain glow matched to the exposure
+  const LM = NITE ? 12 : 5, LK = NITE ? 1 : Math.sqrt(13.3/(5*SKY.expo))*0.8, L = function (col) { return LK === 1 ? col : mul(col, LK); };
+  const loc = function (px, pz, ry) { const cs = Math.cos(ry || 0), sn = Math.sin(ry || 0); return function (lx, lz) { return [px + cs*lx + sn*lz, pz - sn*lx + cs*lz]; }; };
+  K.mul = mul; K.L = L; K.LM = LM; K.loc = loc;
   const neon = function () { return NEON[(rnd()*NEON.length) | 0]; };
   K.neon = neon;
   K.wet = function (px, pz, m) { m = m || 0; for (const r of K.water) if (px > r[0]-m && px < r[2]+m && pz > r[1]-m && pz < r[3]+m) return true; return false; };
   K.road = function (px, pz) { let bd = 1e12; for (let i = 0; i < N; i += 2) { const dx = x[i]-px, dz = z[i]-pz, q = dx*dx + dz*dz; if (q < bd) bd = q; } return Math.sqrt(bd); };
-  K.free = function (px, pz, r) { for (const b of K.placed) { const dx = b[0]-px, dz = b[1]-pz, rr = b[2] + r; if (dx*dx + dz*dz < rr*rr) return false; } return true; };
+  K.free = function (px, pz, r) { for (const q of K.clears) if (px > q[0] - r*0.7 && px < q[2] + r*0.7 && pz > q[1] - r*0.7 && pz < q[3] + r*0.7) return false; for (const b of K.placed) { const dx = b[0]-px, dz = b[1]-pz, rr = b[2] + r; if (dx*dx + dz*dz < rr*rr) return false; } return true; };
   K.keep = function (px, pz, r) { K.placed.push([px, pz, r]); };
   // sight lines: [x0, z0, x1, z1, half-width at the start, height allowed at the start, its growth per unit, widening per unit]; buildings under one are kept low so the landmark at its end is seen from the road
   K.vistas = []; K.lows = [];
@@ -1399,26 +1418,34 @@ function cityKit(c) {
   K.fits = function (px, pz, deep, wide, ry, clear) { const cs = Math.cos(ry), sn = Math.sin(ry);
     for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) { const lx = a*deep/2, lz = b*wide/2, qx = px + cs*lx + sn*lz, qz = pz - sn*lx + cs*lz; if (K.wet(qx, qz, 1.5) || K.road(qx, qz) < clear) return false; }
     return true; };
-  K.land = function (x0, z0, x1, z1) { mb.quad([x0,-0.06,z0],[x1,-0.06,z0],[x1,-0.06,z1],[x0,-0.06,z1],[0.19,0.19,0.21],2,UPc); };
-  K.sea = function (x0, z0, x1, z1) { mb.quad([x0,WY,z0],[x1,WY,z0],[x1,WY,z1],[x0,WY,z1],[0.02,0.03,0.05],4,UPc); };
+  // a level sheet cut along one grid for the whole world: the haze is worked out at the corners, so a sheet a mile wide would be wrapped in fog right under the car; neighbours share their cuts, so no seam opens between them
+  const tile = function (x0, z0, x1, z1, y, col, mat) { const cuts = function (a, b) { const r = [a]; for (let v = Math.ceil((a + 0.01)/96)*96; v < b - 0.01; v += 96) r.push(v); r.push(b); return r; }, X = cuts(x0, x1), Z = cuts(z0, z1);
+    for (let a = 0; a < X.length - 1; a++) for (let b = 0; b < Z.length - 1; b++) mb.quad([X[a],y,Z[b]],[X[a+1],y,Z[b]],[X[a+1],y,Z[b+1]],[X[a],y,Z[b+1]],col,mat,UPc); };
+  K.land = function (x0, z0, x1, z1) { tile(x0, z0, x1, z1, -0.06, ST.land, 2); };
+  K.sea = function (x0, z0, x1, z1) { tile(x0, z0, x1, z1, WY, [0.02,0.03,0.05], 4); };
   // quay wall down to the water, with a string of lamps along its edge
-  K.quay = function (xa, za, xb, zb, lit) { mb.quad([xa,-0.06,za],[xb,-0.06,zb],[xb,WY,zb],[xa,WY,za],[0.30,0.30,0.32],0,UPc);
+  K.quay = function (xa, za, xb, zb, lit) { { const m = Math.max(1, Math.ceil(Math.hypot(xb-xa, zb-za)/96)); for (let k = 0; k < m; k++) { const x0 = xa + (xb-xa)*k/m, z0 = za + (zb-za)*k/m, x1 = xa + (xb-xa)*(k+1)/m, z1 = za + (zb-za)*(k+1)/m; mb.quad([x0,-0.06,z0],[x1,-0.06,z1],[x1,WY,z1],[x0,WY,z0],ST.quay,0,UPc); } }
     if (!lit) return; const len = Math.hypot(xb-xa, zb-za), n = Math.floor(len/24);
-    for (let k = 0; k <= n; k++) { const t = (k + 0.5)/(n + 1), px = xa + (xb-xa)*t, pz = za + (zb-za)*t; mb.box(px, 1.5, pz, 0.14, 3.0, 0.14, [0.3,0.3,0.32], 0); mb.box(px, 3.1, pz, 0.5, 0.4, 0.5, [1.0,0.86,0.60], 5); } };
+    for (let k = 0; k <= n; k++) { const t = (k + 0.5)/(n + 1), px = xa + (xb-xa)*t, pz = za + (zb-za)*t; if (K.road(px, pz) < HW + 7) continue; mb.box(px, 1.5, pz, 0.14, 3.0, 0.14, [0.3,0.3,0.32], 0); mb.box(px, 3.1, pz, 0.5, 0.4, 0.5, [1.0,0.86,0.60], 5); } };
   // a streak of light lying on the water
   K.streak = function (px, pz, dx, dz, len, wid, col) { const l = Math.hypot(dx, dz) || 1, ux = dx/l, uz = dz/l, y = WY + 0.06;
     mb.quad([px - uz*wid, y, pz + ux*wid], [px + uz*wid, y, pz - ux*wid], [px + ux*len + uz*wid*0.5, y, pz + uz*len - ux*wid*0.5], [px + ux*len - uz*wid*0.5, y, pz + uz*len + ux*wid*0.5], col, 12, UPc); };
   // one building: a box whose fronts are drawn by the shader, now and then a setback top or a plant room, a red light on the tall ones
   K.tower = function (px, pz, deep, wide, hgt, ry, o) { o = o || {};
-    const y0 = o.base || 0, tone = 0.17 + rnd()*0.20, tint = rnd(), col = [tone*(0.90 + 0.20*tint), tone*(0.94 + 0.10*rnd()), tone*(1.10 - 0.20*tint)];
+    const y0 = o.base || 0, roof = o.roof || ST.roof; let col = o.col || (ST.pal ? ST.pal(hgt) : null);
+    if (!col) { const tone = 0.17 + rnd()*0.20, tint = rnd(); col = [tone*(0.90 + 0.20*tint), tone*(0.94 + 0.10*rnd()), tone*(1.10 - 0.20*tint)]; }
     mb.box(px, y0 + hgt/2, pz, deep, hgt, wide, col, 7, ry); let top = y0 + hgt;
+    if (!NITE && c.shade && !o.noShade && top < 80 && K.road(px, pz) < 170) c.shade(px, pz, deep, wide, top, ry, K);
+    if (roof === 'mansard' && hgt < 30) { mb.box(px, top + 1.2, pz, deep - 1.6, 2.4, wide - 1.6, [0.30,0.32,0.37], 0, ry); for (let k = 0; k < 2; k++) { const q = loc(px, pz, ry)((rnd() - 0.5)*deep*0.5, (rnd() - 0.5)*wide*0.7); mb.box(q[0], top + 3.0, q[1], 0.9, 1.4, 1.6, [0.55,0.36,0.26], 0, ry); } return top + 2.4; }
+    if (roof === 'tile' && hgt < 30) { mb.box(px, top + 0.7, pz, deep - 1.0, 1.4, wide - 1.0, [0.62,0.34,0.22], 0, ry); return top + 1.4; }
     if (hgt > 26 && rnd() < 0.45) { const hh = hgt*(0.12 + rnd()*0.2); mb.box(px, top + hh/2, pz, deep*0.66, hh, wide*0.66, [col[0]*1.07, col[1]*1.03, col[2]], 7, ry); top += hh; }
     else if (rnd() < 0.6) mb.box(px + (rnd()-0.5)*deep*0.4, top + 0.9, pz + (rnd()-0.5)*wide*0.4, 3 + rnd()*3, 1.8, 3 + rnd()*3, [0.10,0.10,0.11], 0, ry);
     if (top > 44) { mb.box(px, top + 0.5, pz, 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5, ry); if (rnd() < 0.5) mb.cyl(px, top, pz, 0.22, 0.08, 6 + rnd()*8, 4, [0.3,0.3,0.32], 0); }
     return top; };
   // signs on the front that faces the road (the building stands on side `sd` of it): blades of coloured squares, a band over the shop, a screen, a board on the roof
   K.signs = function (px, pz, deep, wide, hgt, ry, sd) { const cs = Math.cos(ry), sn = Math.sin(ry), fx = -sd*cs, fz = sd*sn, P = function (out, along) { return [px + fx*(deep/2 + out) + sn*along, pz + fz*(deep/2 + out) + cs*along]; };
-    if (rnd() < 0.55) { const nb = 1 + (rnd() < 0.35 ? 1 : 0); for (let b = 0; b < nb; b++) { const o = (rnd() - 0.5)*wide*0.8, n = 3 + ((rnd()*4) | 0), s = 1.2, yb = 3.4 + rnd()*2.5, c1 = neon(), c2 = rnd() < 0.5 ? [0.92,0.92,1.0] : neon(); if (yb + n*1.4 > hgt) continue;
+    if (!ST.neon) { if (rnd() < 0.42*ST.signs) { const q = P(0.5, (rnd() - 0.5)*wide*0.2), AWN = [[0.45,0.12,0.10],[0.10,0.30,0.18],[0.12,0.18,0.36],[0.55,0.40,0.14],[0.20,0.20,0.22],[0.85,0.83,0.78]]; mb.box(q[0], 3.3, q[1], 1.1, 0.4, wide*(0.4 + rnd()*0.4), AWN[(rnd()*AWN.length) | 0], 0, ry); } return; }      // by day: an awning over a shop
+    if (rnd() < 0.55*ST.signs) { const nb = 1 + (rnd() < 0.35 ? 1 : 0); for (let b = 0; b < nb; b++) { const o = (rnd() - 0.5)*wide*0.8, n = 3 + ((rnd()*4) | 0), s = 1.2, yb = 3.4 + rnd()*2.5, c1 = neon(), c2 = rnd() < 0.5 ? [0.92,0.92,1.0] : neon(); if (yb + n*1.4 > hgt) continue;
         const q = P(0.85, o); for (let k = 0; k < n; k++) mb.box(q[0], yb + k*(s + 0.16) + s/2, q[1], 1.3, s, 0.22, k % 2 ? c1 : c2, 12, ry); } }
     if (rnd() < 0.5) { const q = P(0.12, 0), cc = neon(); mb.box(q[0], 3.5, q[1], 0.18, 0.9, wide*(0.5 + rnd()*0.4), [cc[0]*0.8, cc[1]*0.8, cc[2]*0.8], 12, ry); }
     if (hgt > 22 && rnd() < 0.14) { const q0 = 0.16, cols = 3, rows = 2, pw = Math.min(wide*0.24, 5), ph = Math.min(hgt*0.13, 4.2), yb = hgt*0.42;
@@ -1429,10 +1456,10 @@ function cityKit(c) {
   // two rows of buildings along both sides of the road
   K.rows = function (skip) {
     for (const sd of [-1, 1]) for (let row = 0; row < 2; row++) { let i = 0;
-      while (i < N) { const wide = 11 + rnd()*16, deep = 10 + rnd()*12 + row*6, gap = rnd() < 0.2 ? 3 + rnd()*8 : 0.6, j = (i + Math.round(wide/2)) % N;
+      while (i < N) { const wide = 11 + rnd()*16, deep = 10 + rnd()*12 + row*6, gap = rnd() < 0.2 ? 3 + rnd()*8 : 1.6, j = (i + Math.round(wide/2)) % N;
         if (i + wide + 1.5 > N) break;                                   // the row is closed: one more house would stand inside the first one
         const off = (sd > 0 ? c.wp : c.wn)[j] + 5.5 + rnd()*1.4 + row*(24 + rnd()*8) + deep/2, p = at(j, sd*off, 0);      // every front stands a little forward or back: two walls in one plane would flicker
-        let hgt = row === 0 ? 7 + rnd()*rnd()*46 : 14 + rnd()*rnd()*80; if (rnd() < 0.06) hgt += 30 + rnd()*40;
+        let hgt; if (ST.rowH) hgt = ST.rowH(row, rnd); else { hgt = row === 0 ? 7 + rnd()*rnd()*46 : 14 + rnd()*rnd()*80; if (rnd() < 0.06) hgt += 30 + rnd()*40; }
         const r = 0.42*Math.min(deep, wide); hgt = K.cap(p[0], p[2], hgt, r);
         if (!(skip && skip(j)) && K.fits(p[0], p[2], deep, wide, h[j], HW + 5.2) && K.free(p[0], p[2], r)) { K.tower(p[0], p[2], deep, wide, hgt, h[j]); K.keep(p[0], p[2], r); if (row === 0) K.signs(p[0], p[2], deep, wide, hgt, h[j], sd); }
         i += Math.round(wide + gap); } } };
@@ -1442,26 +1469,26 @@ function cityKit(c) {
       if (ok && !ok(px, pz)) continue; const hg = K.cap(px, pz, hgt, r); if (K.wet(px, pz, r) || !K.free(px, pz, r*0.95) || K.road(px, pz) < clear + r) continue;
       K.tower(px, pz, deep, wide, hg, rnd() < 0.8 ? 0 : rnd()*1.57); K.keep(px, pz, r*0.95); } };
   // tunnel over `len` points of the road from point i0
-  K.tunnel = function (i0, len) {
+  K.tunnel = function (i0, len, o2) { o2 = o2 || {};
     let WI = 0; for (let k = 0; k <= len; k++) { const j = (i0+k) % N; WI = Math.max(WI, c.wp[j], c.wn[j]); } WI += 1.0;
-    const WO = WI + 1.6, YR = 6.4, YT = 7.9, ST = 4, CONC = [0.42,0.42,0.44];
+    const WO = WI + 1.6, YR = 6.4, YT = 7.9, ST = 4, CONC = o2.conc || [0.42,0.42,0.44];
     for (let k = 0; k < len; k += ST) { const i = i0 + k, j = i + Math.min(ST, len - k), pan = (k/ST) | 0, mid = at(i, 0, 3);
       for (const sd of [-1, 1]) { const out = at(i, sd*(WO + 20), 3);
-        mb.quad(at(i, sd*WI, 0), at(j, sd*WI, 0), at(j, sd*WI, 1.3), at(i, sd*WI, 1.3), [0.14,0.12,0.09], 12, out);
-        mb.quad(at(i, sd*WI, 1.3), at(j, sd*WI, 1.3), at(j, sd*WI, 5.1), at(i, sd*WI, 5.1), pan % 2 ? [0.25,0.21,0.15] : [0.23,0.19,0.135], 12, out);
-        mb.quad(at(i, sd*WI, 5.1), at(j, sd*WI, 5.1), at(j, sd*WI, 5.5), at(i, sd*WI, 5.5), pan % 2 ? [0.20,0.185,0.15] : [0.98,0.68,0.30], 12, out);
-        mb.quad(at(i, sd*WI, 5.5), at(j, sd*WI, 5.5), at(j, sd*(WI - 1.0), YR), at(i, sd*(WI - 1.0), YR), [0.20,0.185,0.15], 12, out);
+        mb.quad(at(i, sd*WI, 0), at(j, sd*WI, 0), at(j, sd*WI, 1.3), at(i, sd*WI, 1.3), L([0.14,0.12,0.09]), LM, out);
+        mb.quad(at(i, sd*WI, 1.3), at(j, sd*WI, 1.3), at(j, sd*WI, 5.1), at(i, sd*WI, 5.1), L(pan % 2 ? [0.25,0.21,0.15] : [0.23,0.19,0.135]), LM, out);
+        mb.quad(at(i, sd*WI, 5.1), at(j, sd*WI, 5.1), at(j, sd*WI, 5.5), at(i, sd*WI, 5.5), L(pan % 2 ? [0.20,0.185,0.15] : [0.98,0.68,0.30]), LM, out);
+        mb.quad(at(i, sd*WI, 5.5), at(j, sd*WI, 5.5), at(j, sd*(WI - 1.0), YR), at(i, sd*(WI - 1.0), YR), L([0.20,0.185,0.15]), LM, out);
         mb.quad(at(i, sd*WO, -0.06), at(j, sd*WO, -0.06), at(j, sd*WO, YT), at(i, sd*WO, YT), CONC, 0, mid);
         if (pan % 12 === 6) { const e = at(i, sd*(WI - 0.06), 0); mb.box(e[0], 2.6, e[2], 0.1, 0.5, 0.9, [0.15,0.9,0.35], 5, h[i % N]); } }
-      mb.quad(at(i, -WI + 1.0, YR), at(i, WI - 1.0, YR), at(j, WI - 1.0, YR), at(j, -WI + 1.0, YR), [0.17,0.16,0.135], 12, [mid[0], 30, mid[2]]);
-      mb.quad(at(i, -WO, YT), at(i, WO, YT), at(j, WO, YT), at(j, -WO, YT), [0.30,0.30,0.32], 0, UPc);
-      if (pan % 3 === 1) { const q = at(i, 0, 0); mb.box(q[0], YR - 0.08, q[2], 1.6, 0.12, 0.5, [1.0,0.80,0.46], 12, h[i % N]); c.lamps.push([q[0], YR - 0.5, q[2]]); } }
+      mb.quad(at(i, -WI + 1.0, YR), at(i, WI - 1.0, YR), at(j, WI - 1.0, YR), at(j, -WI + 1.0, YR), L([0.17,0.16,0.135]), LM, [mid[0], 30, mid[2]]);
+      mb.quad(at(i, -WO, YT), at(i, WO, YT), at(j, WO, YT), at(j, -WO, YT), o2.top === 'park' ? [1,1,1] : [0.30,0.30,0.32], o2.top === 'park' ? 1 : 0, UPc);
+      if (pan % 3 === 1) { const q = at(i, 0, 0); mb.box(q[0], YR - 0.08, q[2], 1.6, 0.12, 0.5, L([1.0,0.80,0.46]), LM, h[i % N]); if (NITE) c.lamps.push([q[0], YR - 0.5, q[2]]); } }
     for (const e of [0, len]) { const i = (i0 + e) % N, hh = h[i], p = at(i, 0, 0), dir = e === 0 ? -1 : 1, fx = Math.sin(hh)*dir, fz = Math.cos(hh)*dir;
       mb.box(p[0] + fx*0.6, YR + 2.4, p[2] + fz*0.6, 2*WO + 9, 4.8, 1.6, CONC, 0, hh);
       for (const sd of [-1, 1]) { const s2 = at(i, sd*(WO + 1.6), 0); mb.box(s2[0] + fx*0.6, YR/2, s2[2] + fz*0.6, 5.8, YR, 1.6, CONC, 0, hh); }
-      mb.box(p[0] + fx*1.5, YR + 0.42, p[2] + fz*1.5, 2*WI, 0.42, 0.2, [0.95,0.90,0.75], 12, hh);
-      for (let a = 0; a < 14; a++) { const s3 = at(i, -WI + (a + 0.5)*2*WI/14, 0); mb.box(s3[0] + fx*1.45, YR + 1.35, s3[2] + fz*1.45, 2*WI/14, 0.7, 0.1, a % 2 ? [0.95,0.78,0.10] : [0.06,0.06,0.07], a % 2 ? 12 : 0, hh); } }
-    for (let k = 10; k < len - 22; ) { const L = 15 + rnd()*14, i = (i0 + k + Math.round(L/2)) % N, p = at(i, 0, 0); K.tower(p[0], p[2], 2*WO + 2, L - 1.2, 7 + rnd()*24, h[i], { base: YT }); k += Math.round(L); }
+      mb.box(p[0] + fx*1.5, YR + 0.42, p[2] + fz*1.5, 2*WI, 0.42, 0.2, L([0.95,0.90,0.75]), LM, hh);
+      for (let a = 0; a < 14; a++) { const s3 = at(i, -WI + (a + 0.5)*2*WI/14, 0); mb.box(s3[0] + fx*1.45, YR + 1.35, s3[2] + fz*1.45, 2*WI/14, 0.7, 0.1, a % 2 ? L([0.95,0.78,0.10]) : [0.06,0.06,0.07], a % 2 ? LM : 0, hh); } }
+    if (o2.blocks !== false) for (let k = 10; k < len - 22; ) { const L = 15 + rnd()*14, i = (i0 + k + Math.round(L/2)) % N, p = at(i, 0, 0); K.tower(p[0], p[2], 2*WO + 2, L - 1.2, 7 + rnd()*24, h[i], { base: YT }); k += Math.round(L); }
     return WO; };
   // suspension bridge over `len` points of the road from point i0: deck on piers, two towers, cables with hangers
   K.bridge = function (i0, len) {
@@ -1491,38 +1518,11 @@ function cityKit(c) {
         mb.quad([D[0] - f[0], D[1], D[2] - f[1]], [D[0] + f[0], D[1], D[2] + f[1]], [A2[0] + f[0], ya, A2[2] + f[1]], [A2[0] - f[0], ya, A2[2] - f[1]], [0.22,0.23,0.27], 12, mid);
         mb.box(A[0], ya + 0.75, A[2], 0.42, 0.42, 0.42, LED[((k - 5)/6 | 0) % LED.length], 5, 0); } }
     return DW; };
-  // red-and-white lattice tower: four legs that draw together, rings, cross braces, two decks and a mast
-  K.lattice = function (px, pz, H) { const HB = H*0.78, LV = 12, ORG = [0.58,0.25,0.07], WHT = [0.50,0.47,0.40], half = function (t) { return 2.4 + 27.5*Math.pow(1 - t, 2.7); };
-    const ref = [px, 0, pz];
-    for (let k = 0; k < LV; k++) { const t0 = k/LV, t1 = (k+1)/LV, y0 = HB*t0, y1 = HB*t1, w0 = half(t0), w1 = half(t1), col = ((t0*7) | 0) % 2 ? WHT : ORG, lw = 0.55 + 1.0*(1 - t0);
-      for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const X0 = px + sx*w0, Z0 = pz + sz*w0, X1 = px + sx*w1, Z1 = pz + sz*w1;
-        mb.quad([X0-lw,y0,Z0],[X0+lw,y0,Z0],[X1+lw,y1,Z1],[X1-lw,y1,Z1],col,12,ref); mb.quad([X0,y0,Z0-lw],[X0,y0,Z0+lw],[X1,y1,Z1+lw],[X1,y1,Z1-lw],col,12,ref); }
-      const C0 = [[-w0,-w0],[w0,-w0],[w0,w0],[-w0,w0]], C1 = [[-w1,-w1],[w1,-w1],[w1,w1],[-w1,w1]], bh = 0.45 + 0.5*(1 - t0), dim = [col[0]*0.72, col[1]*0.72, col[2]*0.72];
-      for (let f = 0; f < 4; f++) { const a = C0[f], b = C0[(f+1) % 4], a1 = C1[f], b1 = C1[(f+1) % 4];
-        mb.quad([px+a[0],y0,pz+a[1]],[px+b[0],y0,pz+b[1]],[px+b[0],y0+bh,pz+b[1]],[px+a[0],y0+bh,pz+a[1]],dim,12,ref);
-        mb.quad([px+a[0],y0,pz+a[1]],[px+b1[0],y1,pz+b1[1]],[px+b1[0],y1+bh,pz+b1[1]],[px+a[0],y0+bh,pz+a[1]],dim,12,ref);
-        mb.quad([px+b[0],y0,pz+b[1]],[px+a1[0],y1,pz+a1[1]],[px+a1[0],y1+bh,pz+a1[1]],[px+b[0],y0+bh,pz+b[1]],dim,12,ref); } }
-    for (const d of [[0.40, 5.0, 3.0], [0.73, 3.4, 1.6]]) { const w = half(d[0]) + d[2], y = HB*d[0]; mb.box(px, y, pz, 2*w, d[1], 2*w, [0.50,0.48,0.42], 12); mb.box(px, y, pz, 2*w + 0.1, d[1]*0.34, 2*w + 0.1, [0.98,0.86,0.58], 12); }
-    for (let s = 0; s < 4; s++) { const y0 = HB + (H - HB)*s/4, y1 = HB + (H - HB)*(s+1)/4; mb.cyl(px, y0, pz, 1.5 - s*0.33, 1.5 - (s+1)*0.33 + 0.08, y1 - y0, 6, s % 2 ? WHT : ORG, 12); }
-    mb.box(px, H + 0.6, pz, 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5);
-    mb.box(px, 3.5, pz, 30, 7, 30, [0.24,0.24,0.27], 7); K.keep(px, pz, 36); };
   // tall slender broadcasting tower with two pods
   K.needle = function (px, pz, H) { const B = [0.30,0.36,0.50];
     const seg = [[0, 0.30, 10.5, 7.2], [0.30, 0.54, 7.2, 5.4], [0.54, 0.60, 7.6, 8.4], [0.60, 0.68, 5.0, 4.6], [0.68, 0.73, 6.6, 7.2], [0.73, 0.80, 3.4, 2.6], [0.80, 1.0, 1.9, 0.7]];
     seg.forEach(function (s, k) { const pod = k === 2 || k === 4, v = pod ? 1.9 : 1 - k*0.05; mb.cyl(px, H*s[0], pz, s[2], s[3], H*(s[1] - s[0]), 10, [B[0]*v, B[1]*v, B[2]*v], 12, [B[0]*0.6, B[1]*0.6, B[2]*0.6]); });
     mb.box(px, H + 1, pz, 1.4, 1.4, 1.4, [0.95,0.10,0.07], 5); K.keep(px, pz, 20); };
-  // big wheel: its plane runs along (ux, uz)
-  K.wheel = function (px, pz, R, ux, uz) { const cy = R + 7, SEG = 32, nx = -uz, nz = ux, ry = Math.atan2(ux, uz);
-    const Q = function (a, r, tan, o) { const ca = Math.cos(a), sa = Math.sin(a), hx = ca*r - sa*tan, hy = sa*r + ca*tan; return [px + ux*hx + nx*o, cy + hy, pz + uz*hx + nz*o]; };
-    for (let k = 0; k < SEG; k++) { const a0 = k/SEG*6.2832, a1 = (k+1)/SEG*6.2832, col = NEON[k % NEON.length];
-      for (const o of [-1.2, 1.2]) { mb.quad(Q(a0,R-0.55,0,o), Q(a1,R-0.55,0,o), Q(a1,R+0.55,0,o), Q(a0,R+0.55,0,o), col, 12, null);
-        mb.quad(Q(a0,R*0.58-0.22,0,o), Q(a1,R*0.58-0.22,0,o), Q(a1,R*0.58+0.22,0,o), Q(a0,R*0.58+0.22,0,o), [0.30,0.34,0.48], 12, null); }
-      if (k % 2 === 0) mb.quad(Q(a0,2,-0.2,0), Q(a0,2,0.2,0), Q(a0,R,0.2,0), Q(a0,R,-0.2,0), [0.34,0.38,0.52], 12, null);
-      const g = Q(a0, R + 2.0, 0, 0); mb.box(g[0], g[1], g[2], 1.8, 1.8, 2.0, [0.72,0.68,0.55], 12, ry); }
-    mb.box(px, cy, pz, 3.2, 3.2, 6.4, [0.5,0.52,0.6], 12, ry);
-    for (const o of [-3.0, 3.0]) for (const sd of [-1, 1]) { const hx = px + nx*o, hz = pz + nz*o, fx = px + ux*sd*R*0.42 + nx*o*1.5, fz = pz + uz*sd*R*0.42 + nz*o*1.5, w = 0.75;
-      mb.quad([hx - ux*w, cy, hz - uz*w], [hx + ux*w, cy, hz + uz*w], [fx + ux*w, 0, fz + uz*w], [fx - ux*w, 0, fz - uz*w], [0.26,0.28,0.34], 12, null); }
-    K.keep(px, pz, R*0.6); };
   // a volcano's cone on the horizon, snow on the upper third
   K.cone = function (px, pz, R, H) { const SEG = 30, RO = 8, rt = R*0.085, V = [];
     for (let j = 0; j <= RO; j++) for (let a = 0; a < SEG; a++) { const s = j/RO, ang = a/SEG*6.2832, r = (rt + (R - rt)*s)*(1 + (vnoise(a*0.9, j*1.3, 5) - 0.5)*0.10*s), y = H*Math.pow(1 - s, 1.75);
@@ -1537,12 +1537,6 @@ function cityKit(c) {
     mb.box(px, 5.6*s, pz, 10.6*s, 0.6*s, 0.5*s, RED, 12, ry); mb.box(px, 6.5*s, pz, 0.5*s, 1.2*s, 0.4*s, RED, 12, ry);
     mb.box(px, 7.5*s, pz, 12.0*s, 0.66*s, 0.8*s, RED, 12, ry); mb.box(px, 8.05*s, pz, 13.0*s, 0.42*s, 1.1*s, [0.05,0.05,0.06], 0, ry);
     for (const sd of [-1, 1]) mb.box(px + cs*sd*6.3*s, 8.3*s, pz - sn*sd*6.3*s, 1.0*s, 0.42*s, 1.1*s, [0.05,0.05,0.06], 0, ry); };
-  // five-storey pagoda
-  K.pagoda = function (px, pz, s) { let y = 0;
-    mb.box(px, 0.5*s, pz, 13*s, 1.0*s, 13*s, [0.3,0.3,0.32], 0); y = 1.0*s;
-    for (let k = 0; k < 5; k++) { const w = (8.4 - k*1.0)*s; mb.box(px, y + 1.5*s, pz, w, 3.0*s, w, [0.34,0.07,0.05], 12); mb.box(px, y + 1.5*s, pz, w + 0.06, 0.9*s, w*0.5, [0.95,0.78,0.48], 12); mb.box(px, y + 1.5*s, pz, w*0.5, 0.9*s, w + 0.06, [0.95,0.78,0.48], 12);
-      mb.cyl(px, y + 3.0*s, pz, (w/2 + 2.7*s)*1.414, (w/2 - 0.2*s)*1.414, 1.25*s, 4, [0.07,0.08,0.09], 0, null, 0.7854); mb.cyl(px, y + 2.86*s, pz, (w/2 + 2.75*s)*1.414, (w/2 + 2.7*s)*1.414, 0.14*s, 4, [0.55,0.42,0.16], 12, null, 0.7854); y += 4.25*s; }
-    mb.cyl(px, y, pz, 0.28*s, 0.06*s, 6.5*s, 6, [0.62,0.50,0.20], 12); K.keep(px, pz, 11*s); };
   // railway viaduct across the road at point i, with a train standing on it
   K.viaduct = function (i, half) { i = ((i % N) + N) % N; const hh = h[i], p = at(i, 0, 0), w = Math.max(c.wp[i], c.wn[i]), CONC = [0.40,0.40,0.42];
     mb.box(p[0], 8.4, p[2], 2*half, 1.3, 7.4, CONC, 0, hh); mb.box(p[0], 9.3, p[2], 2*half, 0.5, 0.25, [0.3,0.3,0.32], 0, hh);
@@ -1555,7 +1549,7 @@ function cityKit(c) {
   K.gantry = function (i, colr) { i = ((i % N) + N) % N; const hh = h[i], w = Math.max(c.wp[i], c.wn[i]) + 1.7, p = at(i, 0, 0), WH = [0.62,0.62,0.62], STL = [0.5,0.5,0.54];
     for (const sd of [-1, 1]) { const q = at(i, sd*w, 0); mb.cyl(q[0], 0, q[2], 0.22, 0.18, 7.7, 6, STL, 6); }
     mb.box(p[0], 7.5, p[2], 2*w, 0.3, 0.3, STL, 6, hh);
-    for (const o of [-3.7, 3.7]) { const q = at(i, o, 0); mb.box(q[0], 6.25, q[2], 5.8, 2.3, 0.14, colr, 12, hh);
+    for (const o of [-3.7, 3.7]) { const q = at(i, o, 0); mb.box(q[0], 6.25, q[2], 5.8, 2.3, 0.14, NITE ? colr : mul(colr, 2.3), 12, hh);
       for (const f of [-1, 1]) { const fx = Math.sin(hh)*f*0.09, fz = Math.cos(hh)*f*0.09, a1 = at(i, o - 1.9, 0), a2 = at(i, o + 0.7, 0);
         mb.box(a1[0] + fx, 6.15, a1[2] + fz, 0.3, 1.5, 0.02, WH, 12, hh); mb.box(a1[0] + fx, 6.8, a1[2] + fz, 0.9, 0.3, 0.02, WH, 12, hh);
         mb.box(a2[0] + fx, 6.65, a2[2] + fz, 2.7, 0.3, 0.02, WH, 12, hh); mb.box(a2[0] + fx, 5.9, a2[2] + fz, 1.9, 0.3, 0.02, WH, 12, hh); } } };
@@ -1569,11 +1563,176 @@ function cityKit(c) {
     mb.box(px, WY + 0.55, pz, 3.6, 1.1, 14, [0.10,0.10,0.12], 0, ry); mb.box(px, WY + 1.75, pz, 3.0, 1.3, 9.5, [0.95,0.72,0.42], 12, ry); mb.box(px, WY + 2.5, pz, 3.5, 0.22, 10.5, [0.08,0.08,0.09], 0, ry);
     for (let k = 0; k < 7; k++) for (const sd of [-1, 1]) { const o = -4.5 + k*1.5; mb.box(px + cs*sd*1.8 + sn*o, WY + 2.2, pz - sn*sd*1.8 + cs*o, 0.3, 0.36, 0.3, [0.95,0.16,0.10], 5, ry); }
     K.streak(px, pz, cs, -sn, 9, 1.6, [0.34,0.26,0.16]); K.streak(px, pz, -cs, sn, 9, 1.6, [0.34,0.26,0.16]); };
+  // lattice tower: four legs that draw together, rings, cross braces, decks and a mast. Lit from below after dark (mat 12) or plain iron by day (mat 0)
+  K.lattice = function (px, pz, H, o2) { o2 = o2 || {}; const HB = H*(o2.hb || 0.78), LV = 12, ORG = o2.c1 || [0.58,0.25,0.07], WHT = o2.c2 || [0.50,0.47,0.40], m = o2.mat === undefined ? 12 : o2.mat, bw = o2.base || 27.5, ex = o2.exp || 2.7, tw = o2.top || 2.4, half = function (t) { return tw + bw*Math.pow(1 - t, ex); };
+    const ref = [px, 0, pz], nb = o2.bands || 7;
+    for (let k = 0; k < LV; k++) { const t0 = k/LV, t1 = (k+1)/LV, y0 = HB*t0, y1 = HB*t1, w0 = half(t0), w1 = half(t1), col = ((t0*nb) | 0) % 2 ? WHT : ORG, lw = 0.55 + 1.0*(1 - t0);
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const X0 = px + sx*w0, Z0 = pz + sz*w0, X1 = px + sx*w1, Z1 = pz + sz*w1;
+        mb.quad([X0-lw,y0,Z0],[X0+lw,y0,Z0],[X1+lw,y1,Z1],[X1-lw,y1,Z1],col,m,ref); mb.quad([X0,y0,Z0-lw],[X0,y0,Z0+lw],[X1,y1,Z1+lw],[X1,y1,Z1-lw],col,m,ref); }
+      const C0 = [[-w0,-w0],[w0,-w0],[w0,w0],[-w0,w0]], C1 = [[-w1,-w1],[w1,-w1],[w1,w1],[-w1,w1]], bh = 0.45 + 0.5*(1 - t0), dim = [col[0]*0.72, col[1]*0.72, col[2]*0.72];
+      for (let f = 0; f < 4; f++) { const a = C0[f], b = C0[(f+1) % 4], a1 = C1[f], b1 = C1[(f+1) % 4];
+        if (!(o2.arch && k === 0)) mb.quad([px+a[0],y0,pz+a[1]],[px+b[0],y0,pz+b[1]],[px+b[0],y0+bh,pz+b[1]],[px+a[0],y0+bh,pz+a[1]],dim,m,ref);
+        if (o2.arch && k < 2) continue;
+        mb.quad([px+a[0],y0,pz+a[1]],[px+b1[0],y1,pz+b1[1]],[px+b1[0],y1+bh,pz+b1[1]],[px+a[0],y0+bh,pz+a[1]],dim,m,ref);
+        mb.quad([px+b[0],y0,pz+b[1]],[px+a1[0],y1,pz+a1[1]],[px+a1[0],y1+bh,pz+a1[1]],[px+b[0],y0+bh,pz+b[1]],dim,m,ref); } }
+    if (o2.arch) { const yT = HB*2/LV, wA = half(1/LV), a = half(0)*0.80;                                        // a wide arch between each pair of legs, under the first deck
+      for (let f = 0; f < 4; f++) for (let s = 0; s < 10; s++) { const t0 = s/10*3.1416, t1 = (s+1)/10*3.1416, P = function (t, r) { const u = Math.cos(t)*a*r, y = Math.sin(t)*yT*0.92*r; return f === 0 ? [px + u, y, pz - wA] : (f === 1 ? [px + wA, y, pz + u] : (f === 2 ? [px + u, y, pz + wA] : [px - wA, y, pz + u])); };
+          mb.quad(P(t0, 1), P(t1, 1), P(t1, 1.10), P(t0, 1.10), ORG, m, ref); } }
+    for (const d of (o2.decks || [[0.40, 5.0, 3.0], [0.73, 3.4, 1.6]])) { const w = half(d[0]) + d[2], y = HB*d[0]; mb.box(px, y, pz, 2*w, d[1], 2*w, o2.deckCol || [0.50,0.48,0.42], m); mb.box(px, y, pz, 2*w + 0.1, d[1]*0.34, 2*w + 0.1, o2.deckBand || [0.98,0.86,0.58], m === 12 ? 12 : 4); }
+    for (let s = 0; s < 4; s++) { const y0 = HB + (H - HB)*s/4, y1 = HB + (H - HB)*(s+1)/4; mb.cyl(px, y0, pz, 1.5 - s*0.33, 1.5 - (s+1)*0.33 + 0.08, y1 - y0, 6, s % 2 ? WHT : ORG, m); }
+    mb.box(px, H + 0.6, pz, 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5);
+    if (o2.plinth !== false) mb.box(px, 3.5, pz, 30, 7, 30, [0.24,0.24,0.27], 7); K.keep(px, pz, (o2.base || 27.5) + 9); };
+  // big wheel: its plane runs along (ux, uz)
+  K.wheel = function (px, pz, R, ux, uz, o2) { o2 = o2 || {}; const cy = o2.cy || R + 7, SEG = 32, nx = -uz, nz = ux, ry = Math.atan2(ux, uz), m = o2.mat === undefined ? 12 : o2.mat, RIM = o2.col, SPK = o2.spoke || [0.34,0.38,0.52];
+    const Q = function (a, r, tan, o) { const ca = Math.cos(a), sa = Math.sin(a), hx = ca*r - sa*tan, hy = sa*r + ca*tan; return [px + ux*hx + nx*o, cy + hy, pz + uz*hx + nz*o]; };
+    for (let k = 0; k < SEG; k++) { const a0 = k/SEG*6.2832, a1 = (k+1)/SEG*6.2832, col = RIM || NEON[k % NEON.length];
+      for (const o of [-1.2, 1.2]) { mb.quad(Q(a0,R-0.55,0,o), Q(a1,R-0.55,0,o), Q(a1,R+0.55,0,o), Q(a0,R+0.55,0,o), col, m, null);
+        mb.quad(Q(a0,R*0.58-0.22,0,o), Q(a1,R*0.58-0.22,0,o), Q(a1,R*0.58+0.22,0,o), Q(a0,R*0.58+0.22,0,o), SPK, m, null); }
+      if (k % 2 === 0) mb.quad(Q(a0,2,-0.2,0), Q(a0,2,0.2,0), Q(a0,R,0.2,0), Q(a0,R,-0.2,0), SPK, m, null);
+      const g = Q(a0, R + 2.0, 0, 0); mb.box(g[0], g[1], g[2], 1.8, 1.8, 2.0, o2.pod || [0.72,0.68,0.55], m, ry); }
+    mb.box(px, cy, pz, 3.2, 3.2, 6.4, [0.5,0.52,0.6], m, ry);
+    if (!o2.cy) for (const o of [-3.0, 3.0]) for (const sd of [-1, 1]) { const hx = px + nx*o, hz = pz + nz*o, fx = px + ux*sd*R*0.42 + nx*o*1.5, fz = pz + uz*sd*R*0.42 + nz*o*1.5, w = 0.75;
+      mb.quad([hx - ux*w, cy, hz - uz*w], [hx + ux*w, cy, hz + uz*w], [fx + ux*w, 0, fz + uz*w], [fx - ux*w, 0, fz - uz*w], o2.leg || [0.26,0.28,0.34], m, null); }
+    K.keep(px, pz, R*0.6); };
+  // tiered tower with flared roofs: a pagoda, or the keep of a castle on its stone base
+  K.pagoda = function (px, pz, s, o2) { o2 = o2 || {}; const m = o2.mat === undefined ? 12 : o2.mat, BODY = o2.body || [0.34,0.07,0.05], BAND = o2.band || [0.95,0.78,0.48], ROOF = o2.roof || [0.07,0.08,0.09], TRIM = o2.trim || [0.55,0.42,0.16], n = o2.tiers || 5, w0 = o2.w || 8.4, dw = o2.dw || 1.0; let y = 0;
+    if (o2.baseH) { mb.cyl(px, 0, pz, (w0/2 + 5.5)*s*1.414, (w0/2 + 2.2)*s*1.414, o2.baseH, 4, o2.baseCol || [0.40,0.40,0.40], 0, [0.36,0.36,0.36], 0.7854); y = o2.baseH; }
+    else { mb.box(px, 0.5*s, pz, 13*s, 1.0*s, 13*s, [0.3,0.3,0.32], 0); y = 1.0*s; }
+    for (let k = 0; k < n; k++) { const w = (w0 - k*dw)*s; mb.box(px, y + 1.5*s, pz, w, 3.0*s, w, BODY, m); mb.box(px, y + 1.5*s, pz, w + 0.06, 0.9*s, w*0.5, BAND, m); mb.box(px, y + 1.5*s, pz, w*0.5, 0.9*s, w + 0.06, BAND, m);
+      mb.cyl(px, y + 3.0*s, pz, (w/2 + 2.7*s)*1.414, (w/2 - 0.2*s)*1.414, 1.25*s, 4, ROOF, o2.roofMat || 0, null, 0.7854); mb.cyl(px, y + 2.86*s, pz, (w/2 + 2.75*s)*1.414, (w/2 + 2.7*s)*1.414, 0.14*s, 4, TRIM, m, null, 0.7854); y += 4.25*s; }
+    mb.cyl(px, y, pz, 0.28*s, 0.06*s, (o2.spire || 6.5)*s, 6, [0.62,0.50,0.20], m); K.keep(px, pz, 11*s); };
+  // ---- pieces for the daylight cities ----
+  // lawn with trees; nothing is built on it
+  K.park = function (x0, z0, x1, z1, n, o2) { o2 = o2 || {}; tile(x0, z0, x1, z1, 0.0, [1,1,1], 1); K.clears.push([x0,z0,x1,z1]); const kinds = o2.kinds || [0,1,0,6,3];
+    for (let k = 0; k < (n || 0); k++) { const px = x0 + 3 + rnd()*(x1-x0-6), pz = z0 + 3 + rnd()*(z1-z0-6); if (o2.keep && !o2.keep(px, pz)) continue; if (K.road(px, pz) < HW + 7 || K.wet(px, pz, 2) || !K.freeP(px, pz, 3)) continue; c.tree(px, pz, kinds[(rnd()*kinds.length) | 0], (o2.h0 || 5.5) + rnd()*(o2.h1 || 4.5), 0.8 + rnd()*0.3); } };
+  K.freeP = function (px, pz, r) { for (const b of K.placed) { const dx = b[0]-px, dz = b[1]-pz, rr = b[2] + r; if (dx*dx + dz*dz < rr*rr) return false; } return true; };
+  K.open = function (x0, z0, x1, z1) { K.clears.push([x0,z0,x1,z1]); };
+  // shallow basin with a stone rim
+  K.pond = function (x0, z0, x1, z1) { mb.quad([x0,0.05,z0],[x1,0.05,z0],[x1,0.05,z1],[x0,0.05,z1],[0.02,0.03,0.05],4,UPc); const S = [0.70,0.68,0.62], cx = (x0+x1)/2, cz = (z0+z1)/2;
+    mb.box(cx, 0.2, z0, x1-x0+1, 0.4, 0.8, S, 0); mb.box(cx, 0.2, z1, x1-x0+1, 0.4, 0.8, S, 0); mb.box(x0, 0.2, cz, 0.8, 0.4, z1-z0+1, S, 0); mb.box(x1, 0.2, cz, 0.8, 0.4, z1-z0+1, S, 0); };
+  // trees between the kerb and the house fronts
+  K.street = function (step, skipP, kinds, h0, h1) { for (let i = 4; i < N; i += step) for (const sd of [-1, 1]) { if (c.inTun[i] || c.inBr[i] || rnd() < skipP) continue; const p = at(i, sd*((sd > 0 ? c.wp : c.wn)[i] + 3.0), 0); if (K.wet(p[0], p[2], 3) || K.road(p[0], p[2]) < HW + 4.5 || !K.freeP(p[0], p[2], 1)) continue; c.tree(p[0], p[2], kinds[(rnd()*kinds.length) | 0], h0 + rnd()*h1, 0.8 + rnd()*0.3); } };
+  // a river or canal right across the map: the land on both banks, the water, the two quays
+  K.band = function (along, a, b, CX, CZ, Lh, lit) { if (along === 'x') { K.land(CX - Lh, CZ - Lh, CX + Lh, a); K.land(CX - Lh, b, CX + Lh, CZ + Lh); K.sea(CX - Lh, a, CX + Lh, b); K.water.push([CX - Lh, a, CX + Lh, b]);
+      for (const zz of [a, b]) { K.quay(CX - lit, zz, CX + lit, zz, true); K.quay(CX - Lh, zz, CX - lit, zz); K.quay(CX + lit, zz, CX + Lh, zz); } }
+    else { K.land(CX - Lh, CZ - Lh, a, CZ + Lh); K.land(b, CZ - Lh, CX + Lh, CZ + Lh); K.sea(a, CZ - Lh, b, CZ + Lh); K.water.push([a, CZ - Lh, b, CZ + Lh]);
+      for (const xx of [a, b]) { K.quay(xx, CZ - lit, xx, CZ + lit, true); K.quay(xx, CZ - Lh, xx, CZ - lit); K.quay(xx, CZ + lit, xx, CZ + Lh); } } };
+  // bridge deck over `len` points from i0: roadway, parapets, underside, piers
+  K.deck = function (i0, len, o2) { o2 = o2 || {}; const DW = o2.dw || HW + 4.4, S4 = 4, CONC = o2.conc || [0.44,0.44,0.46], ph = o2.parapet || 0.95, drop = o2.drop || 1.9;
+    for (let k = 0; k < len; k += S4) { const i = i0 + k, j = i + Math.min(S4, len - k), mid = at(i, 0, -1);
+      mb.quad(at(i, -DW, -0.03), at(i, DW, -0.03), at(j, DW, -0.03), at(j, -DW, -0.03), ST.land, 2, UPc);
+      for (const sd of [-1, 1]) { mb.quad(at(i, sd*DW, ph), at(j, sd*DW, ph), at(j, sd*DW, -drop), at(i, sd*DW, -drop), CONC, 0, mid);
+        if (o2.rail) mb.quad(at(i, sd*DW, ph), at(j, sd*DW, ph), at(j, sd*DW, ph + 0.5), at(i, sd*DW, ph + 0.5), o2.rail, o2.railMat || 0, mid); }
+      mb.quad(at(i, -DW, -drop), at(i, DW, -drop), at(j, DW, -drop), at(j, -DW, -drop), mul(CONC, 0.6), 0, [mid[0], 40, mid[2]]); }
+    if (o2.piers) for (let k = o2.piers*0.6; k < len - o2.piers*0.4; k += o2.piers) { if (o2.skip && o2.skip(k)) continue; const i = (i0 + Math.round(k)) % N, p = at(i, 0, 0); mb.box(p[0], (WY - drop)/2, p[2], 2*DW*(o2.pw || 0.72), -WY - drop, o2.pl || 3.4, CONC, 0, h[i]); }
+    return DW; };
+  // stone bridge: heavy piers, parapets with lamps; optional pylons with gilded figures at its ends, optional shrines at mid-span
+  K.stoneBridge = function (i0, len, o2) { o2 = o2 || {}; const STN = o2.stone || [0.76,0.72,0.62], DW = K.deck(i0, len, { conc: STN, parapet: 1.15, drop: 3.4, piers: o2.piers || 24, pw: 1.04, pl: 5.0 }), GOLD = [0.85,0.65,0.18];
+    for (let k = 7; k < len - 5; k += 13) for (const sd of [-1, 1]) { const i = (i0 + k) % N, p = at(i, sd*(DW + 0.1), 0), F = loc(p[0], p[2], h[i]); mb.box(p[0], 1.55, p[2], 0.8, 0.8, 0.8, STN, 0, h[i]); mb.cyl(p[0], 1.95, p[2], 0.12, 0.09, 3.2, 5, [0.09,0.10,0.09], 0);
+      for (const d of [[0, 5.4], [0.6, 4.9], [-0.6, 4.9]]) { const q = F(0, d[0]); mb.box(q[0], d[1], q[1], 0.44, 0.44, 0.44, [1.0,0.96,0.84], NITE ? 5 : 0); } }
+    if (o2.pylons) for (const e of [2, len - 2]) for (const sd of [-1, 1]) { const i = (i0 + e) % N, p = at(i, sd*(DW + 2.4), 0); mb.box(p[0], 8, p[2], 3.4, 16, 3.4, STN, 0, h[i]); mb.box(p[0], 16.3, p[2], 4.2, 0.6, 4.2, mul(STN, 0.85), 0, h[i]); mb.box(p[0], 0.8, p[2], 4.4, 1.6, 4.4, mul(STN, 0.85), 0, h[i]);
+        mb.blob(p[0], 18.2, p[2], 1.5, 1.7, 1.5, GOLD, 11, rnd, 0.5, 0.2); mb.box(p[0], 19.9, p[2], 2.6, 0.5, 0.5, GOLD, 11, h[i] + 0.6); K.keep(p[0], p[2], 4); }
+    if (o2.shrines) for (const sd of [-1, 1]) { const i = (i0 + Math.round(len/2)) % N, p = at(i, sd*(DW + 1.2), 0); mb.box(p[0], 2.6, p[2], 2.8, 5.2, 3.6, STN, 0, h[i]); mb.box(p[0], 2.9, p[2], 2.9, 2.6, 1.6, [0.10,0.10,0.11], 0, h[i]); mb.cyl(p[0], 5.2, p[2], 2.3, 0.0, 2.6, 4, [0.30,0.32,0.36], 0, null, 0.7854 - h[i]); mb.box(p[0], 8.0, p[2], 0.3, 0.7, 0.3, GOLD, 11); }
+    return DW; };
+  // steel truss bridge: two humps over the main piers, cross beams over the road
+  K.trussBridge = function (i0, len, col) { const DW = K.deck(i0, len, { piers: 0, conc: [0.40,0.40,0.42] }), TO = DW + 0.7, k1 = len*0.27, k2 = len*0.73, sg = len*0.13, m = NITE ? 12 : 0, dim = mul(col, 0.8), S8 = 8;
+    const top = function (k) { return 9.6 + 15*(Math.exp(-(k-k1)*(k-k1)/(sg*sg)) + Math.exp(-(k-k2)*(k-k2)/(sg*sg))); };
+    for (const kt of [k1, k2]) { const i = (i0 + Math.round(kt)) % N, p = at(i, 0, 0); mb.box(p[0], (WY - 1.9)/2, p[2], 2*TO + 3, -WY - 1.9, 7, [0.40,0.40,0.42], 0, h[i]); }
+    for (let k = 4; k + S8 <= len - 4; k += S8) { const ia = i0 + k, ib = i0 + k + S8, ya = top(k), yb = top(k + S8), f = [Math.sin(h[ia % N])*0.32, Math.cos(h[ia % N])*0.32], flip = ((k - 4)/S8) % 2;
+      for (const sd of [-1, 1]) { const A = at(ia, sd*TO, ya), B = at(ib, sd*TO, yb), A0 = at(ia, sd*TO, 0.2), B0 = at(ib, sd*TO, 0.2), mid = at(ia, 0, ya);
+        mb.quad(A, B, [B[0], yb + 0.8, B[2]], [A[0], ya + 0.8, A[2]], col, m, mid); mb.quad(A0, B0, [B0[0], 1.0, B0[2]], [A0[0], 1.0, A0[2]], col, m, mid);
+        mb.quad([A0[0] - f[0], 0.2, A0[2] - f[1]], [A0[0] + f[0], 0.2, A0[2] + f[1]], [A[0] + f[0], ya, A[2] + f[1]], [A[0] - f[0], ya, A[2] - f[1]], dim, m, mid);
+        const D0 = flip ? A0 : A, D1 = flip ? B : B0, y0 = flip ? 0.2 : ya, y1 = flip ? yb : 0.2; mb.quad([D0[0], y0 - 0.3, D0[2]], [D0[0], y0 + 0.3, D0[2]], [D1[0], y1 + 0.3, D1[2]], [D1[0], y1 - 0.3, D1[2]], dim, m, mid); }
+      const q = at(ia, 0, 0); mb.box(q[0], ya + 0.4, q[2], 2*TO, 0.6, 0.6, col, m, h[ia % N]); if (ya > 15) mb.box(q[0], 10.2, q[2], 2*TO, 0.5, 0.5, dim, m, h[ia % N]); }
+    for (const kt of [k1, k2]) for (const sd of [-1, 1]) { const A = at(i0 + Math.round(kt), sd*TO, top(kt) + 1.4); mb.box(A[0], A[1], A[2], 0.7, 0.7, 0.7, [0.95,0.10,0.07], 5); }
+    return DW; };
+  // bascule bridge with two stone towers the road runs through, walkways high between them, chains to the banks
+  K.towerBridge = function (i0, len) { const STN = [0.70,0.66,0.58], BLU = [0.26,0.50,0.72], WHT = [0.88,0.90,0.94], SLT = [0.24,0.27,0.32], GOLD = [0.85,0.65,0.18];
+    const DW = K.deck(i0, len, { conc: STN, rail: BLU, piers: 0 }), k1 = Math.round(len*0.30), k2 = len - k1, a = DW + 0.3, TH = 40, YA = 10.5;
+    for (const kt of [k1, k2]) { const i = (i0 + kt) % N, hh = h[i], p = at(i, 0, 0);
+      mb.box(p[0], (WY - 0.2)/2, p[2], 2*a + 20, -WY - 0.2, 17, STN, 0, hh);
+      for (const sd of [-1, 1]) { const q = at(i, sd*(a + 3.6), 0), F = loc(q[0], q[2], hh); mb.box(q[0], TH/2, q[2], 7.2, TH, 11, STN, 0, hh);
+        const s1 = at(i, sd*(a - 1.1), 0), s2 = at(i, sd*(a - 2.9), 0); mb.box(s1[0], YA - 2.3, s1[2], 2.2, 4.6, 11, STN, 0, hh); mb.box(s2[0], YA - 0.9, s2[2], 1.6, 1.8, 11, STN, 0, hh);
+        for (const f of [-1, 1]) { const t = F(sd*2.7, f*4.7); mb.cyl(t[0], 0, t[1], 1.55, 1.55, TH + 4.5, 8, mul(STN, 0.93), 0); mb.cyl(t[0], TH + 4.5, t[1], 1.8, 0.0, 6.5, 8, SLT, 0); mb.box(t[0], TH + 11.4, t[1], 0.28, 0.8, 0.28, GOLD, 11); } }
+      mb.box(p[0], (YA + TH)/2, p[2], 2*a, TH - YA, 11, STN, 0, hh);
+      for (const f of [-1, 1]) for (const yy of [17.5, 26, 33.5]) { const q = loc(p[0], p[2], hh)(0, f*5.56); mb.box(q[0], yy, q[1], a*1.1, 3.6, 0.1, [0.10,0.12,0.16], 4, hh); mb.box(q[0], yy + 2.5, q[1], 2*a + 14, 0.5, 0.2, mul(STN, 0.8), 0, hh); }
+      mb.cyl(p[0], TH, p[2], 9.2, 0.0, 10, 4, SLT, 0, null, 0.7854 - hh); mb.box(p[0], TH + 10.6, p[2], 0.3, 1.2, 0.3, GOLD, 11); }
+    for (let k = k1; k < k2; k += 4) { const i = i0 + k, j = i0 + Math.min(k2, k + 4), mid = at(i, 0, 32);
+      for (const sd of [-1, 1]) { mb.quad(at(i, sd*6.2, 30.6), at(j, sd*6.2, 30.6), at(j, sd*6.2, 33.8), at(i, sd*6.2, 33.8), ((k - k1)/4) % 2 ? WHT : BLU, 0, mid); mb.quad(at(i, sd*6.2, 33.8), at(j, sd*6.2, 33.8), at(j, sd*6.2, 34.3), at(i, sd*6.2, 34.3), WHT, 0, mid); }
+      mb.quad(at(i, -6.2, 30.6), at(i, 6.2, 30.6), at(j, 6.2, 30.6), at(j, -6.2, 30.6), mul(WHT, 0.8), 0, [mid[0], 60, mid[2]]); }
+    for (const sd of [-1, 1]) for (const side of [0, 1]) for (let s = 0; s < 12; s++) { const t0 = s/12, t1 = (s+1)/12, kk = function (t) { return side ? len - 4 - (len - 4 - k2 - 6)*t : 4 + (k1 - 6 - 4)*t; }, yy = function (t) { return 1.8 + 27*Math.pow(t, 1.7); };
+        const A = at(i0 + Math.round(kk(t0)), sd*(DW + 0.2), yy(t0)), B = at(i0 + Math.round(kk(t1)), sd*(DW + 0.2), yy(t1)), mid = at(i0 + Math.round(kk(t0)), 0, yy(t0));
+        mb.quad(A, B, [B[0], B[1] + 0.9, B[2]], [A[0], A[1] + 0.9, A[2]], BLU, 0, mid);
+        if (s % 2 === 1) { const D = at(i0 + Math.round(kk(t0)), sd*DW, 1.4), f = [Math.sin(h[(i0 + Math.round(kk(t0))) % N])*0.12, Math.cos(h[(i0 + Math.round(kk(t0))) % N])*0.12]; mb.quad([D[0] - f[0], 1.4, D[2] - f[1]], [D[0] + f[0], 1.4, D[2] + f[1]], [A[0] + f[0], A[1], A[2] + f[1]], [A[0] - f[0], A[1], A[2] - f[1]], WHT, 0, mid); } }
+    return DW; };
+  // triumphal arch over the road at point i
+  K.archGate = function (i, o2) { o2 = o2 || {}; i = ((i % N) + N) % N; const hh = h[i], a = Math.max(c.wp[i], c.wn[i]) + 1.6, oh = o2.oh || 16, pw = o2.pw || 11, th = o2.th || 36, d = o2.d || 15, STN = o2.stone || [0.80,0.75,0.64], DK = mul(STN, 0.80), p = at(i, 0, 0), W = 2*(a + pw), F0 = loc(p[0], p[2], hh);
+    for (const sd of [-1, 1]) { const q = at(i, sd*(a + pw/2), 0), F = loc(q[0], q[2], hh); mb.box(q[0], oh/2, q[2], pw, oh, d, STN, 0, hh); mb.box(q[0], 1.3, q[2], pw + 0.8, 2.6, d + 0.8, DK, 0, hh);
+      const s1 = at(i, sd*(a - 1.1), 0), s2 = at(i, sd*(a - 2.9), 0); mb.box(s1[0], oh - 2.4, s1[2], 2.2, 4.8, d, STN, 0, hh); mb.box(s2[0], oh - 0.9, s2[2], 1.6, 1.8, d, STN, 0, hh);
+      for (const f of [-1, 1]) { const g = F(0, f*(d/2 + 0.06)); if (o2.bays) { mb.box(g[0], oh*0.36, g[1], pw*0.46, oh*0.62, 0.12, [0.10,0.10,0.11], 0, hh); mb.box(g[0], oh*0.70, g[1], pw*0.60, 0.5, 0.3, DK, 0, hh); } else { mb.box(g[0], oh*0.50, g[1], pw*0.62, oh*0.46, 0.14, mul(STN, 0.88), 0, hh); mb.blob(g[0], oh*0.46, g[1], pw*0.2, oh*0.17, 0.5, mul(STN, 0.74), 0, rnd, 0.6, 0.2); } }
+      for (let o = -pw/2; o <= pw/2; o += 5) { const kq = F(o, 0); K.keep(kq[0], kq[1], d*0.7); } }
+    mb.box(p[0], (oh + th)/2, p[2], W, th - oh, d, STN, 0, hh); mb.box(p[0], oh + 0.5, p[2], W + 1.0, 1.0, d + 1.0, DK, 0, hh); mb.box(p[0], th - (th - oh)*0.42, p[2], W + 1.3, 0.9, d + 1.3, DK, 0, hh); mb.box(p[0], th + 0.4, p[2], W + 0.8, 0.8, d + 0.8, DK, 0, hh);
+    for (const f of [-1, 1]) for (let k = 0; k < 7; k++) { const g = F0(-W/2 + (k + 0.5)*W/7, f*(d/2 + 0.06)); mb.box(g[0], th - (th - oh)*0.21, g[1], W/7*0.62, (th - oh)*0.24, 0.12, mul(STN, 0.88), 0, hh); }
+    if (o2.crown) { mb.box(p[0], th + 1.6, p[2], W*0.34, 1.6, d*0.5, STN, 0, hh); mb.blob(p[0], th + 4.0, p[2], W*0.10, 2.2, d*0.2, o2.crown, o2.crown[0] > 0.8 ? 0 : 11, rnd, 0.6, 0.2); }
+    return a; };
+  // dome on a round base: `pow` under 1 swells it, `ribs` shade every other gore
+  K.dome = function (px, y0, pz, R, H, col, mat, o2) { o2 = o2 || {}; const SEG = o2.seg || 16, RO = 6, pw = o2.pow || 1, pr = function (j) { const a = j/RO*1.5708; return [j === RO ? 0 : R*Math.pow(Math.cos(a), pw)*(1 + (o2.bulge || 0)*Math.sin(a*2)), y0 + H*Math.sin(a)]; }, ref = [px, y0, pz];
+    for (let j = 0; j < RO; j++) { const A = pr(j), B = pr(j+1); for (let s = 0; s < SEG; s++) { const a0 = s/SEG*6.2832, a1 = (s+1)/SEG*6.2832, k = o2.ribs && s % 2 ? 0.84 : 1, cc = [col[0]*k, col[1]*k, col[2]*k];
+        const p0 = [px + Math.cos(a0)*A[0], A[1], pz + Math.sin(a0)*A[0]], p1 = [px + Math.cos(a1)*A[0], A[1], pz + Math.sin(a1)*A[0]], p2 = [px + Math.cos(a1)*B[0], B[1], pz + Math.sin(a1)*B[0]], p3 = [px + Math.cos(a0)*B[0], B[1], pz + Math.sin(a0)*B[0]];
+        if (j < RO - 1) mb.quad(p0, p1, p2, p3, cc, mat, ref); else mb.tri(p0, p1, [px, B[1], pz], cc, mat, ref); } }
+    if (o2.finial) { mb.cyl(px, y0 + H - 0.1, pz, R*0.06, 0.0, R*0.42, 5, o2.finial, 11); mb.blob(px, y0 + H + R*0.10, pz, R*0.07, R*0.07, R*0.07, o2.finial, 11, rnd, 0, 0); } };
+  // clock tower: shaft, a stage with four faces, belfry, pointed roof
+  K.clockTower = function (px, pz, H, o2) { o2 = o2 || {}; const w = o2.w || 7, STN = o2.stone || [0.72,0.62,0.44], DRK = o2.cap || [0.20,0.22,0.24], yS = H*0.60, yC = H*0.75, yB = H*0.83, ry = o2.ry || 0, F = loc(px, pz, ry), s = (yC - yS)*0.76, yc = (yS + yC)/2, e = w/2 + 0.62;
+    mb.box(px, yS/2, pz, w, yS, w, STN, 0, ry); for (let k = 1; k < 6; k++) mb.box(px, yS*k/6, pz, w + 0.3, 0.3, w + 0.3, mul(STN, 0.84), 0, ry);
+    mb.box(px, yc, pz, w + 1.2, yC - yS, w + 1.2, STN, 0, ry); mb.box(px, yS, pz, w + 1.8, 0.5, w + 1.8, mul(STN, 0.84), 0, ry); mb.box(px, yC, pz, w + 1.8, 0.5, w + 1.8, mul(STN, 0.84), 0, ry);
+    for (const d of [[1,0],[-1,0],[0,1],[0,-1]]) { const q = F(d[0]*e, d[1]*e), q2 = F(d[0]*(e + 0.07), d[1]*(e + 0.07)), q3 = F(d[0]*(e + 0.07) + (d[0] ? 0 : s*0.15), d[1]*(e + 0.07) + (d[1] ? 0 : s*0.15));
+      mb.box(q[0], yc, q[1], d[0] ? 0.08 : s, s, d[0] ? s : 0.08, [0.95,0.94,0.86], 0, ry); mb.box(q2[0], yc + s*0.17, q2[1], d[0] ? 0.06 : 0.24, s*0.36, d[0] ? 0.24 : 0.06, [0.05,0.05,0.06], 0, ry); mb.box(q3[0], yc, q3[1], d[0] ? 0.06 : s*0.32, 0.22, d[0] ? s*0.32 : 0.06, [0.05,0.05,0.06], 0, ry); }
+    mb.box(px, (yC + yB)/2, pz, w*0.86, yB - yC, w*0.86, o2.belfry || mul(STN, 0.78), 0, ry);
+    if (o2.dome) K.dome(px, yB, pz, w*0.46, (H - yB)*0.8, o2.dome, 11, { ribs: true, pow: 0.8, finial: [0.85,0.65,0.18] });
+    else { mb.cyl(px, yB, pz, w*0.62, 0.0, H - yB, 4, DRK, 0, null, 0.7854 - ry); mb.box(px, H + 0.5, pz, 0.4, 1.0, 0.4, [0.85,0.65,0.18], 11); }
+    K.keep(px, pz, w); };
+  // rider on a plinth
+  K.rider = function (px, pz, ry, s, ped, o2) { o2 = o2 || {}; const BR = o2.col || [0.20,0.16,0.10], F = loc(px, pz, ry), y = ped; mb.box(px, ped/2, pz, 3.6*s, ped, 7.0*s, o2.stone || [0.50,0.46,0.42], 0, ry); mb.box(px, 0.5*s, pz, 5.6*s, 1.0*s, 9.0*s, o2.stone || [0.50,0.46,0.42], 0, ry);
+    mb.box(px, y + 2.9*s, pz, 1.5*s, 1.7*s, 4.6*s, BR, 11, ry); for (const a of [-1, 1]) for (const b of [-1, 1]) { const q = F(a*0.5*s, b*1.8*s); mb.box(q[0], y + 1.05*s, q[1], 0.45*s, 2.1*s, 0.5*s, BR, 11, ry); }
+    { const q = F(0, 2.6*s); mb.box(q[0], y + 4.3*s, q[1], 0.8*s, 2.0*s, 1.0*s, BR, 11, ry); const q2 = F(0, 3.3*s); mb.box(q2[0], y + 5.3*s, q2[1], 0.7*s, 0.8*s, 1.5*s, BR, 11, ry); const q3 = F(0, -2.5*s); mb.box(q3[0], y + 2.6*s, q3[1], 0.3*s, 1.8*s, 0.3*s, BR, 11, ry); }
+    { const q = F(0, 0.2*s); mb.box(q[0], y + 4.9*s, q[1], 1.1*s, 2.4*s, 1.0*s, BR, 11, ry); mb.box(q[0], y + 6.5*s, q[1], 0.7*s, 0.8*s, 0.7*s, BR, 11, ry); const q2 = F(0.9*s, 0.6*s); mb.box(q2[0], y + 5.6*s, q2[1], 0.3*s, 0.3*s, 1.8*s, BR, 11, ry); }
+    K.keep(px, pz, 5*s); };
+  // round fountain
+  K.fountain = function (px, pz, r) { mb.cyl(px, 0, pz, r, r, 0.8, 16, [0.72,0.70,0.64], 0, [0.16,0.30,0.38]); mb.cyl(px, 0.8, pz, r*0.34, r*0.28, 1.2, 10, [0.72,0.70,0.64], 0, [0.16,0.30,0.38]); mb.cyl(px, 2.0, pz, r*0.14, 0.0, r*0.9, 6, [0.86,0.92,0.98], 0); for (let k = 0; k < 6; k++) { const a = k/6*6.2832; mb.cyl(px + Math.cos(a)*r*0.62, 0.8, pz + Math.sin(a)*r*0.62, r*0.07, 0.0, r*0.42, 5, [0.86,0.92,0.98], 0); } K.keep(px, pz, r + 2); };
+  // slender tower with a balcony and a small dome on top
+  K.minaret = function (px, pz, H, r, col, cap) { mb.cyl(px, 0, pz, r, r*0.8, H*0.84, 10, col, 0); mb.cyl(px, H*0.84, pz, r*1.5, r*1.5, H*0.03, 10, mul(col, 0.9), 0); mb.cyl(px, H*0.87, pz, r*0.9, r*0.9, H*0.05, 10, cap, 11); K.dome(px, H*0.92, pz, r*1.0, H*0.07, cap, 11, { seg: 10, pow: 0.8, finial: [0.85,0.65,0.18] }); };
+  // tall portal with a pointed niche in a tiled frame; it faces along +z of its own axes
+  K.pishtaq = function (px, pz, ry, w, hgt, d, o2) { o2 = o2 || {}; const STN = o2.stone || [0.74,0.62,0.44], TILE = o2.tile || [0.16,0.50,0.62], F = loc(px, pz, ry), f = F(0, d/2 + 0.07), DKB = [0.06,0.12,0.24];
+    mb.box(px, hgt/2, pz, w, hgt, d, STN, 0, ry); mb.box(f[0], hgt*0.36, f[1], w*0.56, hgt*0.72, 0.14, DKB, 0, ry);
+    { const A = F(-w*0.28, d/2 + 0.14), B = F(w*0.28, d/2 + 0.14), C = F(0, d/2 + 0.14); mb.tri([A[0], hgt*0.72, A[1]], [B[0], hgt*0.72, B[1]], [C[0], hgt*0.87, C[1]], DKB, 0, null); }
+    for (const sx of [-1, 1]) { const q = F(sx*w*0.39, d/2 + 0.09); mb.box(q[0], hgt*0.47, q[1], w*0.10, hgt*0.86, 0.14, TILE, 11, ry); } { const q = F(0, d/2 + 0.09); mb.box(q[0], hgt*0.93, q[1], w*0.88, hgt*0.07, 0.14, TILE, 11, ry); }
+    { const q = F(0, d/2 + 0.2); mb.box(q[0], hgt*0.14, q[1], w*0.2, hgt*0.28, 0.1, [0.20,0.13,0.08], 0, ry); } };
+  // box that leans: the top is shifted by (dx, dz)
+  K.lean = function (px, pz, w, d, hgt, dx, dz, col) { const B = [[-w/2,-d/2],[w/2,-d/2],[w/2,d/2],[-w/2,d/2]], P0 = B.map(function (b) { return [px + b[0], 0, pz + b[1]]; }), P1 = B.map(function (b) { return [px + b[0] + dx, hgt, pz + b[1] + dz]; }), ref = [px + dx/2, hgt/2, pz + dz/2];
+    for (let k = 0; k < 4; k++) { const j = (k+1) % 4; mb.quad(P0[k], P0[j], P1[j], P1[k], col, 7, ref); } mb.quad(P1[0], P1[1], P1[2], P1[3], mul(col, 0.6), 0, [px, -50, pz]); K.keep(px, pz, Math.max(w, d)*0.7); };
+  // obelisk
+  K.obelisk = function (px, pz, H, col) { mb.box(px, 1.5, pz, 4, 3, 4, [0.62,0.60,0.56], 0); mb.cyl(px, 3, pz, 1.5, 0.9, H - 5, 4, col, 0, null, 0.7854); mb.cyl(px, H - 2, pz, 0.9, 0.0, 2, 4, [0.85,0.65,0.18], 11, null, 0.7854); K.keep(px, pz, 5); };
+  // red double-deck bus, parked
+  K.bus = function (px, pz, ry) { mb.box(px, 2.3, pz, 2.5, 4.1, 9.6, [0.72,0.08,0.07], 0, ry); mb.box(px, 1.75, pz, 2.56, 0.9, 9.0, [0.06,0.07,0.09], 4, ry); mb.box(px, 3.45, pz, 2.56, 0.9, 9.0, [0.06,0.07,0.09], 4, ry); mb.box(px, 0.35, pz, 2.3, 0.5, 9.0, [0.05,0.05,0.06], 0, ry); K.keep(px, pz, 5); };
+  // the ground of a city: land everywhere but in the given rectangles of water, a quay wherever water meets land
+  K.ground = function (CX, CZ, Lh, rects, litR) { K.water = rects; const xs = [CX - Lh, CX + Lh, CX - litR, CX + litR], zs = [CZ - Lh, CZ + Lh, CZ - litR, CZ + litR];
+    for (const r of rects) { xs.push(Math.max(CX - Lh, r[0]), Math.min(CX + Lh, r[2])); zs.push(Math.max(CZ - Lh, r[1]), Math.min(CZ + Lh, r[3])); }
+    const uq = function (a) { a.sort(function (p, q) { return p - q; }); return a.filter(function (v, k) { return k === 0 || v - a[k-1] > 0.01; }); }, X = uq(xs), Z = uq(zs);
+    const wet = function (a, b) { return a < 0 || b < 0 || a >= X.length - 1 || b >= Z.length - 1 ? null : K.wet((X[a] + X[a+1])/2, (Z[b] + Z[b+1])/2); };
+    for (let a = 0; a < X.length - 1; a++) for (let b = 0; b < Z.length - 1; b++) { if (!wet(a, b)) { K.land(X[a], Z[b], X[a+1], Z[b+1]); continue; } K.sea(X[a], Z[b], X[a+1], Z[b+1]);
+      const lit = Math.abs((X[a] + X[a+1])/2 - CX) < litR && Math.abs((Z[b] + Z[b+1])/2 - CZ) < litR;
+      if (wet(a-1, b) === false) K.quay(X[a], Z[b], X[a], Z[b+1], lit); if (wet(a+1, b) === false) K.quay(X[a+1], Z[b], X[a+1], Z[b+1], lit);
+      if (wet(a, b-1) === false) K.quay(X[a], Z[b], X[a+1], Z[b], lit); if (wet(a, b+1) === false) K.quay(X[a], Z[b+1], X[a+1], Z[b+1], lit); } };
+  // streaks of light on the water along the edges of a rectangle (for the cities after dark)
+  K.shine = function (r, n, cols) { for (let k = 0; k < n; k++) { const e = (rnd()*4) | 0, t = rnd(), col = cols[(rnd()*cols.length) | 0], len = Math.min(12 + rnd()*30, (e < 2 ? r[2]-r[0] : r[3]-r[1])*0.45), wid = 0.8 + rnd()*1.6;
+      if (e === 0) K.streak(r[0] + 0.5, r[1] + t*(r[3]-r[1]), 1, 0, len, wid, col); else if (e === 1) K.streak(r[2] - 0.5, r[1] + t*(r[3]-r[1]), -1, 0, len, wid, col); else if (e === 2) K.streak(r[0] + t*(r[2]-r[0]), r[1] + 0.5, 0, 1, len, wid, col); else K.streak(r[0] + t*(r[2]-r[0]), r[3] - 0.5, 0, -1, len, wid, col); } };
+  // a cluster of tall towers around a point
+  K.cluster = function (px, pz, n, rad, h0, h1, col) { for (let k = 0; k < n*3 && n > 0; k++) { const a = rnd()*6.2832, r = rnd()*rad, qx = px + Math.cos(a)*r, qz = pz + Math.sin(a)*r, s = 20 + rnd()*14; if (!K.free(qx, qz, s*0.62) || K.wet(qx, qz, s) || K.road(qx, qz) < 60) continue; K.tower(qx, qz, s, s*(0.7 + rnd()*0.6), h0 + rnd()*(h1 - h0), rnd() < 0.7 ? 0 : 0.5, { col: col ? K.mul(col, 0.9 + rnd()*0.25) : null, roof: 'flat', noShade: true }); K.keep(qx, qz, s*0.62); n--; } };
   return K;
 }
 const CITY_GEN = {
   // Tokyo by night: an avenue of signs, a tunnel under the blocks, a suspension bridge across a harbour inlet
-  tokyo: function (c, K) { const mb = c.mb, at = c.at, N = c.N, rnd = c.rnd, HW = ROAD_W/2, L = 1750, CX = 65, CZ = 330, WY = K.WY;
+  tokyo: function (c) { const K = cityKit(c), mb = c.mb, at = c.at, N = c.N, rnd = c.rnd, HW = ROAD_W/2, L = 1750, CX = 65, CZ = 330, WY = K.WY;
     K.land(CX - L, CZ - L, 280, CZ + L); K.land(280, CZ - L, 680, 170); K.land(280, 500, 680, CZ + L); K.land(1150, CZ - L, CX + L, CZ + L);
     K.sea(280, CZ - L, 1150, CZ + L); K.water = [[280,170,680,500],[680,CZ - L,1150,CZ + L]];
     K.quay(280,170,280,500,true); K.quay(280,170,680,170,true); K.quay(280,500,680,500,true); K.quay(680,-260,680,170,true); K.quay(680,500,680,980,true);
@@ -1611,6 +1770,207 @@ const CITY_GEN = {
     for (let k = 0; k < 150; k++) { const e = (rnd()*6) | 0, t = rnd(), col = rnd() < 0.6 ? [0.36,0.28,0.17] : (rnd() < 0.5 ? [0.20,0.30,0.38] : [0.38,0.16,0.26]), len = 12 + rnd()*30, wid = 0.8 + rnd()*1.6;
       if (e === 0) K.streak(280.5, 170 + t*330, 1, 0, len, wid, col); else if (e === 1) K.streak(280 + t*400, 170.5, 0, 1, len, wid, col); else if (e === 2) K.streak(280 + t*400, 499.5, 0, -1, len, wid, col);
       else if (e === 3) K.streak(680.5, -260 + t*430, 1, 0, len, wid, col); else if (e === 4) K.streak(680.5, 500 + t*480, 1, 0, len, wid, col); else K.streak(1149.5, -500 + t*1700, -1, 0, len*2.2, wid*2, col); }
+  },
+  // Osaka at the blue hour: a red truss bridge over the harbour channel, a canal under lanterns, the castle on its island, a road through a tower
+  osaka: function (c) { const K = cityKit(c, { wy: -9, style: { signs: 1.35 } }), mb = c.mb, at = c.at, N = c.N, rnd = c.rnd, HW = ROAD_W/2, L = 1750, CX = 20, CZ = 200, WY = K.WY, S = c.S;
+    const moat = [[375,485,525,510],[375,610,525,635],[375,510,400,610],[500,510,525,610]], canal = [60,470,330,512], inlet = [340,140,720,290];
+    K.ground(CX, CZ, L, [inlet, [720,CZ - L,CX + L,CZ + L], canal].concat(moat), 780);
+    // the castle: white keep with green roofs on a stone base, lit from below
+    K.park(402,512,498,608, 26, { keep: function (px, pz) { return Math.hypot(px - 450, pz - 560) > 30; } }); K.open(368,478,532,642);
+    K.pagoda(450, 560, 2.3, { body: [0.50,0.50,0.46], band: [0.80,0.62,0.22], roof: [0.10,0.22,0.20], trim: [0.70,0.55,0.20], w: 9.5, dw: 1.3, baseH: 13, baseCol: [0.36,0.36,0.37], spire: 2.5 });
+    // a lattice tower with a blocky deck, twin towers joined at the top, a red wheel on a roof
+    K.lattice(-560, 436, 86, { hb: 0.84, base: 11, exp: 1.5, top: 3.0, c1: [0.50,0.52,0.58], c2: [0.30,0.50,0.75], bands: 9, decks: [[0.66, 9.0, 2.6], [0.84, 5.0, 2.0]], deckCol: [0.55,0.55,0.60], deckBand: [0.95,0.30,0.55] });
+    { const px = 620, pz = 0; for (const o of [-19, 19]) mb.box(px, 50, pz + o, 20, 100, 18, [0.24,0.27,0.33], 7); mb.box(px, 96, pz, 26, 8, 62, [0.26,0.29,0.35], 7); mb.box(px, 101, pz, 14, 2.2, 14, [0.95,0.80,0.45], 12); K.keep(px, pz, 36); }
+    { const px = -400, pz = -210; mb.box(px, 21, pz, 64, 42, 34, [0.26,0.24,0.27], 7); mb.box(px, 46, pz, 4, 32, 4, [0.50,0.10,0.08], 12); K.wheel(px, pz, 25, 1, 0, { cy: 62, col: [0.80,0.10,0.08], spoke: [0.55,0.10,0.08], pod: [0.85,0.22,0.16] }); K.keep(px, pz, 38); }
+    K.vistas.push([440,309, 450,540, 3, 5, 0.03, 0.2], [340,0, 620,0, 3, 5, 0.06, 0.14], [97,430, -560,436, 3, 5, 0.05, 0.12], [-400,85, -400,-210, 3, 5, 0.06, 0.16]);
+    K.lows.push([450,560, 125, 10]);
+    // the canal: a promenade on this side, a wall of signs on the far bank, lanterns along both quays, two arched footbridges, boats
+    K.open(60,436,330,470);
+    for (let xx = 64; xx < 322; ) { const wide = 12 + rnd()*10, deep = 12 + rnd()*8, hgt = 12 + rnd()*26, px = xx + wide/2, pz = 514.5 + deep/2 + rnd(); K.tower(px, pz, deep, wide, hgt, -1.5708); K.signs(px, pz, deep, wide, hgt, -1.5708, 1); K.signs(px, pz, deep, wide, hgt, -1.5708, 1); K.keep(px, pz, 0.45*Math.min(deep, wide)); xx += wide + 0.5; }
+    for (let xx = 64; xx < 328; xx += 5) for (const zz of [468.6, 513.4]) { mb.box(xx, 2.3, zz, 0.34, 0.44, 0.34, xx % 10 < 5 ? [0.95,0.20,0.12] : [1.0,0.70,0.30], 5); if (xx % 20 < 5) mb.box(xx, 1.15, zz, 0.1, 2.3, 0.1, [0.2,0.2,0.22], 0); }
+    for (const bx of [150, 262]) for (let s = 0; s < 7; s++) { const zz = 470 + (s + 0.5)*6, y = 0.25 + 2.3*Math.sin(3.1416*(s + 0.5)/7); mb.box(bx, y, zz, 4.2, 0.4, 6.3, [0.36,0.07,0.05], 12); for (const sd of [-1, 1]) mb.box(bx + sd*2.0, y + 0.7, zz, 0.2, 1.0, 6.3, [0.40,0.08,0.05], 12); }
+    K.boat(118, 491, 1.5708); K.boat(210, 491, 1.5708); K.boat(300, 491, 1.5708); K.boat(560, 215, 0.3); K.boat(820, 60, 1.1);
+    K.shine(canal, 46, [[0.40,0.16,0.26],[0.36,0.28,0.17],[0.18,0.30,0.38],[0.38,0.12,0.10]]); K.shine(inlet, 50, [[0.36,0.28,0.17],[0.20,0.30,0.38],[0.38,0.16,0.26]]);
+    for (const zc of [-210, -150, -90]) K.crane(703, zc, 1, 0);
+    for (const g of [[S.tunnel[0] - 46, 0], [S.tunnel[0] + S.tunnel[1] + 46, 0], [S.bridge[0] - 38, 1], [S.bridge[0] + S.bridge[1] + 38, 1]]) K.gantry(g[0], g[1] ? [0.05,0.16,0.36] : [0.04,0.26,0.15]);
+    K.trussBridge(S.bridge[0], S.bridge[1], [0.46,0.09,0.06]);
+    // the tunnel runs through a tower that stands astride the road
+    { const WO = K.tunnel(S.tunnel[0], S.tunnel[1], { blocks: false }), im = (S.tunnel[0] + (S.tunnel[1] >> 1)) % N, p = at(im, 0, 0), hh = c.h[im], col = [0.28,0.30,0.36];
+      for (const sd of [-1, 1]) { const q = at(im, sd*(WO + 12), 0); mb.box(q[0], 3.95, q[2], 24, 7.9, 46, col, 7, hh); }
+      mb.box(p[0], 7.9 + 44, p[2], 2*WO + 48, 88, 46, col, 7, hh); mb.box(p[0], 97, p[2], 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5); for (let o = -30; o <= 30; o += 12) { const q = at(im, o, 0); K.keep(q[0], q[2], 24); } }
+    K.rows(null);
+    K.fill(900, -620, -330, 720, 800, 14, 34, 10, 70, HW + 30, null);
+    K.fill(700, -1100, -800, 720, 1300, 20, 46, 16, 110, 120, null);
+    K.fill(420, -1500, -1300, 720, 1900, 30, 60, 30, 160, 500, function (px, pz) { return Math.hypot(px - CX, pz - CZ) > 640; });
+    K.street(9, 0.5, [0, 1, 0, 6], 4.0, 1.4);
+  },
+  // Tashkent on a clear day: the square with the rider, the hotel's curved front, blue domes, the television tower, mountains far away
+  tashkent: function (c) { const PAL = [[0.90,0.88,0.82],[0.84,0.80,0.70],[0.78,0.76,0.72],[0.88,0.84,0.74],[0.70,0.72,0.74],[0.80,0.74,0.62]];
+    const K = cityKit(c, { wy: -5, style: { neon: false, signs: 0.6, land: [0.27,0.27,0.28], quay: [0.62,0.60,0.56], pal: function (hgt) { const p = PAL[(c.rnd()*PAL.length) | 0], k = 0.92 + c.rnd()*0.14; return hgt > 44 ? [0.36*k,0.46*k,0.58*k] : [p[0]*k, p[1]*k, p[2]*k]; },
+      rowH: function (row, rnd) { const u = rnd(); return u < 0.55 ? 8 + rnd()*8 : (u < 0.9 ? 16 + rnd()*12 : 30 + rnd()*22); } } });
+    const mb = c.mb, at = c.at, N = c.N, rnd = c.rnd, HW = ROAD_W/2, L = 1500, CX = -40, CZ = 280, S = c.S, WH = [0.94,0.94,0.91], TQ = [0.14,0.56,0.62], GOLD = [0.85,0.65,0.18], SX = 260, SZ = 400;
+    K.ground(CX, CZ, L, [[-345,CZ - L,-305,CZ + L]], 720);
+    // the square inside the big bend: lawn, paths to the middle, the rider on his plinth, a domed rotunda, two clock towers, a hall with columns
+    { const R = 149, n = 28; for (let k = 0; k < n; k++) { const a0 = k/n*6.2832, a1 = (k+1)/n*6.2832; mb.tri([SX, 0.0, SZ], [SX + Math.cos(a0)*R, 0.0, SZ + Math.sin(a0)*R], [SX + Math.cos(a1)*R, 0.0, SZ + Math.sin(a1)*R], [1,1,1], 1, [0,-50,0]); }
+      K.keep(SX, SZ, 151);
+      for (let k = 0; k < 8; k++) { const a = k/8*6.2832 + 0.2, cs = Math.cos(a), sn = Math.sin(a), w = 2.2; mb.quad([SX + cs*13 - sn*w, 0.04, SZ + sn*13 + cs*w], [SX + cs*13 + sn*w, 0.04, SZ + sn*13 - cs*w], [SX + cs*146 + sn*w, 0.04, SZ + sn*146 - cs*w], [SX + cs*146 - sn*w, 0.04, SZ + sn*146 + cs*w], [0.66,0.63,0.58], 0, [0,-50,0]); }
+      mb.cyl(SX, 0, SZ, 14, 14, 0.5, 20, [0.60,0.58,0.54], 0, [0.66,0.63,0.58]); K.rider(SX, SZ, -2.4, 1.7, 9, { stone: [0.46,0.30,0.26] });
+      { const px = 190, pz = 345; mb.cyl(px, 0, pz, 16, 16, 11, 20, WH, 0, WH); for (let k = 0; k < 18; k++) { const a = k/18*6.2832; mb.cyl(px + Math.cos(a)*18.6, 0, pz + Math.sin(a)*18.6, 0.7, 0.6, 11, 6, WH, 0); } mb.cyl(px, 11, pz, 20, 20, 1.3, 20, WH, 0, WH); mb.cyl(px, 12.3, pz, 12.4, 12.4, 4, 20, [0.16,0.40,0.58], 11, WH); K.dome(px, 16.3, pz, 12.6, 11.5, TQ, 11, { ribs: true, pow: 0.72, seg: 20, finial: GOLD }); K.keep(px, pz, 22); }
+      K.clockTower(322, 300, 31, { w: 6, stone: [0.82,0.74,0.58], dome: TQ, belfry: WH }); K.clockTower(350, 328, 31, { w: 6, stone: [0.82,0.74,0.58], dome: TQ, belfry: WH });
+      { const px = 148, pz = 468; mb.box(px, 8, pz, 28, 16, 46, WH, 0); mb.box(px, 16.6, pz, 36, 1.2, 54, WH, 0); for (let k = 0; k < 10; k++) for (const sx of [-1, 1]) mb.cyl(px + sx*16.6, 0, pz - 24 + k*5.33, 0.65, 0.55, 16, 6, WH, 0); mb.box(px, 8, pz, 28.3, 11, 40, [0.10,0.16,0.24], 4); K.dome(px, 17.2, pz, 8, 5, TQ, 11, { ribs: true, pow: 0.7 }); K.keep(px, pz, 28); }
+      for (let k = 0; k < 150; k++) { const a = rnd()*6.2832, r = 30 + rnd()*112, tx = SX + Math.cos(a)*r, tz = SZ + Math.sin(a)*r, da = ((a - 0.2) % 0.7854 + 0.7854) % 0.7854; if (Math.min(da, 0.7854 - da)*r < 5.5 || Math.hypot(tx - 190, tz - 345) < 25 || Math.hypot(tx - 322, tz - 300) < 8 || Math.hypot(tx - 350, tz - 328) < 8 || Math.hypot(tx - 148, tz - 468) < 34) continue; c.tree(tx, tz, [0, 1, 0, 6, 3][(rnd()*5) | 0], 6 + rnd()*4.5, 0.8 + rnd()*0.3); } }
+    // the hotel: a tall slab bent round the square
+    for (let k = 0; k < 10; k++) { const th = (22 + k*5.4)*0.017453, px = SX + Math.cos(th)*199, pz = SZ + Math.sin(th)*199; mb.box(px, 24, pz, 10, 48, 19.4, [0.80,0.78,0.72], 7, -th); mb.box(px, 49, pz, 11, 2, 19.6, [0.60,0.58,0.54], 0, -th); mb.box(px, 2.5, pz, 15, 5, 19.6, [0.70,0.68,0.64], 0, -th); K.keep(px, pz, 11); K.keep(SX + Math.cos(th)*184, SZ + Math.sin(th)*184, 9); }
+    // the avenue of the start: an arch of white columns with storks on its beam, a park with a golden globe, the television tower straight ahead
+    { const i = c.nearI(200, 0), hh = c.h[i], W0 = Math.max(c.wp[i], c.wn[i]) + 2.2, SIL = [0.75,0.78,0.82], p = at(i, 0, 0), half = W0 + 24.5;
+      for (const sd of [-1, 1]) for (let k = 0; k < 4; k++) { const q = at(i, sd*(W0 + k*7.5), 0); mb.cyl(q[0], 0, q[2], 0.95, 0.8, 15, 10, WH, 0); mb.box(q[0], 0.6, q[2], 2.6, 1.2, 2.6, WH, 0, hh); mb.box(q[0], 15.3, q[2], 2.2, 0.6, 2.2, WH, 0, hh); K.keep(q[0], q[2], 6); }
+      mb.box(p[0], 16.4, p[2], 2*half, 1.6, 2.4, SIL, 11, hh); for (let s2 = 1; s2 <= 3; s2++) mb.box(p[0], 16.4 + s2*1.5, p[2], 2*half*(1 - s2*0.27), 1.5, 2.0, SIL, 11, hh);
+      for (const o of [-7, 0, 7]) { const q = at(i, o, 0), y = 23.5 - Math.abs(o)*0.22; mb.blob(q[0], y, q[2], 1.7, 0.8, 0.8, [0.95,0.95,0.97], 0, rnd, 0.4, 0.1); mb.box(q[0], y + 1.0, q[2], 0.2, 1.6, 0.2, [0.95,0.95,0.97], 0, hh); mb.box(q[0], y - 1.3, q[2], 0.12, 1.6, 0.12, [0.80,0.30,0.20], 0, hh); } }
+    K.park(60,-205,330,-13, 60, { keep: function (px, pz) { return Math.hypot(px - 200, pz + 105) > 16 && Math.hypot(px - 130, pz + 70) > 9 && Math.hypot(px - 270, pz + 70) > 9; } });
+    mb.box(200, 7, -105, 5, 14, 5, [0.46,0.30,0.26], 0); mb.box(200, 0.8, -105, 12, 1.6, 12, [0.60,0.58,0.54], 0); mb.blob(200, 18.4, -105, 4.6, 4.6, 4.6, GOLD, 11, rnd, 0, 0.06); K.fountain(130, -70, 6); K.fountain(270, -70, 6);
+    { const px = 770, pz = -30, H = 215, G = [0.62,0.64,0.67], yJ = H*0.25;
+      mb.cyl(px, 0, pz, 5.2, 3.6, yJ, 10, G, 0); mb.cyl(px, yJ, pz, 9.0, 9.4, H*0.03, 14, [0.80,0.80,0.78], 0, G); mb.cyl(px, yJ + H*0.03, pz, 9.4, 7.0, H*0.022, 14, [0.10,0.14,0.20], 4, G); mb.cyl(px, yJ + H*0.052, pz, 7.4, 7.4, H*0.02, 14, [0.80,0.80,0.78], 0, G);
+      mb.cyl(px, yJ + H*0.072, pz, 3.4, 2.2, H*0.62 - yJ - H*0.072, 10, G, 0);
+      for (let s2 = 0; s2 < 4; s2++) { const r0 = 2.2 - s2*0.3; mb.cyl(px, H*(0.62 + s2*0.06), pz, r0, r0 - 0.3, H*0.06, 8, s2 % 2 ? [0.90,0.90,0.90] : [0.80,0.22,0.14], 0); }
+      mb.cyl(px, H*0.86, pz, 0.7, 0.15, H*0.14, 6, [0.80,0.22,0.14], 0); mb.box(px, H + 0.6, pz, 0.8, 0.8, 0.8, [0.95,0.10,0.07], 5);
+      for (let a = 0; a < 3; a++) { const ang = a*2.0944 + 0.5, fx = px + Math.cos(ang)*36, fz = pz + Math.sin(ang)*36, tx = px + Math.cos(ang)*3.2, tz = pz + Math.sin(ang)*3.2, nx = -Math.sin(ang)*1.4, nz = Math.cos(ang)*1.4;
+        mb.quad([fx - nx, 0, fz - nz], [fx + nx, 0, fz + nz], [tx + nx, yJ*0.96, tz + nz], [tx - nx, yJ*0.96, tz - nz], G, 0, [px, 0, pz]); mb.quad([fx, 0, fz], [fx, 2.8, fz], [tx, yJ*0.96 + 2.8, tz], [tx, yJ*0.96, tz], K.mul(G, 0.85), 0, null); }
+      K.keep(px, pz, 42); }
+    // the old town to the west: the bazaar under its great dome, a madrasa with a tiled portal; a white mosque by the canal; glass towers further out
+    { const px = -615, pz = 270; K.open(-700,45,-512,362); mb.cyl(px, 0, pz, 44, 44, 5, 28, [0.86,0.84,0.78], 0, [0.60,0.60,0.58]); mb.cyl(px, 5, pz, 43, 42, 4.5, 28, [0.16,0.36,0.56], 11, [0.60,0.60,0.58]); K.dome(px, 9.5, pz, 42, 18, TQ, 11, { ribs: true, seg: 28, pow: 0.62, finial: GOLD });
+      for (let k = 0; k < 8; k++) { const a = k/8*6.2832 + 0.39, qx = px + Math.cos(a)*56, qz = pz + Math.sin(a)*56; mb.cyl(qx, 0, qz, 8, 8, 5, 12, [0.86,0.84,0.78], 0); K.dome(qx, 5, qz, 7.6, 6, TQ, 11, { ribs: true, seg: 12, pow: 0.7 }); }
+      const AW = [[0.80,0.20,0.16],[0.16,0.36,0.70],[0.90,0.74,0.20],[0.20,0.56,0.32],[0.92,0.92,0.90]]; for (let k = 0; k < 30; k++) { const qx = -548 + rnd()*30, qz = 190 + rnd()*165; mb.box(qx, 2.7, qz, 3.0, 0.22, 3.0, AW[(rnd()*5) | 0], 0, rnd()); mb.box(qx, 1.3, qz, 0.14, 2.6, 0.14, [0.3,0.3,0.32], 0); } }
+    { const px = -592, pz = 108, ry = 1.5708, F = K.loc(px, pz, ry), BR = [0.76,0.64,0.46]; K.pishtaq(px, pz, ry, 18, 23, 8, { stone: BR });
+      for (const sx of [-1, 1]) { const q = F(sx*24, -1); mb.box(q[0], 5.5, q[1], 30, 11, 7, BR, 0, ry); for (let k = 0; k < 4; k++) for (let fl = 0; fl < 2; fl++) { const n = F(sx*(12.5 + k*7), 2.56); mb.box(n[0], 2.7 + fl*5, n[1], 3.6, 3.6, 0.12, [0.12,0.10,0.10], 0, ry); }
+        const t = F(sx*40.5, 1.5); mb.cyl(t[0], 0, t[1], 2.3, 1.9, 14, 10, BR, 0); K.dome(t[0], 14, t[1], 2.2, 2.6, TQ, 11, { seg: 10, pow: 0.8 }); } }
+    { const px = -252, pz = 172, ry = 3.1416, F = K.loc(px, pz, ry); K.park(-299,96,-200,252, 16, { keep: function (qx, qz) { return Math.hypot(qx - px, qz - pz + 6) > 34; } });
+      mb.box(px, 6.5, pz, 36, 13, 26, WH, 0, ry); const f = F(0, 14); K.pishtaq(f[0], f[1], ry, 13, 19, 3.5, { stone: WH, tile: TQ });
+      mb.cyl(px, 13, pz, 9.6, 9.6, 4, 16, WH, 0, WH); mb.cyl(px, 15.4, pz, 9.7, 9.7, 1.0, 16, TQ, 11); K.dome(px, 17, pz, 9.4, 9.5, TQ, 11, { ribs: true, pow: 0.72, finial: GOLD });
+      for (const sx of [-1, 1]) { const m2 = F(sx*21, 13); K.minaret(m2[0], m2[1], 40, 1.7, WH, TQ); } K.keep(px, pz, 26); }
+    mb.cyl(-800, 0, 470, 13, 11, 152, 12, [0.34,0.44,0.56], 7); mb.box(-800, 153, 470, 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5); K.keep(-800, 470, 16); K.cluster(-840, 470, 10, 130, 55, 115, [0.34,0.44,0.56]);
+    K.vistas.push([330,0, 770,-30, 3, 5, 0.05, 0.14], [-441,470, -800,470, 3, 5, 0.06, 0.14]);
+    for (const b of [S.bridge, S.bridge2]) { const DW = K.deck(b[0], b[1], { conc: [0.82,0.82,0.80], rail: [0.16,0.50,0.58], piers: 0 }); for (const e of [3, b[1] - 3]) for (const sd of [-1, 1]) { const q = at(b[0] + e, sd*(DW + 0.2), 0); mb.box(q[0], 1.4, q[2], 1.2, 2.8, 1.2, WH, 0, c.h[(b[0] + e) % N]); K.dome(q[0], 2.8, q[2], 0.7, 0.8, TQ, 11, { seg: 8 }); } }
+    K.tunnel(S.tunnel[0], S.tunnel[1], { blocks: false, conc: [0.74,0.72,0.68] });
+    K.gantry(S.tunnel[0] - 44, [0.05,0.16,0.36]); K.gantry(S.tunnel[0] + S.tunnel[1] + 60, [0.05,0.16,0.36]);
+    K.rows(null);
+    K.fill(900, -720, -260, 660, 820, 14, 34, 8, 30, HW + 30, null);
+    K.fill(700, -1000, -560, 900, 1150, 20, 46, 8, 44, 120, null);
+    K.street(6, 0.22, [0, 1, 0, 1, 6], 5.5, 3.5);
+  },
+  // Paris late in the day: under the arch on the avenue, across the river toward the iron tower, a tunnel on the quay, the cathedral by the second bridge
+  paris: function (c) { const PAL = [[0.86,0.80,0.68],[0.84,0.79,0.69],[0.88,0.83,0.72],[0.80,0.75,0.65]];
+    const K = cityKit(c, { wy: -8, style: { neon: false, signs: 1, roof: 'mansard', land: [0.26,0.26,0.27], quay: [0.70,0.66,0.58], pal: function () { const p = PAL[(c.rnd()*PAL.length) | 0], k = 0.94 + c.rnd()*0.10; return [p[0]*k, p[1]*k, p[2]*k]; }, rowH: function (row, rnd) { return 11.5 + rnd()*3; } } });
+    const mb = c.mb, at = c.at, N = c.N, rnd = c.rnd, HW = ROAD_W/2, L = 1700, CX = 20, CZ = 380, S = c.S, STN = [0.80,0.75,0.64], PALE = [0.84,0.80,0.72], SLATE = [0.30,0.32,0.37], GOLD = [0.85,0.65,0.18], IRON = [0.36,0.28,0.20];
+    K.ground(CX, CZ, L, [[CX - L,285,CX + L,365]], 820);
+    // the iron tower on its lawn, straight ahead of the first bridge
+    K.park(-436,22,-324,168, 0); for (let zz = 30; zz < 165; zz += 9) for (const xx of [-431, -329]) c.tree(xx, zz, zz % 2 ? 0 : 1, 6.5 + rnd()*2, 0.85 + rnd()*0.2);
+    K.lattice(-380, -70, 176, { mat: 0, hb: 0.93, base: 31, exp: 2.3, top: 1.6, c1: IRON, c2: IRON, bands: 1, arch: true, plinth: false, decks: [[0.185, 3.2, 2.2], [0.37, 2.6, 1.6], [0.87, 2.2, 0.9]], deckCol: K.mul(IRON, 0.8), deckBand: [0.10,0.10,0.10] });
+    K.open(-430,-112,-330,24);
+    // the arch over the avenue; far beyond it, the towers of the business quarter round a hollow white cube
+    K.archGate(c.nearI(-150, 560), { th: 44, oh: 17, pw: 12, d: 19, stone: STN });
+    { const px = -1060, pz = 560, W2 = [0.90,0.90,0.92]; for (const o of [-27, 27]) mb.box(px, 31, pz + o, 44, 62, 8, W2, 0); mb.box(px, 58, pz, 44, 8, 62, W2, 0); mb.box(px, 2, pz, 44, 4, 62, W2, 0); K.keep(px, pz, 44); K.cluster(-1150, 560, 14, 190, 60, 125, [0.34,0.42,0.52]); }
+    // the garden with the glass pyramid in front of the long palace by the river
+    K.park(-92,425,126,546, 56, { keep: function (px, pz) { return Math.hypot(px - 18, pz - 480) > 24; } }); K.open(-104,366,164,426);
+    mb.cyl(18, 0, 480, 17, 0.0, 11, 4, [0.10,0.12,0.14], 4, null, 0.7854); for (const o of [[-22, 0], [22, 0], [0, 22]]) mb.cyl(18 + o[0], 0, 480 + o[1], 5, 0.0, 3.2, 4, [0.10,0.12,0.14], 4, null, 0.7854);
+    mb.box(30, 9, 397, 252, 18, 18, PALE, 7); mb.box(30, 19.3, 397, 250, 2.6, 15, SLATE, 0); for (const xx of [-96, 30, 156]) { mb.box(xx, 12, 397, 20, 24, 21, PALE, 7); mb.box(xx, 26, 397, 17, 4, 17, SLATE, 0); }
+    for (const xx of [-96, 156]) { mb.box(xx, 9, 412 + 10, 18, 18, 32, PALE, 7); mb.box(xx, 19.3, 412 + 10, 15, 2.6, 30, SLATE, 0); }
+    // the square with the obelisk and two fountains
+    K.open(-292,490,-198,547); mb.quad([-290,0.02,492],[-200,0.02,492],[-200,0.02,545],[-290,0.02,545],[0.62,0.60,0.55],0,[0,-50,0]); K.obelisk(-244, 518, 24, [0.80,0.66,0.48]); K.fountain(-268, 504, 5); K.fountain(-220, 532, 5);
+    // the cathedral in its garden near the second bridge
+    { const px = 304, pz = 236, G = [0.80,0.78,0.72]; K.park(226,186,394,284, 24, { keep: function (qx, qz) { return Math.abs(qx - px) > 34 || Math.abs(qz - pz) > 20; } });
+      mb.box(px + 6, 10, pz, 46, 20, 15, G, 0); mb.box(px + 6, 21.6, pz, 44, 3.2, 8, SLATE, 0); mb.box(px + 10, 10, pz, 12, 20, 30, G, 0); mb.box(px + 10, 21.6, pz, 8, 3.2, 28, SLATE, 0);
+      for (const o of [-5.6, 5.6]) { mb.box(px - 21, 17, pz + o, 8.4, 34, 8.4, G, 0); for (const q of [-1.6, 1.6]) { mb.box(px - 21, 27.5, pz + o + q, 8.6, 7, 1.3, [0.12,0.11,0.11], 0); mb.box(px - 21 + q, 27.5, pz + o, 1.3, 7, 8.6, [0.12,0.11,0.11], 0); } mb.box(px - 25.3, 9, pz + o, 0.12, 10, 3, [0.20,0.14,0.10], 0); mb.box(px - 21, 34.4, pz + o, 9.2, 0.8, 9.2, K.mul(G, 0.85), 0); }
+      mb.box(px - 25.3, 20, pz, 0.14, 5, 5, [0.14,0.12,0.16], 0); mb.cyl(px + 10, 23, pz, 1.0, 0.0, 24, 6, SLATE, 0);
+      for (let k = 0; k < 7; k++) for (const sd of [-1, 1]) mb.box(px - 10 + k*6, 6, pz + sd*9.4, 1.0, 12, 4, G, 0); K.keep(px, pz, 30); }
+    // the quay: plane trees between the road and the river
+    K.park(-326,203,118,283, 46, { kinds: [0, 1, 0] });
+    // a white church with tall domes on a hill to the north; one dark tower to the south
+    { const px = -380, pz = 1090, W2 = [0.93,0.91,0.86]; mb.cyl(px, 0, pz, 120, 52, 26, 18, [0.20,0.34,0.14], 0, [0.22,0.36,0.15]); mb.box(px, 34, pz, 26, 16, 34, W2, 0); mb.cyl(px, 42, pz, 7.2, 7.2, 8, 14, W2, 0); K.dome(px, 50, pz, 7.6, 14, W2, 0, { pow: 0.6, seg: 14, finial: W2 });
+      for (const a of [[-9, -12], [9, -12], [-9, 12], [9, 12]]) { mb.cyl(px + a[0], 42, pz + a[1], 3.2, 3.2, 3, 10, W2, 0); K.dome(px + a[0], 45, pz + a[1], 3.4, 6, W2, 0, { pow: 0.6, seg: 10 }); } mb.box(px, 50, pz + 24, 6.5, 48, 6.5, W2, 0); K.dome(px, 74, pz + 24, 3.6, 6, W2, 0, { pow: 0.6, seg: 10 }); K.keep(px, pz, 124); }
+    mb.box(150, 62, -330, 28, 124, 16, [0.17,0.15,0.14], 7); mb.box(150, 124.5, -330, 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5); K.keep(150, -330, 22);
+    K.stoneBridge(S.bridge[0], S.bridge[1], { pylons: true, stone: [0.82,0.78,0.68] }); K.stoneBridge(S.bridge2[0], S.bridge2[1], { stone: [0.78,0.74,0.64], piers: 20 });
+    K.tunnel(S.tunnel[0], S.tunnel[1], { blocks: false, conc: [0.66,0.62,0.55] });
+    K.boat(-120, 325, 1.5708); K.boat(210, 322, 1.5708);
+    K.rows(null);
+    K.fill(900, -640, -260, 660, 880, 16, 34, 11, 16, HW + 30, null);
+    K.fill(800, -1150, -720, 1150, 1450, 20, 44, 11, 17, 120, null);
+    K.fill(300, -1500, -1100, 1500, 1800, 26, 50, 11, 18, 500, function (px, pz) { return Math.hypot(px - CX, pz - CZ) > 640; });
+    K.street(6, 0.2, [0, 1, 0], 5.5, 2.5);
+  },
+  // Madrid under a hard sun: the gate of five arches, the avenue between two leaning towers, a park with a pond, a stone bridge, a tunnel under the riverside park
+  madrid: function (c) { const PAL = [[0.88,0.74,0.56],[0.86,0.66,0.52],[0.90,0.84,0.72],[0.82,0.60,0.46],[0.92,0.90,0.84],[0.84,0.76,0.60]];
+    const K = cityKit(c, { wy: -6, style: { neon: false, signs: 1, roof: 'tile', land: [0.28,0.27,0.26], quay: [0.66,0.62,0.54], pal: function (hgt) { const p = PAL[(c.rnd()*PAL.length) | 0], k = 0.93 + c.rnd()*0.12; return hgt > 34 ? [0.88*k,0.88*k,0.86*k] : [p[0]*k, p[1]*k, p[2]*k]; }, rowH: function (row, rnd) { const u = rnd(); return u < 0.82 ? 11 + rnd()*8 : 20 + rnd()*16; } } });
+    const mb = c.mb, at = c.at, N = c.N, rnd = c.rnd, HW = ROAD_W/2, L = 1700, CX = -120, CZ = 320, S = c.S, STN = [0.84,0.80,0.72], GOLD = [0.85,0.65,0.18], SLATE = [0.34,0.38,0.44];
+    K.ground(CX, CZ, L, [[-450,CZ - L,-400,CZ + L]], 820);
+    // the west bank is one big park; the tunnel is buried under it
+    K.park(CX - L, CZ - L, -454, CZ + L, 0); const WO = K.tunnel(S.tunnel[0], S.tunnel[1], { blocks: false, top: 'park', conc: [0.62,0.60,0.56] });
+    for (let k = 0; k < 520; k++) { const tx = -980 + rnd()*520, tz = -60 + rnd()*820; if (K.road(tx, tz) < WO + 5) continue; c.tree(tx, tz, [0, 1, 0, 6, 3, 4][(rnd()*6) | 0], 6 + rnd()*5, 0.8 + rnd()*0.3); }
+    { const px = -770, pz = 560; mb.cyl(px, 0, pz, 2.0, 1.6, 64, 10, [0.90,0.90,0.90], 0); mb.cyl(px, 64, pz, 9.5, 11, 2.8, 18, [0.72,0.75,0.80], 11, [0.80,0.82,0.86]); mb.cyl(px, 66.8, pz, 11, 9, 1.0, 18, [0.10,0.14,0.20], 4, [0.80,0.82,0.86]); mb.cyl(px, 67.8, pz, 0.4, 0.1, 12, 5, [0.80,0.80,0.80], 0); }
+    // the gate over the start avenue, the park behind it with its pond and the colonnade of the monument
+    K.archGate(c.nearI(170, 0), { th: 27, oh: 15, pw: 13, d: 9, bays: true, stone: [0.84,0.82,0.76], crown: [0.90,0.90,0.86] });
+    K.park(40,-252,332,-13, 90, { keep: function (px, pz) { return !(px > 142 && px < 268 && pz > -178 && pz < -88) && Math.hypot(px - 205, pz + 190) > 38; } }); K.pond(150,-170,260,-96);
+    for (let k = 0; k < 13; k++) { const th = (198 + k*12)*0.017453, qx = 205 + Math.cos(th)*31, qz = -180 + Math.sin(th)*31; mb.cyl(qx, 0, qz, 0.85, 0.75, 9, 8, STN, 0); if (k < 12) { const t2 = th + 6*0.017453; mb.box(205 + Math.cos(t2)*31, 9.5, -180 + Math.sin(t2)*31, 7.0, 1.0, 1.9, STN, 0, Math.atan2(-Math.cos(t2), -Math.sin(t2))); } }
+    K.rider(205, -188, 0, 1.3, 13, { stone: STN });
+    // the fountain at the bend and the white palace behind it
+    K.fountain(372, -24, 8); mb.blob(372, 3.4, -24, 1.6, 1.4, 2.6, [0.86,0.84,0.80], 0, rnd, 0.5, 0.15);
+    { const px = 458, pz = -78, W2 = [0.93,0.91,0.87]; mb.box(px, 11, pz, 62, 22, 40, W2, 7); mb.box(px, 31, pz, 11, 40, 11, W2, 7); mb.cyl(px, 51, pz, 5.5, 0.0, 9, 4, SLATE, 0, null, 0.7854); for (const o of [-26, 26]) { mb.box(px + o, 14, pz + 17.2, 8, 28, 8, W2, 7); mb.cyl(px + o, 28, pz + 17.2, 4.2, 0.0, 6, 4, SLATE, 0, null, 0.7854); } K.keep(px, pz, 36); }
+    // the avenue: two towers leaning toward each other across it, four very tall ones at its far end
+    K.lean(344, 486, 17, 17, 66, 11, 0, [0.16,0.17,0.20]); K.lean(416, 486, 17, 17, 66, -11, 0, [0.16,0.17,0.20]);
+    { const T4 = [[350,830,[0.30,0.36,0.44]],[398,866,[0.20,0.22,0.26]],[352,906,[0.36,0.44,0.52]],[400,944,[0.28,0.30,0.34]]]; T4.forEach(function (t, k) { if (k === 2) mb.cyl(t[0], 0, t[1], 13, 13, 143, 14, t[2], 7); else mb.box(t[0], 72, t[1], 22, 144 - k*2, 20, t[2], 7); mb.box(t[0], 146, t[1], 0.9, 0.9, 0.9, [0.95,0.10,0.07], 5); K.keep(t[0], t[1], 16); }); }
+    for (const t of [[296,300,90,[0.92,0.92,0.92]],[282,352,70,[0.22,0.24,0.28]],[470,330,78,[0.40,0.46,0.52]]]) { K.tower(t[0], t[1], 22, 22, t[2], 0, { col: t[3], roof: 'flat' }); K.keep(t[0], t[1], 15); }
+    K.vistas.push([380,525, 380,900, 3, 5, 0.05, 0.14]);
+    // a corner house under a dark dome with a gilded figure
+    { const px = -206, pz = -34; mb.box(px, 13, pz, 22, 26, 22, [0.90,0.88,0.82], 7, 0.5); mb.cyl(px, 26, pz, 7.4, 7.4, 3, 14, [0.90,0.88,0.82], 0); K.dome(px, 29, pz, 7, 8.5, [0.16,0.17,0.20], 11, { ribs: true, pow: 0.8, finial: GOLD }); mb.blob(px, 42, pz, 1.4, 1.8, 0.8, GOLD, 11, rnd, 0.5, 0.2); K.keep(px, pz, 16); K.lows.push([px, pz, 46, 10]); }
+    // the royal palace above the river, the cathedral beside it
+    K.open(-397,290,-204,549);
+    { const px = -322, pz = 452, P2 = [0.86,0.84,0.78]; mb.box(px, 11, pz, 96, 22, 96, P2, 7); mb.box(px, 22.6, pz, 98, 1.2, 98, K.mul(P2, 0.85), 0); for (const a of [[-1,-1],[1,-1],[1,1],[-1,1]]) mb.box(px + a[0]*44, 13, pz + a[1]*44, 14, 26, 14, P2, 7); mb.box(px, 11.5, pz, 50, 23.2, 50, [0.20,0.20,0.22], 0); K.rider(-238, 452, 1.5708, 1.2, 8, { stone: STN }); K.park(-262,388,-210,546, 14, { keep: function (qx, qz) { return Math.hypot(qx + 238, qz - 452) > 12; } }); }
+    { const px = -330, pz = 334, G = [0.80,0.78,0.72]; mb.box(px, 10, pz, 30, 20, 50, G, 0); mb.cyl(px, 20, pz - 8, 8.4, 8.4, 5, 14, G, 0); K.dome(px, 25, pz - 8, 8.2, 9, [0.40,0.46,0.52], 11, { pow: 0.75, seg: 14, finial: GOLD }); for (const o of [-11, 11]) { mb.box(px + o, 16, pz + 23, 7, 32, 7, G, 0); mb.cyl(px + o, 32, pz + 23, 3.6, 0.0, 6, 4, SLATE, 0, null, 0.7854); } }
+    K.stoneBridge(S.bridge[0], S.bridge[1], { shrines: true, stone: [0.80,0.76,0.66], piers: 18 });
+    { const b = S.bridge2; K.deck(b[0], b[1], { conc: [0.86,0.86,0.84], rail: [0.78,0.80,0.84], piers: 30 }); }
+    K.gantry(S.tunnel[0] - 44, [0.05,0.16,0.36]); K.gantry(S.tunnel[0] + S.tunnel[1] + 44, [0.05,0.16,0.36]);
+    K.rows(null);
+    K.fill(900, -400, -300, 700, 900, 14, 34, 11, 24, HW + 30, null);
+    K.fill(800, -400, -760, 1150, 1400, 20, 46, 11, 30, 120, null);
+    K.fill(300, -400, -1150, 1500, 1800, 26, 50, 11, 40, 500, function (px, pz) { return Math.hypot(px - CX, pz - CZ) > 640; });
+    K.street(8, 0.3, [0, 1, 0, 6], 5.5, 3);
+  },
+  // London under cloud: through the towers of the bascule bridge, a tunnel under the City, the clock tower and the great wheel by the second bridge
+  london: function (c) { const PAL = [[0.46,0.31,0.24],[0.62,0.60,0.56],[0.78,0.74,0.66],[0.52,0.36,0.27],[0.70,0.68,0.64],[0.40,0.42,0.46]];
+    const K = cityKit(c, { wy: -9, style: { neon: false, signs: 0.8, land: [0.24,0.24,0.25], quay: [0.50,0.48,0.44], pal: function (hgt) { const p = PAL[(c.rnd()*PAL.length) | 0], k = 0.92 + c.rnd()*0.14; return hgt > 36 ? [0.34*k,0.42*k,0.50*k] : [p[0]*k, p[1]*k, p[2]*k]; },
+      rowH: function (row, rnd) { const u = rnd(); return u < 0.7 ? 10 + rnd()*9 : (u < 0.93 ? 19 + rnd()*14 : 40 + rnd()*40); } } });
+    const mb = c.mb, at = c.at, N = c.N, rnd = c.rnd, HW = ROAD_W/2, L = 1700, CX = -20, CZ = 290, S = c.S, OCH = [0.70,0.60,0.42], SLATE = [0.24,0.27,0.32], GOLD = [0.85,0.65,0.18], PALE = [0.84,0.82,0.76], GLS = [0.34,0.42,0.50];
+    K.ground(CX, CZ, L, [[CX - L,245,CX + L,345]], 820);
+    K.towerBridge(S.bridge[0], S.bridge[1]); K.stoneBridge(S.bridge2[0], S.bridge2[1], { stone: [0.56,0.62,0.54], piers: 22 });
+    // the clock tower and the long palace on the river; the great wheel on the other bank
+    K.open(-672,345,-438,427); K.clockTower(-470, 394, 56, { w: 7.5, stone: OCH });
+    mb.box(-562, 9, 372, 160, 18, 28, OCH, 7); mb.box(-562, 19.2, 372, 158, 2.4, 22, SLATE, 0); for (let xx = -638; xx <= -486; xx += 8) for (const zz of [358.4, 385.6]) mb.cyl(xx, 18, zz, 0.7, 0.0, 5.5, 4, OCH, 0);
+    mb.box(-652, 28, 372, 15, 56, 15, OCH, 7); for (const a of [[-1,-1],[1,-1],[1,1],[-1,1]]) mb.cyl(-652 + a[0]*7, 56, 372 + a[1]*7, 1.3, 0.0, 9, 4, OCH, 0); mb.cyl(-562, 20, 372, 2.6, 0.0, 22, 8, SLATE, 0); mb.box(-652, 62, 372, 0.2, 12, 0.2, [0.3,0.3,0.3], 0);
+    K.open(-407,158,-283,245); K.wheel(-345, 202, 38, 1, 0, { mat: 0, col: [0.90,0.91,0.93], spoke: [0.78,0.80,0.84], pod: [0.80,0.86,0.92], leg: [0.85,0.86,0.90] });
+    // a glass spire, a white keep inside its walls, a cathedral under a great dome
+    mb.cyl(250, 0, 150, 27, 1.0, 178, 4, [0.10,0.13,0.17], 4, null, 0.7854); mb.cyl(250, 178, 150, 0.4, 0.0, 8, 4, [0.6,0.6,0.62], 0); K.keep(250, 150, 26);
+    { const px = 478, pz = 406, W2 = [0.84,0.82,0.76]; K.park(412,352,544,462, 10, { keep: function (qx, qz) { return Math.hypot(qx - px, qz - pz) > 30; } });
+      mb.box(px, 9, pz, 24, 18, 24, W2, 0); for (const a of [[-1,-1],[1,-1],[1,1],[-1,1]]) { mb.cyl(px + a[0]*12, 0, pz + a[1]*12, 2.7, 2.7, 22, 10, W2, 0); K.dome(px + a[0]*12, 22, pz + a[1]*12, 2.9, 3.2, [0.30,0.33,0.36], 0, { seg: 10, pow: 0.7, finial: GOLD }); }
+      for (let k = 0; k < 5; k++) for (const f of [-1, 1]) { mb.box(px - 8 + k*4, 11, pz + f*12.05, 1.2, 3.2, 0.1, [0.10,0.10,0.11], 0); mb.box(px + f*12.05, 11, pz - 8 + k*4, 0.1, 3.2, 1.2, [0.10,0.10,0.11], 0); }
+      for (const w of [[px, pz - 44, 96, 2.4], [px, pz + 44, 96, 2.4]]) mb.box(w[0], 3, w[1], w[2], 6, w[3], K.mul(W2, 0.9), 0); for (const w of [px - 48, px + 48]) mb.box(w, 3, pz, 2.4, 6, 88, K.mul(W2, 0.9), 0);
+      for (const a of [[-1,-1],[1,-1],[1,1],[-1,1]]) mb.cyl(px + a[0]*48, 0, pz + a[1]*44, 4.5, 4.5, 8.5, 10, K.mul(W2, 0.9), 0); K.keep(px, pz, 22); }
+    { const px = 40, pz = 440; K.open(-16,348,96,494); mb.box(px, 8, pz, 30, 16, 54, PALE, 0); mb.box(px, 8, pz + 8, 50, 16, 17, PALE, 0); mb.box(px, 17, pz, 26, 2, 50, [0.50,0.54,0.56], 0);
+      mb.cyl(px, 16, pz + 8, 9.4, 9.4, 9.5, 20, PALE, 0, PALE); for (let k = 0; k < 20; k++) { const a = k/20*6.2832; mb.cyl(px + Math.cos(a)*10.6, 17, pz + 8 + Math.sin(a)*10.6, 0.5, 0.5, 8, 5, PALE, 0); } mb.cyl(px, 25, pz + 8, 11.4, 11.4, 0.9, 20, PALE, 0, PALE);
+      K.dome(px, 25.9, pz + 8, 10.2, 11, [0.50,0.54,0.56], 0, { pow: 0.7, seg: 20 }); mb.cyl(px, 36.5, pz + 8, 1.7, 1.5, 5, 8, PALE, 0); mb.blob(px, 42.4, pz + 8, 0.9, 0.9, 0.9, GOLD, 11, rnd, 0, 0); mb.box(px, 44.2, pz + 8, 0.2, 2.2, 0.2, GOLD, 11);
+      for (const o of [-10, 10]) { mb.box(px + o, 13, pz - 24, 6.4, 26, 6.4, PALE, 0); K.dome(px + o, 26, pz - 24, 2.8, 4, [0.50,0.54,0.56], 0, { seg: 10, pow: 0.7, finial: GOLD }); } K.keep(px, pz, 30); }
+    // the towers of the City past the bascule bridge: one rounded like a shell; more glass far to the east; a brick power station with four chimneys to the south
+    { const px = 385, pz = 772, R = 14, H = 104, pr = [0.78,0.94,1.0,0.97,0.88,0.72,0.50,0.25,0.0]; for (let k = 0; k < 8; k++) mb.cyl(px, H*k/8, pz, R*pr[k], R*pr[k+1], H/8, 16, k % 2 ? [0.10,0.14,0.18] : [0.14,0.19,0.24], 4); K.keep(px, pz, 18);
+      for (const t of [[432,722,24,22,122],[338,704,20,20,132],[300,792,22,20,96],[468,806,24,24,112],[420,860,22,22,90]]) { K.tower(t[0], t[1], t[2], t[3], t[4], 0.25, { col: K.mul(GLS, 0.9 + rnd()*0.3), roof: 'flat', noShade: true }); K.keep(t[0], t[1], 16); } }
+    K.cluster(840, 0, 7, 90, 90, 135, GLS); mb.box(840, 68, 0, 22, 136, 22, K.mul(GLS, 1.1), 7); mb.cyl(840, 136, 0, 15.6, 0.0, 12, 4, [0.6,0.62,0.66], 0, null, 0.7854); K.keep(840, 0, 16);
+    { const px = -420, pz = -172, BRK = [0.50,0.33,0.24]; mb.box(px, 13, pz, 64, 26, 40, BRK, 0); mb.box(px, 16, pz, 36, 32, 30, BRK, 0); for (const a of [[-1,-1],[1,-1],[1,1],[-1,1]]) { mb.box(px + a[0]*26, 17, pz + a[1]*15, 9, 34, 9, BRK, 0); mb.cyl(px + a[0]*26, 34, pz + a[1]*15, 3.0, 2.3, 40, 10, [0.90,0.88,0.82], 0); } K.keep(px, pz, 40); }
+    K.vistas.push([380,445, 385,772, 3, 5, 0.05, 0.16], [250,0, 840,0, 3, 5, 0.05, 0.14], [-420,151, -420,-172, 3, 5, 0.06, 0.16]);
+    K.tunnel(S.tunnel[0], S.tunnel[1], { conc: [0.52,0.50,0.47] });
+    for (const b of [[-300,172,0.2],[-450,420,1.5708],[82,484,1.5708],[430,472,1.5708],[-392,236,1.5708]]) { K.bus(b[0], b[1], b[2]); mb.box(b[0] + 7, 1.25, b[1] + 3, 1.0, 2.5, 1.0, [0.72,0.08,0.07], 0); }
+    K.boat(0, 296, 1.5708); K.boat(210, 300, 1.5708);
+    K.rows(null);
+    K.fill(900, -660, -260, 640, 820, 14, 34, 10, 40, HW + 30, null);
+    K.fill(800, -1150, -720, 1150, 1400, 20, 46, 10, 60, 120, null);
+    K.fill(300, -1500, -1150, 1500, 1800, 26, 50, 10, 70, 500, function (px, pz) { return Math.hypot(px - CX, pz - CZ) > 640; });
+    K.street(10, 0.4, [0, 1, 6], 5, 3);
   }
 };
 function buildWorld() {
@@ -1621,10 +1981,11 @@ function buildWorld() {
   const cx = (T.minX + T.maxX)/2, cz = (T.minZ + T.maxZ)/2;
   const at = function (i, off, y) { i = ((i % N) + N) % N; return [x[i] + Math.cos(h[i])*off, y, z[i] - Math.sin(h[i])*off]; };
   // city circuits: where the tunnel and the bridge lie along the lap, whichever way it is driven
-  const CITY = TRACKS[T.id].city || null, inTun = new Uint8Array(N), inBr = new Uint8Array(N); let TUN = null, BR = null;
+  const CITY = TRACKS[T.id].city || null, inTun = new Uint8Array(N), inBr = new Uint8Array(N), SPAN = {}; let TUN = null, BR = null;
   const nearI = function (px, pz) { let b = 0, bd = 1e12; for (let i = 0; i < N; i++) { const dx = x[i]-px, dz = z[i]-pz, q = dx*dx + dz*dz; if (q < bd) { bd = q; b = i; } } return b; };
   if (CITY) { const span = function (a, b) { const ia = nearI(a[0], a[1]), ib = nearI(b[0], b[1]), d = (ib - ia + N) % N; return d <= N/2 ? [ia, d] : [ib, N - d]; };
-    TUN = span(CITY.tunnel[0], CITY.tunnel[1]); BR = span(CITY.bridge[0], CITY.bridge[1]); for (let k = 0; k <= TUN[1]; k++) inTun[(TUN[0]+k) % N] = 1; for (let k = 0; k <= BR[1]; k++) inBr[(BR[0]+k) % N] = 1; }
+    for (const k in CITY.spans) { const sp = span(CITY.spans[k][0], CITY.spans[k][1]), arr = k.indexOf('tunnel') === 0 ? inTun : inBr; SPAN[k] = sp; for (let q = 0; q <= sp[1]; q++) arr[(sp[0]+q) % N] = 1; }
+    TUN = SPAN.tunnel; BR = SPAN.bridge; }
   if (!CITY) for (let gi = -13; gi < 13; gi++) for (let gj = -13; gj < 13; gj++) { const x0 = cx + gi*200, z0 = cz + gj*200; mb.quad([x0,-0.8,z0],[x0+200,-0.8,z0],[x0+200,-0.8,z0+200],[x0,-0.8,z0+200],[0.3,0.55,0.25],1,UP); }
   // terrain: flat around the circuit, rolling further out, rising toward the mountains
   const GS = 12, MARG = 520, gx0 = T.minX - MARG, gz0 = T.minZ - MARG, gw = Math.ceil((T.maxX - T.minX + 2*MARG)/GS) + 1, gh = Math.ceil((T.maxZ - T.minZ + 2*MARG)/GS) + 1;
@@ -1647,7 +2008,7 @@ function buildWorld() {
   for (let i = 0; i < N; i++) {
     ribbon(i, -HW-1.6, -HW, 0.012, 0.016, VERGE, 0); ribbon(i, HW, HW+1.6, 0.016, 0.012, VERGE, 0);   // verges
     { const O = [-HW, -3.2, -1.2, 1.2, 3.2, HW], Cc = [0.275, 0.25, 0.205, 0.205, 0.25, 0.275], wob = function (j) { return 0.94 + 0.12*vnoise(j*0.07, 3, tseed); };
-      for (let q = 0; q < 5; q++) { const a0 = Cc[q]*wob(i), a1 = Cc[q+1]*wob(i), b0 = Cc[q]*wob(i+1), b1 = Cc[q+1]*wob(i+1), n = [0,1,0], col = function (v) { return [v, v*1.01, v*1.05]; };
+      for (let q = 0; q < 5; q++) { const a0 = Cc[q]*wob(i), a1 = Cc[q+1]*wob(i), b0 = Cc[q]*wob(i+1), b1 = Cc[q+1]*wob(i+1), n = [0,1,0], tk = CITY && !NIGHT && inTun[i] ? 0.62 : 1, col = function (v) { return [v*tk, v*1.01*tk, v*1.05*tk]; };      // by day the road inside a tunnel lies in its shade
         mb.sv(at(i,O[q],0.02), n, col(a0), 2); mb.sv(at(i,O[q+1],0.02), n, col(a1), 2); mb.sv(at(i+1,O[q+1],0.02), n, col(b1), 2); mb.sv(at(i,O[q],0.02), n, col(a0), 2); mb.sv(at(i+1,O[q+1],0.02), n, col(b1), 2); mb.sv(at(i+1,O[q],0.02), n, col(b0), 2); } }
     ribbon(i, -HW+0.30, -HW+0.52, 0.034, 0.034, LINE, 0); ribbon(i, HW-0.52, HW-0.30, 0.034, 0.034, LINE, 0);
     if (!sharp[i] && i % 8 < 4) ribbon(i, -0.09, 0.09, 0.034, 0.034, LINE, 0);
@@ -1729,7 +2090,13 @@ function buildWorld() {
     for (let k = 0; k < tries; k++) { const px = gx0 + 20 + rnd()*(gw*GS - 40), pz = gz0 + 20 + rnd()*(gh*GS - 40), d = Dist(px, pz); if (d < 50 || d > 500) continue;
       if (fbm2(px/75, pz/75, tseed + 99) < 0.50 - 0.10*sstep(150, 400, d)) continue;
       const conif = fbm2(px/140 + 30, pz/140, tseed + 7) > 0.52; tree(px, pz, conif ? (rnd() < 0.6 ? 3 : 4) : pick(), (conif ? 8 : 7) + rnd()*6, 0.72 + rnd()*0.36); } }
-  if (CITY) { const ctx = { mb: mb, at: at, N: N, x: x, z: z, h: h, rnd: rnd, lamps: lamps, tree: tree, nearI: nearI, inTun: inTun, inBr: inBr, TUN: TUN, BR: BR, wp: T.wp, wn: T.wn }; CITY_GEN[CITY.kind](ctx, cityKit(ctx)); }
+  if (CITY) {
+    // the shadow of a house: its roof slid along the sun's rays, joined to its foot; none where it would fall on water
+    const shade = function (px, pz, deep, wide, top, ry, K) { const cs = Math.cos(ry || 0), sn = Math.sin(ry || 0), B = [], Tp = [];
+      for (const a of [[-1,-1],[1,-1],[1,1],[-1,1]]) { const lx = a[0]*deep/2, lz = a[1]*wide/2, X = px + cs*lx + sn*lz, Z = pz - sn*lx + cs*lz, X2 = X - kx*(top - SHADOW_Y), Z2 = Z - kz*(top - SHADOW_Y); if (K.wet(X2, Z2, 1) || K.wet(X, Z, 1)) return; B.push([X, SHADOW_Y, Z]); Tp.push([X2, SHADOW_Y, Z2]); }
+      const tri = function (a, b, c2) { sh.v.push(a[0],a[1],a[2],0,1,0,0,0,0,0, b[0],b[1],b[2],0,1,0,0,0,0,0, c2[0],c2[1],c2[2],0,1,0,0,0,0,0); };
+      tri(Tp[0], Tp[1], Tp[2]); tri(Tp[0], Tp[2], Tp[3]); for (let k = 0; k < 4; k++) { const j = (k+1) % 4; tri(B[k], B[j], Tp[j]); tri(B[k], Tp[j], Tp[k]); } };
+    const ctx = { mb: mb, at: at, N: N, x: x, z: z, h: h, rnd: rnd, lamps: lamps, tree: tree, nearI: nearI, inTun: inTun, inBr: inBr, TUN: TUN, BR: BR, S: SPAN, shade: shade, wp: T.wp, wn: T.wn }; CITY_GEN[CITY.kind](ctx); }
   const scEnd = sc.v.length;
   // shadow = the scenery flattened along the sun's rays (the trees' ovals are in there already)
   for (let k = start; k < scEnd; k += 10) { const y = sc.v[k+1]; sh.v.push(sc.v[k] - kx*(y - SHADOW_Y), SHADOW_Y, sc.v[k+2] - kz*(y - SHADOW_Y), 0,1,0, 0,0,0, 0); }
@@ -1737,10 +2104,10 @@ function buildWorld() {
   if (!CITY) for (let i = 0; i < N; i += 3) for (const sd of [-1, 1]) { if (rnd() < 0.55) continue; const w = (sd > 0 ? T.wp : T.wn)[i], p = at(i, sd*(w + 1.8 + rnd()*7), 0); if (near(p[0], p[2], HW + 3.6)) continue;
     tree(p[0], p[2], rnd() < 0.6 ? 5 : 7, 0.9 + rnd()*1.1, 0.85 + rnd()*0.3); }
   // mountain range all around: ridges from layered noise, forest below, rock above, snow on top
-  if (!CITY) { const R0 = Math.hypot(T.maxX - T.minX, T.maxZ - T.minZ)/2, Rin = R0 + 330, SEG = 132, ROWS = 8, prof = [0, 0.16, 0.48, 0.86, 1, 0.72, 0.36, 0], hy = [], pp = [];
-    for (let j = 0; j < ROWS; j++) for (let a = 0; a < SEG; a++) { const ang = a/SEG*6.2832, r = Rin + j*72 + (vnoise(a*0.9, j*1.7, tseed)*40 - 20)*(j > 0 && j < ROWS-1 ? 1 : 0), wrapA = Math.cos(ang)*5.2, wrapB = Math.sin(ang)*5.2;
+  if (!CITY || CITY.mountains) { const MT = CITY ? CITY.mountains : null, R0 = Math.hypot(T.maxX - T.minX, T.maxZ - T.minZ)/2, Rin = R0 + (MT ? MT.far : 330), SEG = 132, ROWS = 8, prof = [0, 0.16, 0.48, 0.86, 1, 0.72, 0.36, 0], hy = [], pp = [];
+    for (let j = 0; j < ROWS; j++) for (let a = 0; a < SEG; a++) { const ang = a/SEG*6.2832, r = Rin + j*(MT ? 40 : 72) + (vnoise(a*0.9, j*1.7, tseed)*40 - 20)*(j > 0 && j < ROWS-1 ? 1 : 0), wrapA = Math.cos(ang)*5.2, wrapB = Math.sin(ang)*5.2;
       const ridge = fbm2(wrapA + 20, wrapB + 20, tseed + 3)*0.75 + Math.abs(vnoise(wrapA*2.6, wrapB*2.6, tseed + 9) - 0.5)*0.9 + vnoise(a*0.55, j*0.9, tseed + 5)*0.28;
-      hy.push(j === 0 ? -6 : prof[j]*(70 + 250*ridge) - 4); pp.push([cx + Math.cos(ang)*r, cz + Math.sin(ang)*r]); }
+      hy.push(j === 0 ? -6 : prof[j]*(70 + 250*ridge)*(MT ? MT.low + (1 - MT.low)*Math.pow(Math.max(0, Math.cos(ang - MT.ang)), 2) : 1) - 4); pp.push([cx + Math.cos(ang)*r, cz + Math.sin(ang)*r]); }
     const idx = function (j, a) { return j*SEG + ((a % SEG) + SEG) % SEG; };
     const mv = function (j, a) { const k = idx(j, a), y = hy[k], j0 = Math.max(0, j-1), j1 = Math.min(ROWS-1, j+1), ka = idx(j, a-1), kb = idx(j, a+1), k0 = idx(j0, a), k1 = idx(j1, a);
       // normal from the neighbours
@@ -1886,8 +2253,23 @@ const TRACKS = [
   { name: 'Шпильки', desc: 'Ночь: длинные прямые и развороты · 2 круга', pace: 1.02, sky: 'night', laps: 2,
     pts: [[0,0,0],[365,0,24],[400,-80,22],[340,-120,20],[110,-110,17],[90,-190,17],[357,-205,26],[425,-290,36],[374,-400,66],[153,-420,38],[-51,-395,20],[-76,-320,17],[128,-300,15],[136,-235,15],[-128,-235,30],[-212,-150,58],[-204,-30,48],[-144,0,24]] },
   { name: 'Токио', desc: 'Ночной город: туннель, мост через залив, огни · 2 круга', pace: 1.02, sky: 'tokyo', laps: 2,
-    city: { kind: 'tokyo', tunnel: [[-322,461],[-340,124]], bridge: [[470,158],[470,512]] },
-    pts: [[0,0,0],[360,0,60],[470,110,70],[470,560,80],[360,660,60],[150,660,40],[70,570,30],[-40,540,30],[-150,620,45],[-300,560,60],[-340,380,60],[-340,80,70],[-200,0,45]] }
+    city: { kind: 'tokyo', spans: { tunnel: [[-322,461],[-340,124]], bridge: [[470,158],[470,512]] } },
+    pts: [[0,0,0],[360,0,60],[470,110,70],[470,560,80],[360,660,60],[150,660,40],[70,570,30],[-40,540,30],[-150,620,45],[-300,560,60],[-340,380,60],[-340,80,70],[-200,0,45]] },
+  { name: 'Осака', desc: 'Сумерки: красный мост, канал в огнях, замок · 2 круга', pace: 1.02, sky: 'osaka', laps: 2,
+    city: { kind: 'osaka', spans: { tunnel: [[-400,310],[-400,100]], bridge: [[440,128],[440,304]] } },
+    pts: [[0,0,0],[340,0,50],[440,100,60],[440,330,50],[340,430,50],[80,430,40],[0,350,30],[-120,350,40],[-200,430,40],[-330,430,50],[-400,340,50],[-400,60,60],[-300,-40,50],[-200,-40,30],[-140,0,30]] },
+  { name: 'Ташкент', desc: 'Солнце: сквер, купола, телебашня, горы вдали · 2 круга', pace: 1.02, sky: 'tashkent', laps: 2,
+    city: { kind: 'tashkent', spans: { tunnel: [[420,140],[420,365]], bridge: [[-285,470],[-365,470]], bridge2: [[-365,70],[-285,70]] }, mountains: { ang: 0.8, low: 0.10, far: 700 } },
+    pts: [[0,0,0],[330,0,60],[420,90,60],[420,560,160],[-150,560,60],[-240,470,50],[-420,470,50],[-500,390,50],[-500,150,50],[-420,70,50],[-200,70,40],[-120,0,30]] },
+  { name: 'Париж', desc: 'Вечер: арка на проспекте, мосты через реку, башня · 2 круга', pace: 1.02, sky: 'paris', laps: 2,
+    city: { kind: 'paris', spans: { tunnel: [[-230,190],[-20,190]], bridge: [[-380,395],[-380,255]], bridge2: [[420,255],[420,395]] } },
+    pts: [[0,560,0],[-300,560,60],[-380,460,60],[-380,190,50],[140,190,60],[220,120,50],[330,120,50],[420,200,60],[420,470,60],[340,620,50],[200,620,40],[140,560,30]] },
+  { name: 'Мадрид', desc: 'Жара: ворота, проспект между башнями, парк, река · 2 круга', pace: 1.02, sky: 'madrid', laps: 2,
+    city: { kind: 'madrid', spans: { tunnel: [[-620,450],[-620,235]], bridge: [[-362,560],[-488,560]], bridge2: [[-488,120],[-362,120]] } },
+    pts: [[0,0,0],[300,0,60],[380,80,60],[380,560,70],[290,650,60],[-100,650,50],[-180,560,40],[-560,560,60],[-620,480,50],[-620,200,50],[-540,120,50],[-280,120,40],[-200,40,40],[-120,0,30]] },
+  { name: 'Лондон', desc: 'Пасмурно: башенный мост, река, туннель под Сити · 2 круга', pace: 1.02, sky: 'london', laps: 2,
+    city: { kind: 'london', spans: { tunnel: [[170,570],[-150,570]], bridge: [[380,215],[380,375]], bridge2: [[-420,375],[-420,215]] } },
+    pts: [[0,0,0],[250,0,50],[380,120,60],[380,470,60],[280,570,50],[-330,570,50],[-420,470,60],[-420,130,60],[-340,30,40],[-220,60,40],[-140,0,30]] }
 ];
 let T = null, DRY = false;          // the built track; DRY: the player is under a roof, the rain is not drawn
 function trackKey(id, rev, rain) { return 'u' + id + (rev ? 'r' : '') + (rain ? 'w' : ''); }      // records are kept apart for each direction and weather
@@ -2784,7 +3166,7 @@ function update(dt) {
 // the device that fired and applied by the device that owns the car that was hit.
 // ---------------------------------------------------------------------------
 const NET = { on: false, host: false, racing: false, code: '', me: 0, tr: null, roster: [], conn: {}, nextId: 1, track: 0, sendT: 0, results: {}, firstFin: 0 };
-const ROOM_PREFIX = 'turbodrift10-';         // bumped whenever players of the old and the new version could not race together (here: a fourth track)
+const ROOM_PREFIX = 'turbodrift11-';         // bumped whenever players of the old and the new version could not race together (here: a fourth track)
 function peerTransport() {
   let peer = null, hc = null, seq = 1, opened = false; const conns = {}; let self = null;
   const load = function (done0) { if (window.Peer) return done0(null); let lf = false; const done = function (e) { if (!lf) { lf = true; done0(e); } }; setTimeout(function () { done('load'); }, 12000);
@@ -2837,9 +3219,9 @@ function roomTransport(room) {
   const hostOf = function () { for (const p of nr.peers()) if (!p.sameTab && p.presence && p.presence.host) return p.peer; return ''; };
   const fail = function (done) { return function (e) { done(e && e.code === 'not_permitted' ? 'denied' : 'room'); }; };
   return self = { mesh: true, msg: netMsg, gone: netClosed,
-    host: function (code, done) { room.join('td10-' + code.toLowerCase()).then(function (r) { nr = r;
+    host: function (code, done) { room.join('td11-' + code.toLowerCase()).then(function (r) { nr = r;
       setTimeout(function () { if (hostOf()) { try { nr.leave(); } catch (e) {} return done('unavailable-id'); } try { nr.presence({ host: true }); } catch (e) {} me = myLabel(); listen(true); done(null); }, 900); }, fail(done)); },
-    join: function (code, done) { room.join('td10-' + code.toLowerCase()).then(function (r) { nr = r; let tries = 0;
+    join: function (code, done) { room.join('td11-' + code.toLowerCase()).then(function (r) { nr = r; let tries = 0;
       const look = function () { hostPeer = hostOf(); if (hostPeer) { me = myLabel(); listen(false); return done(null); } if (++tries > 16) { try { nr.leave(); } catch (e) {} return done('peer-unavailable'); } setTimeout(look, 300); }; look(); }, fail(done)); },
     send: function (id, o) { if (!nr) return; if (id === 0) emit(OPEN[o.t] ? '*' : hostPeer, o); else if (labels[id]) emit(labels[id], o); },
     all: function (o, except) { if (nr) emit('*', o, except > 0 ? labels[except] : ''); },
@@ -2979,7 +3361,7 @@ function netLobby() {
       b.addEventListener('click', function () { netSetCar(garage.type, i); }); sw.appendChild(b); }); }
   if (NET.host && !NET.pub) { const ol = document.getElementById('mpopts'); ol.innerHTML = ''; NET.opt = NET.opt || { rev: false, rain: false, ko: false };
     [['rev', 'Обратно'], ['rain', 'Дождь'], ['ko', 'Выбывание']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (NET.opt[o[0]] ? ' on' : ''); b.textContent = o[1]; b.addEventListener('click', function () { NET.opt[o[0]] = !NET.opt[o[0]]; netRoster(); }); ol.appendChild(b); });
-    const tl = document.getElementById('mptracks'); tl.innerHTML = '';
+    const tl = document.getElementById('mptracks'); tl.innerHTML = ''; tl.classList.toggle('many', TRACKS.length > 5);
     TRACKS.forEach(function (tr, i) { const b = document.createElement('button'); b.className = 'track' + (i === NET.track ? ' on' : ''); const left = document.createElement('span'); left.textContent = tr.name; const sm = document.createElement('small'); sm.textContent = tr.desc; left.appendChild(sm); b.appendChild(left);
       b.addEventListener('click', function () { NET.track = i; netLobby(); }); tl.appendChild(b); }); }
 }
@@ -3082,9 +3464,9 @@ function voiceUI() {
   const eb = document.getElementById('earbtn'); eb.textContent = VOICE.deaf ? '🔇 Голоса' : '🔊 Голоса'; eb.title = VOICE.deaf ? 'Голоса других выключены' : 'Голоса других включены'; eb.classList.toggle('offd', VOICE.deaf); eb.classList.toggle('on', !VOICE.deaf);
   const all = document.querySelectorAll('.micbtn'); for (let i = 0; i < all.length; i++) { all[i].classList.toggle('on', on); if (all[i].parentNode && all[i].parentNode.id === 'femo') all[i].style.display = can ? '' : 'none'; }
 }
-(function () { const tog = function () { voiceMic(!VOICE.stream); }; document.getElementById('micbtn').addEventListener('click', tog); document.getElementById('micbtn2').addEventListener('click', tog);
+(function () { const tog = function () { voiceMic(!VOICE.stream); }; document.getElementById('micbtn').addEventListener('click', tog); tapMob(document.getElementById('micbtn2'), tog);
   const ear = function () { VOICE.deaf = !VOICE.deaf; voiceSync(); voiceUI(); toast(VOICE.deaf ? 'Голоса других игроков выключены' : 'Голоса других игроков включены'); };
-  document.getElementById('earbtn').addEventListener('click', ear); document.getElementById('earbtn2').addEventListener('click', ear); })();
+  document.getElementById('earbtn').addEventListener('click', ear); tapMob(document.getElementById('earbtn2'), ear); })();
 function chatReset() { CHAT.log = []; CHAT.seen = {}; for (const id of ['chatlog', 'padlog', 'chatfeed']) document.getElementById(id).innerHTML = ''; chatClose(); padClose(); }
 (function () { const g = document.getElementById('phr'); PHRASES.forEach(function (t, i) { const b = document.createElement('button'); b.textContent = t; b.addEventListener('click', function () { if (chatSend(null, i) && chatDriving()) chatClose(); }); g.appendChild(b); });
   document.getElementById('chatx').addEventListener('click', chatClose); document.getElementById('padx').addEventListener('click', padClose);
@@ -3385,7 +3767,7 @@ function buildFpsSwitch() {
 function buildMenu() {
   buildGarage(); buildLevels(); buildUISwitch(); buildCtlSwitch(); buildFpsSwitch(); buildOpts();
   { const names = []; if (opt.rev) names.push('обратно'); if (opt.rain) names.push('дождь'); if (opt.ko) names.push('выбывание'); document.getElementById('playsub').textContent = (champPick ? 'Чемпионат' : TRACKS[lastTrack].name) + ' · ' + LEVELS[level].name + (names.length ? ' · ' + names.join(', ') : ''); }
-  const el = document.getElementById('tracks'); el.innerHTML = '';
+  const el = document.getElementById('tracks'); el.innerHTML = ''; el.classList.toggle('many', TRACKS.length > 5); document.getElementById('tdesc').textContent = champPick ? 'Все трассы подряд, очки за места' : TRACKS[lastTrack].desc;
   TRACKS.forEach(function (tr, i) {
     const b = document.createElement('button'); b.className = 'track';
     const left = document.createElement('span'); left.textContent = tr.name; const md = document.createElement('span'); md.className = 'medals'; md.title = 'Победы по уровням сложности'; const tk = trackKey(i, opt.rev, opt.rain), wv = wins[tk] || [];
@@ -3459,14 +3841,19 @@ for (let k = 0; k < 3; k++) { const el = document.getElementById('it' + k);
   el.addEventListener('click', function () { if (!document.body.classList.contains('mob')) selectItem(k); });
   el.addEventListener('pointerdown', function (e) { if (!document.body.classList.contains('mob')) return; e.preventDefault(); if (state === 'race' && player.items[k]) { sel = k; useItem(player, k); } }); }      // on a phone the press itself fires: no waiting for the finger to lift
 document.getElementById('fire').addEventListener('click', function () { if (state === 'race') useItem(player, sel); });
-document.getElementById('fireback').addEventListener('click', function () { if (state !== 'race') return; let k = sel; if (document.body.classList.contains('mob')) { k = -1; for (let q = 0; q < player.items.length && k < 0; q++) { const id = PU[player.items[q].type].id; if (id === 'rocket' || id === 'bolt') k = q; } } if (k >= 0) useItem(player, k, true); });
+// the shot backwards. On a phone the press itself fires, as with the other buttons: a tap made while another finger holds the steering strip never becomes a "click"
+{ const fbk = document.getElementById('fireback'), shootBack = function () { if (state !== 'race') return; let k = sel; if (document.body.classList.contains('mob')) { k = -1; for (let q = 0; q < player.items.length && k < 0; q++) { const id = PU[player.items[q].type].id; if (id === 'rocket' || id === 'bolt') k = q; } } if (k >= 0) useItem(player, k, true); };
+  fbk.addEventListener('pointerdown', function (e) { if (!document.body.classList.contains('mob')) return; e.preventDefault(); shootBack(); });
+  fbk.addEventListener('click', function () { if (!document.body.classList.contains('mob')) shootBack(); }); }
 document.getElementById('share').addEventListener('click', share); document.getElementById('psnd').addEventListener('click', function () { sndSet(!sndOff); buildFpsSwitch(); });
 document.getElementById('again').addEventListener('click', function () { startRace(T.id, !!rivalBot); });
 document.getElementById('champnext').addEventListener('click', champNext);
 document.getElementById('tomenu').addEventListener('click', toMenu);
 document.getElementById('watch').addEventListener('click', specStart); document.getElementById('specback').addEventListener('click', function () { specStop(true); });
 document.getElementById('specprev').addEventListener('click', function () { specStep(-1); }); document.getElementById('specnext').addEventListener('click', function () { specStep(1); });
-document.getElementById('pause').addEventListener('click', function () { pause(true); });
+tapMob(document.getElementById('pause'), function () { pause(true); });
+// A button of the race screen that has to work while another finger holds the steering strip: such a tap never becomes a "click", so on a touch screen the lift of the finger does the job
+function tapMob(el, fn) { let t = 0; el.addEventListener('pointerup', function (e) { if (e.pointerType === 'mouse' || !document.body.classList.contains('mob')) return; t = performance.now(); fn(e); }); el.addEventListener('click', function (e) { if (performance.now() - t < 700) return; fn(e); }); }
 document.getElementById('resume').addEventListener('click', function () { pause(false); });
 document.getElementById('quit').addEventListener('click', toMenu);
 document.getElementById('mpopen').addEventListener('click', function () { audio(); netOpen(); });
