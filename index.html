@@ -119,7 +119,7 @@
   .lv { flex: 1; border: 0; border-radius: 12px; padding: 9px 2px; font-size: 13px; font-weight: 800; color: #fff; background: rgba(255,255,255,.14); }
   .lv.on { background: #ffd23f; color: #1a2140; }
   .medals { display: inline-flex; gap: 3px; margin-left: 8px; vertical-align: middle; } .medals u { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.25); } .medals u.on { background: #ffd23f; }
-  .ctlsw::before { content: 'Руль' !important; } .fpssw::before { content: 'Графика' !important; } body.kbd .ctlsw { display: none; }
+  .ctlsw::before { content: 'Руль' !important; } .fpssw::before { content: 'Графика' !important; } .ecosw::before { content: 'Батарея' !important; } .fpssw .lv { flex: 1 1 auto; padding-left: 7px; padding-right: 7px; } body.kbd .ctlsw { display: none; }
   .uisw .lv { font-size: 12px; padding: 7px 2px; } .uisw::before { content: 'Интерфейс'; align-self: center; font-size: 12px; opacity: .8; margin-right: 4px; white-space: nowrap; }
   kbd { display: inline-block; min-width: 20px; padding: 2px 6px; margin: 0 2px; border-radius: 6px; border: 1px solid rgba(255,255,255,.35); border-bottom-width: 2.5px; background: rgba(10,13,24,.6); font: 700 11px/1.4 sans-serif; text-align: center; color: #fff; }
   .kb { display: inline-block; margin: 0 10px 6px 0; white-space: nowrap; }
@@ -388,6 +388,7 @@
   <div class="levels uisw" id="uisw"></div>
   <div class="levels uisw ctlsw for-mob" id="ctlsw"></div>
   <div class="levels uisw fpssw" id="fpssw"></div>
+  <div class="levels uisw ecosw" id="ecosw"></div>
   <div class="btns"><button class="main" id="prefsclose">Готово</button></div>
 </div>
 
@@ -419,12 +420,12 @@
     <div style="margin-top:6px"><b>Долгий занос</b> заряжает турбо, оно сработает на выходе</div>
     <div><b>Старт</b> — <span class="for-pc">нажми газ ровно на GO</span><span class="for-mob">держи ТОРМОЗ и отпусти ровно на GO</span>: будет рывок<span class="for-pc">; раньше времени — пробуксовка</span></div>
     <div><b>Слипстрим</b> — держись прямо за соперником, машина разгонится сильнее; <b>обгон впритирку</b> без касания даёт турбо</div>
-    <div><b>Графика</b> в настройках: «Лёгкая» рисует те же кадры с меньшей чёткостью — плавно и телефон греется меньше; «30 к/с» греется меньше всего, но картинка дёрганее</div>
+    <div><b>Графика</b> в настройках — от минимальной до максимальной: чем ниже, тем меньше чёткости, теней и эффектов, зато плавнее на слабом телефоне. <b>Батарея → Экономия</b> рисует вдвое меньше кадров: телефон греется меньше</div>
     <div><b>Чат</b> — кнопка 💬 в комнате, в заезде и на финише: готовые фразы в одно касание<span class="for-pc">, свой текст — клавиша <kbd>T</kbd></span><span class="for-mob">, свой текст — «Написать своё» (не во время езды)</span>. Чат можно выключить</div>
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт через 15 секунд после второго игрока, свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>H</kbd> гудок</span><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 41</div>
+    <div style="opacity:.5;margin-top:8px">версия 42</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -496,7 +497,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 41</div>
+  <div class="fver">Turbo Drift · версия 42</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -997,13 +998,13 @@ function frustum(m) {                               // six planes of the view vo
   for (const pr of [[r0,1],[r0,-1],[r1,1],[r1,-1],[r2,1],[r2,-1]]) { const a = r3[0] + pr[0][0]*pr[1], b = r3[1] + pr[0][1]*pr[1], c = r3[2] + pr[0][2]*pr[1], d = r3[3] + pr[0][3]*pr[1], l = Math.hypot(a, b, c) || 1; P.push(a/l, b/l, c/l, d/l); }
   return P;
 }
-function drawChunks(C, planes, eye, sorted) {
+function drawChunks(C, planes, eye, sorted, far) {
   gl.bindBuffer(gl.ARRAY_BUFFER, C.buf);
   gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 40, 0); gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 40, 12); gl.vertexAttribPointer(2, 3, gl.FLOAT, false, 40, 24); gl.vertexAttribPointer(3, 1, gl.FLOAT, false, 40, 36);
   gl.uniformMatrix4fv(CUR.m, false, IDENT); gl.uniform1f(CUR.brake, 0);
   const vis = C.vis; let n = 0;
   for (const r of C.ranges) { let inside = true; for (let k = 0; k < 24; k += 4) if (planes[k]*r.cx + planes[k+1]*r.cy + planes[k+2]*r.cz + planes[k+3] < -r.rad) { inside = false; break; }
-    if (!inside) continue; const dx = r.cx - eye[0], dy = r.cy - eye[1], dz = r.cz - eye[2]; r.d = dx*dx + dy*dy + dz*dz; vis[n++] = r; }
+    if (!inside) continue; const dx = r.cx - eye[0], dy = r.cy - eye[1], dz = r.cz - eye[2]; r.d = dx*dx + dy*dy + dz*dz; if (far && r.d > far*far) continue; vis[n++] = r; }
   vis.length = n; if (sorted) vis.sort(function (a, b) { return a.d - b.d; });
   for (let i = 0; i < n; i++) gl.drawArrays(gl.TRIANGLES, vis[i].first, vis[i].count);
   if (C.bigCount) gl.drawArrays(gl.TRIANGLES, C.bigFirst, C.bigCount);
@@ -1463,12 +1464,12 @@ function render() {
   }
   // 2. the world, near cells first; 3. trees; 4. sky, only where nothing covers it
   gl.uniform3fv(PO.tint, WHITE3); drawChunks(W.opaque, planes, camEye, true);
-  use(PT); drawChunks(W.trees, planes, camEye, true);
+  use(PT); drawChunks(W.trees, planes, camEye, true, state === 'menu' ? 0 : GFX.far);
   use(PS); gl.depthMask(false); SKYM[12] = camEye[0]; SKYM[13] = camEye[1]; SKYM[14] = camEye[2]; drawMesh(W.sky, SKYM);
   // 5. shadows: every pixel is darkened once, however many shapes overlap there
   use(PSH); gl.enable(gl.STENCIL_TEST); gl.stencilFunc(gl.EQUAL, 0, 0xff); gl.stencilOp(gl.KEEP, gl.KEEP, gl.INCR);
   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-  drawChunks(W.shadow, planes, camEye, false);
+  if (GFX.sh) drawChunks(W.shadow, planes, camEye, false);          // the cars keep their shadows on every preset: without one a car floats
   cars.forEach(function (c, i) { const p = parts[i]; drawMesh(p.k.body, mul(SHADOW, p.body)); for (const m of p.wheels) drawMesh(p.k.wheel, mul(SHADOW, m)); });
   gl.disable(gl.STENCIL_TEST);
   // 6. shields: a dome of energy around the car for as long as the shield holds
@@ -1660,7 +1661,7 @@ function visuals(c, vf, vl, accel, braking, dt) {
   for (const sd of [-1, 1]) marks.push([c.x + co*sd*k.wx + s*k.zR, 0.045, c.z - s*sd*k.wx + co*k.zR]);
   if (c.sliding && vf > 8 && c.lastMarks && c.off < ROAD_W/2 + 1) {
     for (let i = 0; i < 2; i++) { const a = c.lastMarks[i], b = marks[i], w = 0.13;
-      if (Math.hypot(b[0]-a[0], b[2]-a[2]) < 3) skids.push({ a: [a[0]-co*w, 0.045, a[2]+s*w], b: [a[0]+co*w, 0.045, a[2]-s*w], c: [b[0]+co*w, 0.045, b[2]-s*w], d: [b[0]-co*w, 0.045, b[2]+s*w], al: 0.42 }); }
+      if (GFX.fx && Math.hypot(b[0]-a[0], b[2]-a[2]) < 3) skids.push({ a: [a[0]-co*w, 0.045, a[2]+s*w], b: [a[0]+co*w, 0.045, a[2]-s*w], c: [b[0]+co*w, 0.045, b[2]-s*w], d: [b[0]-co*w, 0.045, b[2]+s*w], al: 0.42 }); }
     if (skids.length > 420) skids.splice(0, skids.length - 420);
   }
   c.lastMarks = marks;
@@ -2314,7 +2315,7 @@ window.addEventListener('keydown', function (e) { key(e, true); }); window.addEv
 // Update
 // ---------------------------------------------------------------------------
 function smoke(c, color, dt, flame) {          // puffs from the rear wheels, or a flame from the exhaust
-  c.puff = (c.puff || 0) - dt; if (c.puff > 0 || particles.length > 90) return; c.puff = flame ? 0.02 : 0.035;
+  if (!flame && !GFX.fx) return; c.puff = (c.puff || 0) - dt; if (c.puff > 0 || particles.length > 90) return; c.puff = flame ? 0.02 : 0.035;
   const k = CARS[c.type || 0], s = Math.sin(c.h), co = Math.cos(c.h);
   if (flame) { for (const sd of [-0.45, 0.45]) particles.push({ x: c.x + co*sd*k.wx - s*(k.half + 0.15), z: c.z - s*sd*k.wx - co*(k.half + 0.15), y: 0.24, vy: 0.2, life: 0.16, max: 0.16, c: color, size: 0.16, alpha: 0.95 }); return; }
   for (const sd of [-1, 1]) particles.push({ x: c.x + co*sd*k.wx + s*(k.zR - 0.2) + (Math.random()-0.5)*0.2, z: c.z - s*sd*k.wx + co*(k.zR - 0.2) + (Math.random()-0.5)*0.2, y: 0.22, vy: 0.9, life: 0.75, max: 0.75, c: color, size: 0.36, alpha: 0.5 }); }
@@ -2778,9 +2779,17 @@ function drawMap() {
 // Frame pacing. A 120 Hz screen would have the game draw twice as often for no visible gain in a
 // racing camera, so fast screens are drawn every second refresh; menus and the results screen
 // run at 30 a second, a paused game is not redrawn at all. "Экономия" caps racing at 30 too.
-let last = 0, lastRaf = 0, rafCount = 0, screenHz = 60, pausedDrawn = false, fpsEco = false, gfxLight = false; const hzSamples = [];
-// Two ways to spare a warm phone: 'light' keeps every frame and draws fewer pixels (smooth, a little softer); 'eco' draws half the frames (sharp, but choppier).
-try { const m = localStorage.getItem('td_fps'); fpsEco = m === 'eco'; gfxLight = m === 'light'; } catch (e) {}
+let last = 0, lastRaf = 0, rafCount = 0, screenHz = 60, pausedDrawn = false, fpsEco = false; const hzSamples = [];
+// Graphics presets, named the way games name them. Each step down draws fewer pixels and drops something that costs frames:
+// rs — share of the full resolution, sh — shadows of trees and buildings, far — how far trees are drawn (0 = all), fx — tyre smoke and skid marks.
+// Saving the battery is a separate switch: half the frames, whatever the preset.
+const GFX_SET = { min:  { name: 'Минимальная',  rs: 0.58, sh: false, far: 260, fx: false, tip: 'Для слабых телефонов: низкая чёткость, без теней, деревья только рядом, без дыма из-под колёс' },
+                  mid:  { name: 'Средняя',      rs: 0.72, sh: false, far: 0,   fx: true,  tip: 'Ниже чёткость, без теней от деревьев и построек' },
+                  high: { name: 'Высокая',      rs: 0.86, sh: true,  far: 0,   fx: true,  tip: 'Чуть ниже чёткость, все тени и эффекты' },
+                  max:  { name: 'Максимальная', rs: 1,    sh: true,  far: 0,   fx: true,  tip: 'Полная чёткость, все тени и эффекты' } };
+let gfx = 'max', GFX = GFX_SET.max;
+try { const g = localStorage.getItem('td_gfx'), old = localStorage.getItem('td_fps'); if (GFX_SET[g]) gfx = g; else if (old === 'light') gfx = 'mid';          // settings saved by earlier versions carry over
+  const e = localStorage.getItem('td_eco'); fpsEco = e === null ? old === 'eco' : e === '1'; GFX = GFX_SET[gfx]; } catch (e) {}
 function frame(t) {
   requestAnimationFrame(frame); if (NET.on && NET.pub) pubTick();
   // the screen's refresh rate, from the shortest gaps between callbacks (late frames only make gaps longer); re-measured as the game runs
@@ -2830,7 +2839,7 @@ function stageBox(dt) {
 let WIDE = true, ROT = false;                                  // true while the page is drawn rotated 90° inside an upright screen
 function viewW() { return ROT ? window.innerHeight : window.innerWidth; }
 function viewH() { return ROT ? window.innerWidth : window.innerHeight; }
-function resize() { const rs = renderScale*(gfxLight ? 0.7 : 1), w = Math.max(2, Math.floor(viewW()*rs)), h = Math.max(2, Math.floor(viewH()*rs)); if (canvas.width !== w) canvas.width = w; if (canvas.height !== h) canvas.height = h; }      // assigning a size, even the same one, wipes the picture and reallocates it
+function resize() { const rs = renderScale*GFX.rs, w = Math.max(2, Math.floor(viewW()*rs)), h = Math.max(2, Math.floor(viewH()*rs)); if (canvas.width !== w) canvas.width = w; if (canvas.height !== h) canvas.height = h; }      // assigning a size, even the same one, wipes the picture and reallocates it
 // A phone plays in landscape. The player turns the phone so its top points left; the page is rotated to match.
 function layout() {
   const b = document.body, mob = b.classList.contains('mob'); ROT = mob && window.innerHeight > window.innerWidth*1.05;
@@ -2905,10 +2914,13 @@ function buildCtlSwitch() {
     b.addEventListener('click', function () { TILT.mode = o[0]; try { localStorage.setItem('td_ctl', TILT.mode); } catch (e) {} if (o[0] === 'tilt') tiltStart(); buildCtlSwitch(); }); el.appendChild(b); });
 }
 function buildFpsSwitch() {
-  const el = document.getElementById('fpssw'), cur = fpsEco ? 'eco' : (gfxLight ? 'light' : 'full'); el.innerHTML = '';
-  [['full', 'Полная', 'Все кадры, полная чёткость'], ['light', 'Лёгкая', 'Те же кадры, чёткость ниже: плавно и телефон греется меньше'], ['eco', '30 к/с', 'Вдвое меньше кадров: греется меньше всего, но картинка дёрганее']].forEach(function (o) {
-    const b = document.createElement('button'); b.className = 'lv' + (cur === o[0] ? ' on' : ''); b.textContent = o[1]; b.title = o[2];
-    b.addEventListener('click', function () { fpsEco = o[0] === 'eco'; gfxLight = o[0] === 'light'; try { localStorage.setItem('td_fps', o[0]); } catch (e) {} resize(); buildFpsSwitch(); toast(o[2]); }); el.appendChild(b); });
+  const el = document.getElementById('fpssw'); el.innerHTML = '';
+  ['min', 'mid', 'high', 'max'].forEach(function (k) { const o = GFX_SET[k], b = document.createElement('button'); b.className = 'lv' + (gfx === k ? ' on' : ''); b.textContent = o.name; b.title = o.tip;
+    b.addEventListener('click', function () { gfx = k; GFX = o; try { localStorage.setItem('td_gfx', k); } catch (e) {} resize(); buildFpsSwitch(); toast(o.tip); }); el.appendChild(b); });
+  const ee = document.getElementById('ecosw'); ee.innerHTML = '';
+  [[false, 'Обычно', 'Все кадры: картинка плавная'], [true, 'Экономия', 'Вдвое меньше кадров: телефон греется меньше и дольше держит заряд, но картинка менее плавная']].forEach(function (o) {
+    const b = document.createElement('button'); b.className = 'lv' + (fpsEco === o[0] ? ' on' : ''); b.textContent = o[1]; b.title = o[2];
+    b.addEventListener('click', function () { fpsEco = o[0]; try { localStorage.setItem('td_eco', fpsEco ? '1' : '0'); } catch (e) {} buildFpsSwitch(); toast(o[2]); }); ee.appendChild(b); });
 }
 function buildMenu() {
   buildGarage(); buildLevels(); buildUISwitch(); buildCtlSwitch(); buildFpsSwitch(); buildOpts();
