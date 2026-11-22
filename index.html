@@ -127,6 +127,7 @@
   .arrow { width: 44px; height: 44px; border-radius: 14px; border: 0; background: rgba(255,255,255,.18); color: #fff; font-size: 26px; font-weight: 800; line-height: 1; }
   .carname { min-width: 200px; font-size: 20px; font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,.5); }
   .swatches { display: flex; gap: 8px; margin-bottom: 14px; }
+  .arrow.end { opacity: .22; pointer-events: none; }
   .mver { position: absolute; left: 12px; bottom: 8px; font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 9px; background: rgba(10,13,24,.55); color: #ffd23f; opacity: .85; pointer-events: none; z-index: 2; }
   /* the garage: the car in the middle, what can be changed on the left, the choices along the bottom */
   #garage { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; gap: 8px; padding: 12px 14px 14px; text-align: left; align-items: stretch; justify-content: stretch; overflow: hidden; background: radial-gradient(ellipse 62% 58% at 57% 46%, rgba(8,11,24,0) 40%, rgba(8,11,24,.78) 100%); }
@@ -569,7 +570,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 87</div>
+    <div style="opacity:.5;margin-top:8px">версия 88</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -646,7 +647,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 87</div>
+  <div class="fver">Turbo Drift · версия 88</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -4599,6 +4600,7 @@ function statColor(v) { const t = Math.max(0, Math.min(1, (v - 0.13)/0.78)), A =
 function buildGarage() {
   if (garage.view === undefined || !(garage.view >= 0 && garage.view < CAR_TYPES.length)) garage.view = garage.type;
   document.getElementById('tuneopen').style.display = owns(garage.view) ? '' : 'none';
+  { const at = CAR_ORDER.indexOf(garage.view); document.getElementById('carprev').classList.toggle('end', at <= 0); document.getElementById('carnext').classList.toggle('end', at >= CAR_ORDER.length - 1); }
   const vt = garage.view, mine = owns(vt), C = CAR_TYPES[vt];
   document.getElementById('carname').textContent = C.name; document.getElementById('careng').textContent = C.eng.label; statBars(document.getElementById('carstats'), vt);
   document.getElementById('coins').textContent = String(WALLET.coins);
@@ -4830,7 +4832,10 @@ function share() {
   const boxEl = document.getElementById('linkbox'); boxEl.style.display = 'block'; boxEl.textContent = text + ' ' + link;
   try { navigator.clipboard.writeText(text + ' ' + link).then(function () { note('Ссылка скопирована'); }, function () {}); } catch (e) {}
 }
-for (const d of [-1, 1]) document.getElementById(d < 0 ? 'carprev' : 'carnext').addEventListener('click', function () { garage.view = ((garage.view === undefined ? garage.type : garage.view) + d + CAR_TYPES.length) % CAR_TYPES.length; if (owns(garage.view)) { garage.type = garage.view; saveGarage(); } buildGarage(); });
+// The showroom runs from the free cars to the dearest and stops at both ends: past the dearest car there is nothing, and the arrow there is dimmed.
+const CAR_ORDER = CAR_TYPES.map(function (c, i) { return i; }).sort(function (a, b) { return CAR_TYPES[a].price - CAR_TYPES[b].price || a - b; });
+function carShift(from, d, ownedOnly) { let k = CAR_ORDER.indexOf(from) + d; while (k >= 0 && k < CAR_ORDER.length) { if (!ownedOnly || owns(CAR_ORDER[k])) return CAR_ORDER[k]; k += d; } return from; }
+for (const d of [-1, 1]) document.getElementById(d < 0 ? 'carprev' : 'carnext').addEventListener('click', function () { const cur = garage.view === undefined ? garage.type : garage.view, nx = carShift(cur, d, false); if (nx === cur) return; garage.view = nx; if (owns(garage.view)) { garage.type = garage.view; saveGarage(); } buildGarage(); });
 document.getElementById('buycar').addEventListener('click', buyCar); document.getElementById('champ').addEventListener('click', function () { champPick = true; buildMenu(); });
 document.getElementById('setupopen').addEventListener('click', function () { document.getElementById('setup').classList.remove('hidden'); }); document.getElementById('setupclose').addEventListener('click', function () { document.getElementById('setup').classList.add('hidden'); });
 document.getElementById('setupgo').addEventListener('click', playGo);
@@ -4864,7 +4869,7 @@ document.getElementById('mpquick').addEventListener('click', function () { audio
 document.getElementById('pubbots').addEventListener('click', function () { if (NET.on && NET.host && NET.pub && !NET.racing && NET.roster.length < 2) netStart(); });
 document.getElementById('helpopen').addEventListener('click', function () { document.getElementById('help').classList.remove('hidden'); });
 document.getElementById('helpclose').addEventListener('click', function () { document.getElementById('help').classList.add('hidden'); });
-for (const d of [-1, 1]) document.getElementById(d < 0 ? 'mpcarprev' : 'mpcarnext').addEventListener('click', function () { if (!NET.on) return; let t = garage.type; for (let k = 0; k < CAR_TYPES.length; k++) { t = (t + d + CAR_TYPES.length) % CAR_TYPES.length; if (owns(t)) break; } netSetCar(t, garage.color); });      // in a room only the cars the player owns
+for (const d of [-1, 1]) document.getElementById(d < 0 ? 'mpcarprev' : 'mpcarnext').addEventListener('click', function () { if (!NET.on) return; const t = carShift(garage.type, d, true); if (t !== garage.type) netSetCar(t, garage.color); });      // in a room only the cars the player owns
 document.getElementById('mpjoin').addEventListener('click', function () { netJoin(document.getElementById('mpcode').value); });
 document.getElementById('mpgo').addEventListener('click', netStart); document.getElementById('mprdy').addEventListener('click', function () { netReady(); }); document.getElementById('pubrdy').addEventListener('click', function () { netReady(); });
 document.getElementById('mpshare').addEventListener('click', netShare);
