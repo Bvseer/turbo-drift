@@ -480,7 +480,7 @@
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 66</div>
+    <div style="opacity:.5;margin-top:8px">версия 67</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -555,7 +555,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 66</div>
+  <div class="fver">Turbo Drift · версия 67</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -743,8 +743,9 @@ function musStep(k, t) { const S = 60/98/4, bar = (k >> 4) % 8, st = k & 15, ch 
   if (st % 4 === 0) { const a = actx, o = a.createOscillator(), g = a.createGain(); o.frequency.setValueAtTime(118, t); o.frequency.exponentialRampToValueAtTime(44, t + 0.13); g.gain.setValueAtTime(st === 0 || st === 8 ? 0.50 : 0.34, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.20); o.connect(g); g.connect(MUS.g); o.start(t); o.stop(t + 0.22); }      // kick
   if (st === 4 || st === 12) musHit(t, 0.13, 0.11, 1500); if (st % 4 === 2) musHit(t, 0.035, 0.05, 7000); if (st === 15 && bar % 2) musHit(t, 0.03, 0.035, 7000);
 }
+function musWanted() { return !!(MUS.on && !sndOff && actx && SND && SND.unlocked && state === 'menu' && !document.hidden); }
 function musFrame() { try {
-  const want = MUS.on && !sndOff && actx && SND && SND.unlocked && state === 'menu' && !document.hidden && actx.state === 'running';
+  let want = musWanted(); if (want && actx.state !== 'running') { actx.resume(); want = false; }                // the audio engine went to rest (after a pause, or with nothing else to play): wake it
   if (!want) { if (MUS.live) { MUS.live = false; MUS.g.gain.cancelScheduledValues(actx.currentTime); MUS.g.gain.setTargetAtTime(0, actx.currentTime, 0.12); } return; }
   if (!MUS.g) { const a = actx; MUS.g = a.createGain(); MUS.g.gain.value = 0; MUS.g.connect(SND.comp); MUS.dly = a.createGain(); MUS.dly.connect(MUS.g); const d = a.createDelay(1), fb = a.createGain(); d.delayTime.value = 60/98*0.75; fb.gain.value = 0.32; MUS.dly.connect(d); d.connect(fb); fb.connect(d); d.connect(MUS.g);
     const nb = a.createBuffer(1, a.sampleRate*0.5, a.sampleRate), ch = nb.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random()*2 - 1; MUS.noise = nb; }
@@ -792,7 +793,8 @@ function gearbox(G, u, thr, dt, free, e) {
 function soundFrame(dt) {
   try { if (!SND || !actx) return; const S = SND, G = S.st, now = performance.now();
     const live = (state === 'race' || state === 'countdown' || state === 'finished') && player && !document.hidden, racing = state === 'race';
-    if (!live) { if (actx.state === 'running') { S.master.gain.setTargetAtTime(0, actx.currentTime, 0.08); if (now - (S.beepT || 0) > 2500 && now - (S.liveT || 0) > 700 && !S.force) actx.suspend(); } return; }     // nothing to hear: the audio engine rests
+    if (!live) { if (actx.state === 'running') { S.master.gain.setTargetAtTime(0, actx.currentTime, 0.08); if (now - (S.beepT || 0) > 2500 && now - (S.liveT || 0) > 700 && !S.force && !musWanted()) actx.suspend(); } return; }     // (not while the menu music plays)
+        // nothing to hear: the audio engine rests
     S.liveT = now; if (actx.state !== 'running' && !S.force) { if (S.unlocked) actx.resume(); return; }
     S.acc = (S.acc || 0) + dt; if (S.acc < 1/31 && !S.force) return; dt = S.acc; S.acc = 0;                 // 30 updates a second are plenty for the ear
     const t = actx.currentTime; S.master.gain.setTargetAtTime(0.85, t, 0.12);
