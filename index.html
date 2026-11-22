@@ -35,7 +35,10 @@
   .steer { pointer-events: auto; position: absolute; left: 12px; bottom: 18px; width: 178px; height: 84px; border-radius: 42px; background: linear-gradient(180deg, rgba(20,26,44,.62), rgba(8,11,22,.72)); border: 1.5px solid rgba(255,255,255,.22);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px rgba(0,0,0,.35); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-sizing: border-box; font-size: 20px; color: rgba(255,255,255,.55); touch-action: none; }
   .knob { position: absolute; left: 50%; top: 50%; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #c9d2e6 70%); box-shadow: 0 4px 14px rgba(0,0,0,.45), inset 0 -3px 6px rgba(0,0,0,.18); pointer-events: none; }
-  body.kbd .gasbtn, body.kbd .driftbtn, body.kbd .steer, body.kbd .tiltbar { display: none; }
+  /* the steering wheel: the third way to steer on a phone. It stands where the strip stands and is turned with the thumb on its rim */
+  .wheel { display: none; pointer-events: auto; position: absolute; left: 14px; bottom: 14px; width: 138px; height: 138px; border-radius: 50%; touch-action: none; -webkit-user-select: none; user-select: none; filter: drop-shadow(0 6px 14px rgba(0,0,0,.4)); } #wheelrot { width: 100%; height: 100%; will-change: transform; }
+  body.mob.wheelctl:not(.tilt) .wheel { display: block; } body.mob.wheelctl .steer { display: none; } body.mob.lefty.wheelctl:not(.tilt) .wheel { left: auto; right: 14px; } body.tiny .wheel { width: 122px; height: 122px; }
+  body.kbd .gasbtn, body.kbd .driftbtn, body.kbd .steer, body.kbd .tiltbar, body.kbd .wheel { display: none; }
   /* phone: throttle is automatic, so no gas pedal; with tilt steering the brake takes the left thumb */
   body.mob .gasbtn { display: none; } body.mob .driftbtn { right: 12px; bottom: 18px; width: 84px; height: 84px; font-size: 13px; }
   body.mob .fire { right: 104px; bottom: 22px; } body.mob .fireback { right: 116px; bottom: 102px; } body.mob .slots { right: 8px; bottom: 114px; width: 94px; } body.mob .firename { right: 12px; bottom: 156px; }
@@ -392,6 +395,7 @@
   <div class="hpbar"><i id="hp"></i></div>
   <div class="warn" id="warn" style="display:none">РАКЕТА!</div>
   <div class="steer" id="steer" aria-label="Руль"><span>◀</span><div class="knob" id="knob"></div><span>▶</span></div>
+  <div class="wheel" id="wheel" aria-label="Руль"><div id="wheelrot"><svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="48" fill="rgba(8,11,22,.55)"/><path d="M50 50 L10 46 M50 50 L90 46 M50 50 L50 90" stroke="#aeb8cf" stroke-width="9" stroke-linecap="round"/><circle cx="50" cy="50" r="42" fill="none" stroke="#e9edf6" stroke-width="10"/><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="2"/><circle cx="50" cy="50" r="13" fill="#c9d2e6" stroke="rgba(0,0,0,.3)" stroke-width="1.5"/><rect x="46.5" y="3" width="7" height="10" rx="2" fill="#ffd23f"/></svg></div></div>
   <div class="slots"><button class="item empty" id="it0"></button><button class="item empty" id="it1"></button><button class="item empty" id="it2"></button></div>
   <div class="firename" id="firename"></div>
   <button class="fire empty" id="fire" aria-label="Применить бонус"></button>
@@ -570,7 +574,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 89</div>
+    <div style="opacity:.5;margin-top:8px">версия 90</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -647,7 +651,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 89</div>
+  <div class="fver">Turbo Drift · версия 90</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -3814,7 +3818,8 @@ const TILT = { mode: 'tilt', g: null, t: 0, zero: 0, roll: 0, val: 0, asked: fal
 const HAND = { sens: 'mid', left: false, curve: { soft: 1.55, mid: 1, sharp: 0.68 } };
 try { const q = localStorage.getItem('td_sens'); if (HAND.curve[q]) HAND.sens = q; HAND.left = localStorage.getItem('td_left') === '1'; } catch (e) {}
 document.body.classList.toggle('lefty', HAND.left);
-try { const m = localStorage.getItem('td_ctl'); if (m === 'tilt' || m === 'strip') TILT.mode = m; } catch (e) {}
+try { const m = localStorage.getItem('td_ctl'); if (m === 'tilt' || m === 'strip' || m === 'wheel') TILT.mode = m; } catch (e) {}
+document.body.classList.toggle('wheelctl', TILT.mode === 'wheel');
 function tiltRoll() {                                  // degrees, positive = right side down
   const g = TILT.g; if (!g) return 0; let ang = 0; try { ang = (screen.orientation && screen.orientation.angle) || window.orientation || 0; } catch (e) {} if (ROT) ang = 90;
   let up = g[1], right = g[0]; if (ang === 90) { up = g[0]; right = -g[1]; } else if (ang === 270 || ang === -90) { up = -g[0]; right = g[1]; } else if (ang === 180) { up = -g[1]; right = -g[0]; }
@@ -3852,6 +3857,15 @@ if (touchOnly && uiMode === 'pc') { uiMode = 'auto'; try { localStorage.removeIt
 function detectUI() { if (uiMode !== 'auto') return uiMode; let touch = false; try { touch = (navigator.maxTouchPoints || 0) > 0 && window.matchMedia('(pointer: coarse)').matches; } catch (e) {} return touch ? 'mobile' : 'pc'; }
 applyUI(detectUI());
 window.addEventListener('touchstart', function () { if (uiMode === 'auto' && !document.body.classList.contains('mob')) applyUI('mobile'); }, { passive: true });
+(function () {                                        // the wheel: the thumb takes the rim anywhere and turns it; a quarter turn is full lock, and it springs back when let go
+  const el = document.getElementById('wheel'), rot = document.getElementById('wheelrot'), LOCK = 90*Math.PI/180, OVER = LOCK + 0.4; let id = null, last = 0, ang = 0, raw = 0;          // the hand may run a little past full lock; coming back, the wheel answers at once and not after the whole overshoot
+  const at = function (e) { const r = el.getBoundingClientRect(), dx = e.clientX - (r.left + r.width/2), dy = e.clientY - (r.top + r.height/2); return Math.hypot(dx, dy) < r.width*0.13 ? null : Math.atan2(dy, dx); };          // too near the hub the angle means nothing
+  const show = function () { rot.style.transform = 'rotate(' + (ang*180/Math.PI).toFixed(1) + 'deg)'; };
+  el.addEventListener('pointerdown', function (e) { audio(); id = e.pointerId; last = at(e); raw = ang = 0; stripOn = true; rot.style.transition = 'none'; try { el.setPointerCapture(e.pointerId); } catch (x) {} e.preventDefault(); });
+  el.addEventListener('pointermove', function (e) { if (id !== e.pointerId) return; const a = at(e); if (a === null) return; if (last !== null) { let d = a - last; if (d > Math.PI) d -= 2*Math.PI; else if (d < -Math.PI) d += 2*Math.PI; raw = Math.max(-OVER, Math.min(OVER, raw + d)); ang = Math.max(-LOCK, Math.min(LOCK, raw)); stripSteer = ang/LOCK; show(); } last = a; });
+  const end = function (e) { if (id !== e.pointerId) return; id = null; stripOn = false; stripSteer = 0; ang = 0; raw = 0; rot.style.transition = 'transform .16s ease-out'; show(); };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+})();
 (function () {                                        // the strip is a slider: where the thumb rests is how far the wheel is turned
   const el = document.getElementById('steer'), knob = document.getElementById('knob');
   const set = function (e) { const r = el.getBoundingClientRect(), k = Math.max(-1, Math.min(1, ROT ? (e.clientY - (r.top + r.height/2))/(r.height*0.40) : (e.clientX - (r.left + r.width/2))/(r.width*0.40)));
@@ -4723,8 +4737,9 @@ function buildCtlSwitch() {
     [[false,'Под правую руку'], [true,'Под левую руку']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (HAND.left === o[0] ? ' on' : ''); b.textContent = o[1];
       b.addEventListener('click', function () { HAND.left = o[0]; try { localStorage.setItem('td_left', o[0] ? '1' : '0'); } catch (e) {} document.body.classList.toggle('lefty', HAND.left); buildCtlSwitch(); toast(o[0] ? 'Бонусы слева, тормоз справа' : 'Бонусы справа, тормоз слева'); }); eh.appendChild(b); }); }
   const el = document.getElementById('ctlsw'); el.innerHTML = '';
-  [['tilt','Наклон телефона'], ['strip','Полоса на экране']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (TILT.mode === o[0] ? ' on' : ''); b.textContent = o[1];
-    b.addEventListener('click', function () { TILT.mode = o[0]; try { localStorage.setItem('td_ctl', TILT.mode); } catch (e) {} if (o[0] === 'tilt') tiltStart(); buildCtlSwitch(); }); el.appendChild(b); });
+  [['tilt','Наклон'], ['strip','Полоса'], ['wheel','Руль']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (TILT.mode === o[0] ? ' on' : ''); b.textContent = o[1];
+    b.addEventListener('click', function () { TILT.mode = o[0]; try { localStorage.setItem('td_ctl', TILT.mode); } catch (e) {} document.body.classList.toggle('wheelctl', TILT.mode === 'wheel'); if (o[0] === 'tilt') tiltStart(); else document.body.classList.remove('tilt'); buildCtlSwitch();
+      toast(o[0] === 'tilt' ? 'Наклоняй телефон, как руль' : o[0] === 'wheel' ? 'Руль на экране: положи палец на обод и крути' : 'Полоса на экране: веди пальцем влево и вправо'); }); el.appendChild(b); });
 }
 function buildFpsSwitch() {
   const el = document.getElementById('fpssw'); el.innerHTML = '';
