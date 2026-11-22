@@ -3,7 +3,7 @@
 // Optional plain variables: GAME_URL (where the game is hosted), BOT_NAME, APP_NAME.
 
 const TRACKS = 32;                                   // Кольцо, Змейка, Шпильки, Токио, Осака, Ташкент, Париж, Мадрид, Лондон, Лос-Анджелес, Сан-Франциско, Майами, Дубай, Монако, Чикаго; room is left for more (32 in all), so that a new track needs no new server
-const MIN_MS = [79000, 66000, 100000, 85000, 81000, 80000, 76000, 95000, 80000, 74000, 84000, 79000, 94000, 75000, 90000, 95000], MIN_DEF = 52000;      // lowered with the cars' higher top speed (game version 86)      // the last one is Tashkent after its lap was redrawn (the game sends it as track 15)   // nobody drives a clean race faster than this: such a time is not taken (MIN_DEF for a track not listed yet)
+const MIN_MS = [69000, 57000, 87000, 74000, 70000, 70000, 66000, 83000, 70000, 64000, 73000, 69000, 82000, 65000, 78000, 83000], MIN_DEF = 45000;      // lowered twice with the cars: the higher top speed of version 86, the much faster dear cars of version 87      // the last one is Tashkent after its lap was redrawn (the game sends it as track 15)   // nobody drives a clean race faster than this: such a time is not taken (MIN_DEF for a track not listed yet)
 const MAX_MS = 20*60*1000;
 const CARS = 32;                                     // car numbers the game may send; the game itself knows their names
 const TOP = 15;

@@ -569,7 +569,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 86</div>
+    <div style="opacity:.5;margin-top:8px">версия 87</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -646,7 +646,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 86</div>
+  <div class="fver">Turbo Drift · версия 87</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1330,7 +1330,8 @@ const CAR_TYPES = [
 // What each model is like to drive: top speed, pull, cornering grip, armour (1 = the standard car), and what it costs in coins.
 // [top speed, acceleration, grip, armour, price]. On these circuits a lap is decided by top speed almost alone, so top speed climbs with the price in even steps: no car that is paid for laps slower than a free one.
 // The two free cars are a match for each other; the heavy one keeps the free cars' pace and sells armour.
-const CAR_STATS = [[1.000,1.00,1.00,1.00,0], [1.050,1.05,1.04,0.85,25000], [1.018,1.07,0.96,1.15,5000], [0.996,1.05,1.07,0.90,0], [1.000,0.96,0.98,1.45,3000], [1.008,1.02,1.09,0.90,2000], [1.041,1.01,1.01,1.00,16000], [1.026,1.10,1.02,0.95,8000], [1.033,1.03,1.00,1.20,12000]];
+const CAR_STATS = [[1.000,1.00,1.00,1.00,0], [1.200,1.10,1.04,0.85,25000], [1.060,1.07,0.96,1.15,5000], [0.996,1.05,1.07,0.90,0], [1.020,0.96,0.98,1.45,3000], [1.030,1.02,1.09,0.90,2000], [1.150,1.06,1.01,1.00,16000], [1.090,1.10,1.02,0.95,8000], [1.120,1.05,1.00,1.20,12000]];
+// The dearer the car, the faster in a straight line, and plainly so: from the free cars to the dearest the top speed grows by a fifth.
 // The prices are set against what a regular player earns, about 800-1000 coins a day: the cheapest car in two or three days, a good one in a couple of weeks, the whole garage in about three months.
 CAR_TYPES.forEach(function (c, i) { const q = CAR_STATS[i]; c.st = { top: q[0], acc: q[1], grip: q[2], arm: q[3] }; c.price = q[4]; c.eng.gears = c.eng.gears.map(function (g) { return Math.round(g*1.15); }); });          // the gears are stretched with the top speed (SPD)
 let RAIN = false;                     // wet road: less grip for everyone
@@ -1588,8 +1589,8 @@ function fullK(t, stg, whl) { const k = carK(t, stg), g = WHEEL_ACC[whl | 0] || 
 function dressPlayer(c) { const t = c.type || 0; c.tn = tuneSel(t); c.K = fullK(t, stageOf(t), c.tn ? c.tn[4] : 0); }
 // In a room everybody's car is pulled most of the way to one common level: a better model or a higher stage still shows, but as a small edge and not as another class.
 // (Alone against the rivals, in the career and on the record tables the car is what it was bought and built to be.)
-const NET_REF = { top: 1.03, acc: 1.05, grip: 1.03 }, NET_KEEP = 0.3;
-function netK(k) { return { top: NET_REF.top + (k.top - NET_REF.top)*NET_KEEP, acc: NET_REF.acc + (k.acc - NET_REF.acc)*NET_KEEP, grip: NET_REF.grip + (k.grip - NET_REF.grip)*NET_KEEP, arm: k.arm }; }
+const NET_REF = { top: 1.08, acc: 1.05, grip: 1.03 }, NET_KEEP = 0.3, NET_KEEP_TOP = 0.15;
+function netK(k) { return { top: NET_REF.top + (k.top - NET_REF.top)*NET_KEEP_TOP, acc: NET_REF.acc + (k.acc - NET_REF.acc)*NET_KEEP, grip: NET_REF.grip + (k.grip - NET_REF.grip)*NET_KEEP, arm: k.arm }; }
 const TMESH = {};
 // The body's own lines, so that a bolted-on part can be set on the metal and not near it: the same formulas the body is built from.
 // F(t): one cross-section, t from -1 (tail) to 1 (nose); topY(t, x): how high the upper surface is at that section, x metres off the middle.
@@ -3139,7 +3140,10 @@ function newBot(color, skill, lane, name, type) { const b = newCar(color, type);
   b.ai = { ofs: 0, abs: null, think: Math.random()*0.1, stuck: 0, wrong: 0, cap: 99, go: 0 }; return b; }
 function botReady(b) {                                  // once the track and the weather are known
   if (b.rival) return; const room = NET.racing, own = room ? netK(CAR_TYPES[b.type || 0].st) : CAR_TYPES[b.type || 0].st, pk = player && player !== b && player.K ? (room ? netK(CAR_TYPES[player.type || 0].st) : CAR_TYPES[player.type || 0].st) : own;      // the model, not its stage: what the player paid for is his to keep
-  b.K0 = { top: Math.max(own.top, pk.top), acc: Math.max(own.acc, pk.acc), grip: Math.max(own.grip, pk.grip), arm: own.arm }; b.K = { top: b.K0.top, acc: b.K0.acc, grip: b.K0.grip, arm: own.arm }; b.chase = 1;      // whatever the body, a rival's car is never slower, weaker off the line or worse in corners than the player's
+  // In a room every rival is at least as quick as the player's car, as before. Alone against the computer a rival keeps his own car's pace, but only within a few per cent of the player's model:
+  // a dearer car is a real edge over cheaper bodies, and a free car is not left behind by a body five classes above it.
+  b.K0 = room ? { top: Math.max(own.top, pk.top), acc: Math.max(own.acc, pk.acc), grip: Math.max(own.grip, pk.grip), arm: own.arm }
+    : { top: Math.max(pk.top - 0.04, Math.min(pk.top + 0.02, own.top)), acc: Math.max(pk.acc - 0.03, Math.min(pk.acc + 0.03, own.acc)), grip: Math.max(own.grip, pk.grip), arm: own.arm }; b.K = { top: b.K0.top, acc: b.K0.acc, grip: b.K0.grip, arm: own.arm }; b.chase = 1;      // whatever the body, a rival's car is never slower, weaker off the line or worse in corners than the player's
   const P = b.drv = driverOf(b.skill); b.vpl = lineSpeed(b.K0, P);
   b.ai.go = Math.max(0.02, P.react*(0.6 + Math.random()*0.8)); b.ai.launch = Math.random() < P.launch; b.ai.ofs = b.lat - T.rl[b.idx]*P.wide; b.ai.abs = null;
 }
@@ -4586,7 +4590,7 @@ function toMenu() {
 function homeColor(set) { try { if (set !== undefined) localStorage.setItem('td_home', String(set)); const h = parseInt(localStorage.getItem('td_home') || '', 10); if (h >= 0 && h < PAINTS.length && paintOwned(h)) return h; } catch (e) {} return paintOwned(garage.color) ? garage.color : 0; }
 function saveGarage() { try { localStorage.setItem('td_car', JSON.stringify({ type: garage.type, color: garage.color })); } catch (e) {} }
 function statBars(el, t, room) {
-  const st0 = owns(t) ? fullK(t, stageOf(t), (tuneSel(t) || [0, 0, 0, 0, 0])[4]) : CAR_TYPES[t].st, st = room ? netK(st0) : st0, rows = [['Скорость', (st.top - 0.92)/0.15], ['Разгон', (st.acc - 0.90)/0.22], ['Управление', (st.grip - 0.90)/0.21], ['Броня', (st.arm - 0.75)/0.75]]; el.innerHTML = '';
+  const st0 = owns(t) ? fullK(t, stageOf(t), (tuneSel(t) || [0, 0, 0, 0, 0])[4]) : CAR_TYPES[t].st, st = room ? netK(st0) : st0, rows = [['Скорость', (st.top - 0.94)/0.30], ['Разгон', (st.acc - 0.90)/0.22], ['Управление', (st.grip - 0.90)/0.21], ['Броня', (st.arm - 0.75)/0.75]]; el.innerHTML = '';
   rows.forEach(function (r) { const sp = document.createElement('span'), i = document.createElement('i'), u = document.createElement('u'); u.style.width = Math.round(Math.max(0.08, Math.min(1, r[1]))*100) + '%'; u.style.background = statColor(r[1]); i.appendChild(u); sp.appendChild(document.createTextNode(r[0])); sp.appendChild(i); el.appendChild(sp); });
 }
 // a weak side of the car reads red, an average one yellow, a strong one green; the worst and the best car in the garage mark the ends
@@ -4653,7 +4657,7 @@ function buildGar() {
   const C = CAR_TYPES[t], stg = stageOf(t), sel = tuneSel(t) || [0, 0, 0, 0, 0], parts = sel.filter(function (v) { return v > 0; }).length;
   document.getElementById('gname').textContent = C.name; document.getElementById('gsub').textContent = (stg ? 'Стейдж ' + stg : 'Сток') + ' · ' + (parts ? parts + plural(parts, ' деталь', ' детали', ' деталей') : 'без деталей'); document.getElementById('gcoins').textContent = fmtN(WALLET.coins);
   // the four bars; a stage being looked at shows what it would add
-  { const el = document.getElementById('gstats'), a = fullK(t, stg, sel[4]), b = GAR.cat === 'stage' && GAR.pv > stg ? fullK(t, GAR.pv, sel[4]) : GAR.cat === 'whl' && GAR.pv !== null ? fullK(t, stg, GAR.pv) : a, rows = [['Скорость', 'top', 0.92, 0.15], ['Разгон', 'acc', 0.90, 0.22], ['Управление', 'grip', 0.90, 0.21], ['Броня', 'arm', 0.75, 0.75]]; el.innerHTML = '';
+  { const el = document.getElementById('gstats'), a = fullK(t, stg, sel[4]), b = GAR.cat === 'stage' && GAR.pv > stg ? fullK(t, GAR.pv, sel[4]) : GAR.cat === 'whl' && GAR.pv !== null ? fullK(t, stg, GAR.pv) : a, rows = [['Скорость', 'top', 0.94, 0.30], ['Разгон', 'acc', 0.90, 0.22], ['Управление', 'grip', 0.90, 0.21], ['Броня', 'arm', 0.75, 0.75]]; el.innerHTML = '';
     rows.forEach(function (r) { const v0 = Math.max(0.08, Math.min(1, (a[r[1]] - r[2])/r[3])), v1 = Math.max(v0, Math.min(1, (b[r[1]] - r[2])/r[3])), sp = document.createElement('span'), i = document.createElement('i'), u = document.createElement('u'); u.style.width = Math.round(v0*100) + '%'; u.style.background = statColor(v0); i.appendChild(u);
       if (v1 > v0 + 0.004) { const d = document.createElement('u'); d.className = 'dl'; d.style.width = Math.max(4, Math.round((v1 - v0)*100)) + '%'; i.appendChild(d); } sp.appendChild(document.createTextNode(r[0])); sp.appendChild(i); el.appendChild(sp); }); }
   // the list on the left: every part with what is on the car now
