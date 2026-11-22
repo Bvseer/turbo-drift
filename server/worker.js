@@ -70,6 +70,30 @@ async function score(env, q, request) {
   return json(await board(env, track, me));
 }
 
+// The player's own things, kept by his Telegram id: coins, the cars he has bought, his best times. The game sends what changed on the device since
+// the last answer (coins earned or spent, cars bought) and gets the whole state back, so two devices never overwrite each other.
+// A device that comes here for the first time sends everything it holds (`first`); that is joined to what is already kept: every car of both, the larger purse.
+const COINS_MAX = 10000000;
+async function withSave(env, work) {          // the table is made the first time it is needed: no new setup step
+  try { return await work(); } catch (e) { if (!/no such table/i.test(String(e && e.message || e))) throw e; await env.DB.prepare('CREATE TABLE IF NOT EXISTS save (uid INTEGER PRIMARY KEY, coins INTEGER NOT NULL, owned TEXT NOT NULL, best TEXT NOT NULL, at INTEGER NOT NULL)').run(); return await work(); }
+}
+async function save(env, q) {
+  const me = await whoIs(q.init, env); if (!me) return json({ ok: false, err: 'auth' }, 401);
+  const cars = (a) => { const r = []; if (Array.isArray(a)) for (const t of a.slice(0, 64)) if (Number.isInteger(t) && t >= 0 && t < CARS && r.indexOf(t) < 0) r.push(t); return r; };
+  const num = (v) => Math.max(-COINS_MAX, Math.min(COINS_MAX, Math.round(+v) || 0)), clamp = (v) => Math.max(0, Math.min(COINS_MAX, v));
+  const row = await withSave(env, () => env.DB.prepare('SELECT coins, owned, best FROM save WHERE uid = ?').bind(me.id).first());
+  let coins = 0, owned = [0, 3], best = {}, fresh = !row;
+  if (row) { coins = row.coins | 0; try { owned = cars(JSON.parse(row.owned)); } catch (e) {} try { best = JSON.parse(row.best) || {}; } catch (e) { best = {}; } }
+  if (q.first && typeof q.first === 'object') { const fc = clamp(num(q.first.coins)); coins = fresh ? fc : Math.max(coins, fc); for (const t of cars(q.first.owned)) if (owned.indexOf(t) < 0) owned.push(t); }
+  else { coins = clamp(coins + num(q.d)); for (const t of cars(q.buy)) if (owned.indexOf(t) < 0) owned.push(t); }
+  for (const t of [0, 3]) if (owned.indexOf(t) < 0) owned.push(t);
+  if (q.best && typeof q.best === 'object') { let n = 0; for (const k in q.best) { if (++n > 300) break; const ms = Math.round(+q.best[k]); if (!/^[a-z0-9]{1,8}$/.test(k) || !(ms >= 20000 && ms <= MAX_MS)) continue; if (!best[k] || ms < best[k]) best[k] = ms; } }
+  const keys = Object.keys(best); if (keys.length > 400) best = Object.fromEntries(keys.slice(0, 400).map((k) => [k, best[k]]));
+  await env.DB.prepare('INSERT INTO save (uid, coins, owned, best, at) VALUES (?1, ?2, ?3, ?4, ?5) ON CONFLICT (uid) DO UPDATE SET coins = excluded.coins, owned = excluded.owned, best = excluded.best, at = excluded.at')
+    .bind(me.id, coins, JSON.stringify(owned), JSON.stringify(best), Math.floor(Date.now()/1000)).run();
+  return json({ ok: true, coins: coins, owned: owned, best: best });
+}
+
 async function telegram(env, request) {
   if (!env.HOOK_SECRET || request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== env.HOOK_SECRET) return new Response('no', { status: 403 });
   let up = null; try { up = await request.json(); } catch (e) {}
@@ -89,10 +113,11 @@ export default {
     try {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
       if (path === '/tg' && request.method === 'POST') return await telegram(env, request);
-      if (path === '/top' || path === '/score') {
-        let q = {}; if (request.method === 'POST') { const t = await request.text(); if (t.length > 6000) return json({ ok: false, err: 'big' }, 413); try { q = JSON.parse(t) || {}; } catch (e) { return json({ ok: false, err: 'json' }, 400); } }
+      if (path === '/top' || path === '/score' || path === '/save') {
+        let q = {}; if (request.method === 'POST') { const t = await request.text(); if (t.length > (path === '/save' ? 20000 : 6000)) return json({ ok: false, err: 'big' }, 413); try { q = JSON.parse(t) || {}; } catch (e) { return json({ ok: false, err: 'json' }, 400); } }
         else q = { track: url.searchParams.get('track') };
         if (path === '/score') return request.method === 'POST' ? await score(env, q, request) : json({ ok: false, err: 'method' }, 405);
+        if (path === '/save') return request.method === 'POST' ? await save(env, q) : json({ ok: false, err: 'method' }, 405);
         const track = q.track | 0; if (!(track >= 0 && track < TRACKS)) return json({ ok: false, err: 'range' }, 400);
         return json(await board(env, track, await whoIs(q.init, env)));
       }

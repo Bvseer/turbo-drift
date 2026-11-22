@@ -476,11 +476,11 @@
     <div><b>Чат</b> — кнопка 💬 в комнате и на финише: готовые фразы в одно касание<span class="for-pc">, свой текст — клавиша <kbd>T</kbd></span><span class="for-mob">, свой текст — «Написать своё»</span>. В заезде писать нельзя — там говорят голосом. Чат можно выключить</div>
     <div><b>Звук</b> игры выключается в настройках и на экране паузы</div>
     <div><b>Голос</b> — кнопка с микрофоном в комнате, в заезде и на финише. Микрофон выключен, пока сам не включишь; чужие голоса слышно сразу. Заглушить всех — кнопка «Голоса» в комнате или кнопка с динамиком под паузой в заезде; одного игрока — нажми на 🎤 возле его имени в комнате</div>
-    <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт через 15 секунд после второго игрока, свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
+    <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
     <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px">версия 67</div>
+    <div style="opacity:.5;margin-top:8px;padding:6px 0" id="verline">версия 69</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -555,7 +555,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 67</div>
+  <div class="fver">Turbo Drift · версия 69</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -594,7 +594,7 @@ function initTelegram() {
     const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
     if (sp && !challenge) { challenge = parseChallenge(sp); showChallenge(); }
     { const rc = roomFromLink(sp); if (rc) { document.getElementById('welcome').classList.add('hidden'); netOpen(); document.getElementById('mpcode').value = rc; netJoin(rc); } else if (sp === 'online') netQuick(); else if (challenge) document.getElementById('welcome').classList.add('hidden'); }
-    loadCloud();
+    loadCloud(); walletSoon();
   } catch (e) {}
 }
 function haptic(kind) {
@@ -626,12 +626,16 @@ function parseChallenge(code) {
 let bestTimes = {};
 try { bestTimes = JSON.parse(localStorage.getItem('td_best') || '{}') || {}; } catch (e) { bestTimes = {}; }
 function saveBest() {
-  try { localStorage.setItem('td_best', JSON.stringify(bestTimes)); } catch (e) {}
+  try { localStorage.setItem('td_best', JSON.stringify(bestTimes)); } catch (e) {} walletSoon();
   try { if (tg && tg.CloudStorage) tg.CloudStorage.setItem('best', JSON.stringify(bestTimes)); } catch (e) {}
 }
 function loadCloud() {
   try { if (!tg.CloudStorage) return;
-    tg.CloudStorage.getItem('wallet', function (err, v) { if (err || !v) return; try { const w = JSON.parse(v); if (w && Array.isArray(w.owned) && !localStorage.getItem('td_wallet')) { WALLET = { coins: Math.max(0, w.coins | 0), owned: w.owned.filter(function (t) { return t >= 0 && t < CAR_TYPES.length; }) }; for (const t of [0, 3]) if (!owns(t)) WALLET.owned.push(t); saveWallet(); buildMenu(); } } catch (e) {} });
+    // what Telegram's own storage kept from the time before the server: joined to this device's wallet once (every car of both, the larger purse); from then on the server keeps the wallet
+    tg.CloudStorage.getItem('wallet', function (err, v) { if (err) return; try { if (localStorage.getItem('td_wcloud')) return; localStorage.setItem('td_wcloud', '1');
+        const w = v ? JSON.parse(v) : null, co = w && Array.isArray(w.owned) ? w.owned.filter(function (t) { return t >= 0 && t < CAR_TYPES.length; }) : [], cc = w ? Math.max(0, w.coins | 0) : 0; let got = false;
+        for (const t of co) if (!owns(t)) { WALLET.owned.push(t); got = true; } if (cc > WALLET.coins) { WALLET.coins = cc; got = true; }
+        if (got || cc < WALLET.coins || WALLET.owned.some(function (t) { return co.indexOf(t) < 0; })) saveWallet(); if (got) buildMenu(); } catch (e) {} });
     tg.CloudStorage.getItem('best', function (err, v) { if (err || !v) return;
       try { const o = JSON.parse(v); for (const k in o) if (!bestTimes[k] || o[k] < bestTimes[k]) bestTimes[k] = o[k]; buildMenu(); } catch (e) {} });
   } catch (e) {}
@@ -3040,8 +3044,31 @@ try { const w = JSON.parse(localStorage.getItem('td_wallet') || 'null');
   if (w && Array.isArray(w.owned)) WALLET = { coins: Math.max(0, w.coins | 0), owned: w.owned.filter(function (t) { return t >= 0 && t < CAR_TYPES.length; }) };
   else { const g = JSON.parse(localStorage.getItem('td_car') || 'null'); if (g && g.type > 0 && g.type < CAR_TYPES.length && WALLET.owned.indexOf(g.type | 0) < 0) WALLET.owned.push(g.type | 0); }
   for (const t of [0, 3]) if (WALLET.owned.indexOf(t) < 0) WALLET.owned.push(t); } catch (e) {}
-function saveWallet() { try { localStorage.setItem('td_wallet', JSON.stringify(WALLET)); } catch (e) {} try { if (tg && tg.CloudStorage) tg.CloudStorage.setItem('wallet', JSON.stringify(WALLET)); } catch (e) {} }
+function saveWallet(quiet) { try { localStorage.setItem('td_wallet', JSON.stringify(WALLET)); } catch (e) {} try { if (tg && tg.CloudStorage) tg.CloudStorage.setItem('wallet', JSON.stringify(WALLET)); } catch (e) {} if (!quiet) walletSoon(); }
+// The wallet and the best times are kept on the game's server under the player's Telegram id, so they do not depend on one device or on its cache.
+// The device sends only what changed since the server's last answer (coins earned or spent, cars bought) and takes the whole state back; a device that
+// comes for the first time sends all it has, and the server joins it to what it keeps. Outside Telegram there is no id to keep it under: there everything stays on the device as before.
+const WSRV = { srv: null, busy: false, again: false };
+try { const q = JSON.parse(localStorage.getItem('td_wsrv') || 'null'); if (q && Array.isArray(q.owned)) WSRV.srv = { coins: q.coins | 0, owned: q.owned }; } catch (e) {}
+function walletSoon() { clearTimeout(walletSoon.t); walletSoon.t = setTimeout(walletSync, 1500); }
+function walletSync() {
+  if (!lbOn() || !lbInit()) return; if (WSRV.busy) { WSRV.again = true; return; }
+  const sent = { coins: WALLET.coins, owned: WALLET.owned.slice() }, body = { init: lbInit(), best: bestTimes };
+  if (!WSRV.srv) body.first = sent; else { body.d = sent.coins - WSRV.srv.coins; body.buy = sent.owned.filter(function (t) { return WSRV.srv.owned.indexOf(t) < 0; }); }
+  WSRV.busy = true;
+  lbCall('/save', body, function (r) { WSRV.busy = false;
+    if (r && Array.isArray(r.owned)) { const dc = WALLET.coins - sent.coins, nb = WALLET.owned.filter(function (t) { return sent.owned.indexOf(t) < 0; }), was = JSON.stringify(WALLET);       // dc, nb: what happened here while the request was on its way
+      WSRV.srv = { coins: Math.max(0, r.coins | 0), owned: r.owned.filter(function (t) { return t >= 0 && t < CAR_TYPES.length; }) }; try { localStorage.setItem('td_wsrv', JSON.stringify(WSRV.srv)); } catch (e) {}
+      WALLET = { coins: Math.max(0, WSRV.srv.coins + dc), owned: WSRV.srv.owned.slice() }; for (const t of nb) if (!owns(t)) WALLET.owned.push(t); for (const t of [0, 3]) if (!owns(t)) WALLET.owned.push(t); saveWallet(true);
+      let nbest = false; if (r.best) for (const k in r.best) { const ms = r.best[k] | 0; if (ms > 0 && (!bestTimes[k] || ms < bestTimes[k])) { bestTimes[k] = ms; nbest = true; } } if (nbest) { try { localStorage.setItem('td_best', JSON.stringify(bestTimes)); } catch (e) {} }
+      if ((JSON.stringify(WALLET) !== was || nbest) && state === 'menu') { try { buildMenu(); } catch (e) {} }
+      if (dc || nb.length) WSRV.again = true; }
+    if (WSRV.again) { WSRV.again = false; walletSoon(); } });
+}
 function owns(t) { return WALLET.owned.indexOf(t) >= 0; }
+// For the author of the game: seven quick taps on the version line under «Как играть» fill the purse.
+(function () { let n = 0, t0 = 0; const el = document.getElementById('verline'); if (!el) return;
+  el.addEventListener('click', function () { const now = performance.now(); if (now - t0 > 1500) n = 0; t0 = now; if (++n < 7) return; n = 0; WALLET.coins += 50000; saveWallet(); try { buildGarage(); } catch (e) {} toast('+50 000 монет'); beep(660, 0.25, 'triangle', 0.07, 1320); }); })();
 function earn(n) { n = Math.max(0, Math.round(n)); WALLET.coins += n; saveWallet(); return n; }
 const PLACE_PTS = [10, 7, 5, 3, 2, 1];
 // Championship: the three tracks in a row, points for places, one table at the end.
