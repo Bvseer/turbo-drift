@@ -546,7 +546,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 79</div>
+    <div style="opacity:.5;margin-top:8px">версия 80</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -574,6 +574,7 @@
     <div class="mcol mcenter">
       <div class="carname"><span id="mpcarname"></span><small id="mpcareng"></small></div>
       <div class="stats" id="mpcarstats"></div>
+      <div class="sub" style="font-size:11.5px;margin:2px 0 4px;opacity:.75">В комнате машины почти равны по скорости</div>
       <div class="stage"><button class="arrow" id="mpcarprev" aria-label="Предыдущая машина">‹</button><div class="stagehole" id="mpstage"></div><button class="arrow" id="mpcarnext" aria-label="Следующая машина">›</button></div>
       <div class="swatches" id="mpswatches"></div>
     </div>
@@ -622,7 +623,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 79</div>
+  <div class="fver">Turbo Drift · версия 80</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1306,7 +1307,8 @@ const CAR_TYPES = [
 // What each model is like to drive: top speed, pull, cornering grip, armour (1 = the standard car), and what it costs in coins.
 // [top speed, acceleration, grip, armour, price]. On these circuits a lap is decided by top speed almost alone, so top speed climbs with the price in even steps: no car that is paid for laps slower than a free one.
 // The two free cars are a match for each other; the heavy one keeps the free cars' pace and sells armour.
-const CAR_STATS = [[1.000,1.00,1.00,1.00,0], [1.050,1.05,1.04,0.85,2000], [1.018,1.07,0.96,1.15,600], [0.996,1.05,1.07,0.90,0], [1.000,0.96,0.98,1.45,400], [1.008,1.02,1.09,0.90,300], [1.041,1.01,1.01,1.00,1400], [1.026,1.10,1.02,0.95,900], [1.033,1.03,1.00,1.20,1200]];
+const CAR_STATS = [[1.000,1.00,1.00,1.00,0], [1.050,1.05,1.04,0.85,25000], [1.018,1.07,0.96,1.15,5000], [0.996,1.05,1.07,0.90,0], [1.000,0.96,0.98,1.45,3000], [1.008,1.02,1.09,0.90,2000], [1.041,1.01,1.01,1.00,16000], [1.026,1.10,1.02,0.95,8000], [1.033,1.03,1.00,1.20,12000]];
+// The prices are set against what a regular player earns, about 800-1000 coins a day: the cheapest car in two or three days, a good one in a couple of weeks, the whole garage in about three months.
 CAR_TYPES.forEach(function (c, i) { const q = CAR_STATS[i]; c.st = { top: q[0], acc: q[1], grip: q[2], arm: q[3] }; c.price = q[4]; });
 let RAIN = false;                     // wet road: less grip for everyone
 const PAINTS = [[0.86,0.08,0.10],[0.10,0.33,0.86],[0.98,0.72,0.06],[0.10,0.62,0.30],[0.95,0.42,0.08],[0.92,0.93,0.95],[0.09,0.10,0.12],[0.50,0.18,0.72],
@@ -1517,17 +1519,17 @@ function progSave(quiet) { try { localStorage.setItem('td_prog', JSON.stringify(
 function progSet(k, v) { if (progJoin(k, v)) progSave(); }
 function progMerge(o) { let ch = false; if (o && typeof o === 'object') for (const k in o) if (/^[a-z0-9]{1,8}$/.test(k) && progJoin(k, o[k])) ch = true; if (ch) progSave(true); return ch; }
 // ---- Stages: three steps of engine and chassis work on each car, bought one after another. Each step adds a little top speed and a good deal of pull and grip.
-const STAGE_INFO = [['Сток', ''], ['Стейдж 1', 'прошивка и впуск'], ['Стейдж 2', 'выпуск и подвеска'], ['Стейдж 3', 'турбина и тормоза']], STAGE_BASE = [0, 300, 700, 1500], STAGE_GAIN = { top: 0.008, acc: 0.03, grip: 0.02 };
+const STAGE_INFO = [['Сток', ''], ['Стейдж 1', 'прошивка и впуск'], ['Стейдж 2', 'выпуск и подвеска'], ['Стейдж 3', 'турбина и тормоза']], STAGE_BASE = [0, 1500, 4000, 10000], STAGE_GAIN = { top: 0.008, acc: 0.03, grip: 0.02 };
 function stageOf(t) { return Math.min(3, progGet('s' + t)); }
-function stagePrice(t, n) { return STAGE_BASE[n] + Math.round(CAR_TYPES[t].price*0.2/50)*50; }
+function stagePrice(t, n) { return STAGE_BASE[n] + Math.round(CAR_TYPES[t].price*0.1/100)*100; }
 const CARK = {};
 function carK(t, stg) { const b = CAR_TYPES[t].st; if (!stg) return b; const k = t + '_' + stg; return CARK[k] || (CARK[k] = { top: b.top*(1 + STAGE_GAIN.top*stg), acc: b.acc*(1 + STAGE_GAIN.acc*stg), grip: b.grip*(1 + STAGE_GAIN.grip*stg), arm: b.arm }); }
 // ---- Outside tuning: spoiler, body kit, wheels, light under the floor. Each part is bought for one car and can then be put on and taken off freely.
 const TUNE_KEYS = ['sp', 'kit', 'rim', 'neon'], TUNE_PARTS = {
-  sp:   { name: 'Спойлер', bit: 0,  opts: [['Сток', 0], ['Лип', 250], ['Крыло', 600]] },
-  kit:  { name: 'Обвес',   bit: 3,  opts: [['Сток', 0], ['Спорт', 500]] },
-  rim:  { name: 'Диски',   bit: 5,  opts: [['Сток', 0], ['Чёрные', 200], ['Золото', 300], ['Белые', 200], ['Красные', 200]], css: ['#c9ccd4', '#15161a', '#d6a02e', '#eceef2', '#c21616'] },
-  neon: { name: 'Неон',    bit: 10, opts: [['Нет', 0], ['Синий', 350], ['Розовый', 350], ['Зелёный', 350], ['Белый', 350]], css: ['#3a3f52', '#2a6bff', '#ff2a9a', '#35f05a', '#ffffff'] } };
+  sp:   { name: 'Спойлер', bit: 0,  opts: [['Сток', 0], ['Лип', 800], ['Крыло', 2500]] },
+  kit:  { name: 'Обвес',   bit: 3,  opts: [['Сток', 0], ['Спорт', 3000]] },
+  rim:  { name: 'Диски',   bit: 5,  opts: [['Сток', 0], ['Чёрные', 1000], ['Золото', 1500], ['Белые', 1000], ['Красные', 1000]], css: ['#c9ccd4', '#15161a', '#d6a02e', '#eceef2', '#c21616'] },
+  neon: { name: 'Неон',    bit: 10, opts: [['Нет', 0], ['Синий', 2000], ['Розовый', 2000], ['Зелёный', 2000], ['Белый', 2500]], css: ['#3a3f52', '#2a6bff', '#ff2a9a', '#35f05a', '#ffffff'] } };
 const RIM_PAINT = [null, [[0.03,0.03,0.035], 11], [[0.83,0.60,0.16], 6], [[0.90,0.90,0.92], 11], [[0.72,0.05,0.05], 11]], NEON_COL = [null, [0.10,0.36,1.0], [1.0,0.14,0.58], [0.18,1.0,0.30], [0.9,0.9,1.0]];
 let TUNE_SEL = {};
 try { const q = JSON.parse(localStorage.getItem('td_tune') || 'null'); if (q && typeof q === 'object') TUNE_SEL = q; } catch (e) {}
@@ -1536,6 +1538,10 @@ function tnClean(a) { if (!Array.isArray(a)) return null; const r = TUNE_KEYS.ma
 function tuneSel(t) { const q = TUNE_SEL[t]; return tnClean(TUNE_KEYS.map(function (k, i) { const v = q && Array.isArray(q) ? q[i] | 0 : 0; return v > 0 && v < TUNE_PARTS[k].opts.length && tuneOwns(t, k, v) ? v : 0; })); }
 function tuneSave() { try { localStorage.setItem('td_tune', JSON.stringify(TUNE_SEL)); } catch (e) {} }
 function dressPlayer(c) { c.K = carK(c.type || 0, stageOf(c.type || 0)); c.tn = tuneSel(c.type || 0); }
+// In a room everybody's car is pulled most of the way to one common level: a better model or a higher stage still shows, but as a small edge and not as another class.
+// (Alone against the rivals, in the career and on the record tables the car is what it was bought and built to be.)
+const NET_REF = { top: 1.03, acc: 1.05, grip: 1.03 }, NET_KEEP = 0.3;
+function netK(k) { return { top: NET_REF.top + (k.top - NET_REF.top)*NET_KEEP, acc: NET_REF.acc + (k.acc - NET_REF.acc)*NET_KEEP, grip: NET_REF.grip + (k.grip - NET_REF.grip)*NET_KEEP, arm: k.arm }; }
 const TMESH = {};
 function tuneMesh(t, sp, kit) {              // the bolted-on parts of one car as a mesh of their own, drawn with the body's matrix and paint
   if (!sp && !kit) return null; const key = 'b' + t + '_' + sp + '_' + kit; if (TMESH[key]) return TMESH[key];
@@ -3033,7 +3039,7 @@ function lineSpeed(K, P) {
 function newBot(color, skill, lane, name, type) { const b = newCar(color, type); b.bot = true; if (name === 'Бот') name = CAR_TYPES[type || 0].name; b.skill = skill; b.lane = lane; b.s = 0; b.v = 0; b.name = name; b.seed = Math.random()*6;
   b.ai = { ofs: 0, abs: null, think: Math.random()*0.1, stuck: 0, wrong: 0, cap: 99, go: 0 }; return b; }
 function botReady(b) {                                  // once the track and the weather are known
-  if (b.rival) return; const own = CAR_TYPES[b.type || 0].st, pk = player && player !== b && player.K ? CAR_TYPES[player.type || 0].st : own;      // the model, not its stage: what the player paid for is his to keep
+  if (b.rival) return; const room = NET.racing, own = room ? netK(CAR_TYPES[b.type || 0].st) : CAR_TYPES[b.type || 0].st, pk = player && player !== b && player.K ? (room ? netK(CAR_TYPES[player.type || 0].st) : CAR_TYPES[player.type || 0].st) : own;      // the model, not its stage: what the player paid for is his to keep
   b.K0 = { top: Math.max(own.top, pk.top), acc: Math.max(own.acc, pk.acc), grip: Math.max(own.grip, pk.grip), arm: own.arm }; b.K = { top: b.K0.top, acc: b.K0.acc, grip: b.K0.grip, arm: own.arm }; b.chase = 1;      // whatever the body, a rival's car is never slower, weaker off the line or worse in corners than the player's
   const P = b.drv = driverOf(b.skill); b.vpl = lineSpeed(b.K0, P);
   b.ai.go = Math.max(0.02, P.react*(0.6 + Math.random()*0.8)); b.ai.launch = Math.random() < P.launch; b.ai.ofs = b.lat - T.rl[b.idx]*P.wide; b.ai.abs = null;
@@ -4057,7 +4063,7 @@ function netLobby() {
     document.getElementById('mprdybox').style.display = !NET.host && !NET.pub ? '' : 'none'; const rb = document.getElementById('mprdy'); rb.textContent = me && me.rdy ? 'Готов ✓' : 'Готов'; rb.className = me && me.rdy ? 'ghost' : 'main';
     document.getElementById('mpgo').textContent = guests.length ? 'Старт · готовы ' + k + '/' + guests.length : 'Старт'; }
   { const me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0]; if (me) { garage.type = me.type; garage.color = me.color; }
-    document.getElementById('mpcarname').textContent = CAR_TYPES[garage.type].name; document.getElementById('mpcareng').textContent = CAR_TYPES[garage.type].eng.label; statBars(document.getElementById('mpcarstats'), garage.type);
+    document.getElementById('mpcarname').textContent = CAR_TYPES[garage.type].name; document.getElementById('mpcareng').textContent = CAR_TYPES[garage.type].eng.label; statBars(document.getElementById('mpcarstats'), garage.type, true);
     { const o = NET.opt || {}, names = []; if (o.rev) names.push('обратно'); if (o.rain) names.push('дождь'); if (o.ko) names.push('выбывание'); document.getElementById('mpoptline').textContent = names.length ? ' Заезд: ' + names.join(', ') + '.' : ''; }
     const sw = document.getElementById('mpswatches'), used = NET.roster.filter(function (p) { return p.nid !== NET.me; }).map(function (p) { return p.color; }); sw.innerHTML = '';
     PAINTS.forEach(function (p, i) { if (!paintOwned(i)) return; const b = document.createElement('button'); b.className = 'sw' + (i === garage.color ? ' on' : '') + (used.indexOf(i) >= 0 ? ' taken' : '');
@@ -4202,7 +4208,7 @@ function netBegin(m) {
   rstatReset();
   audio(); NET.racing = true; NET.seen = performance.now(); NET.last = {}; for (const id in NET.conn) NET.last[id] = NET.seen; NET.sendT = 0; NET.roster = m.list; NET.awarded = false; CHAMP.on = false; RAIN = !!m.rain; buildTrack(m.track, !!m.rev); rivalBot = null; document.getElementById('rival').style.display = 'none';
   { const me = m.list.filter(function (p) { return p.nid === NET.me; })[0]; if (me) { garage.type = me.type; garage.color = me.color; } }
-  player = newCar(PAINTS[garage.color], garage.type); player.name = playerName; player.nid = NET.me; dressPlayer(player); bots = []; cars = [];
+  player = newCar(PAINTS[garage.color], garage.type); player.name = playerName; player.nid = NET.me; dressPlayer(player); player.K = netK(player.K); bots = []; cars = [];
   for (const b of m.bots) { if (NET.host) { const c = newBot(PAINTS[b.color] || PAINTS[0], b.skill, 0, 'Бот', b.type); c.nid = b.nid; bots.push(c); cars.push(c); }
     else { const c = newCar(PAINTS[b.color] || PAINTS[0], b.type); c.net = true; c.nid = b.nid; c.name = CAR_TYPES[b.type || 0].name; cars.push(c); } }
   for (const p of m.list) { if (p.nid === NET.me) continue; const c = newCar(PAINTS[p.color] || PAINTS[0], p.type); c.net = true; c.nid = p.nid; c.name = p.name; c.tn = tnClean(p.tn); cars.push(c); }
@@ -4477,8 +4483,8 @@ function toMenu() {
   document.getElementById('menu').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; buildMenu();
 }
 function saveGarage() { try { localStorage.setItem('td_car', JSON.stringify({ type: garage.type, color: garage.color })); } catch (e) {} }
-function statBars(el, t) {
-  const st = owns(t) ? carK(t, stageOf(t)) : CAR_TYPES[t].st, rows = [['Скорость', (st.top - 0.92)/0.15], ['Разгон', (st.acc - 0.90)/0.22], ['Управление', (st.grip - 0.90)/0.21], ['Броня', (st.arm - 0.75)/0.75]]; el.innerHTML = '';
+function statBars(el, t, room) {
+  const st0 = owns(t) ? carK(t, stageOf(t)) : CAR_TYPES[t].st, st = room ? netK(st0) : st0, rows = [['Скорость', (st.top - 0.92)/0.15], ['Разгон', (st.acc - 0.90)/0.22], ['Управление', (st.grip - 0.90)/0.21], ['Броня', (st.arm - 0.75)/0.75]]; el.innerHTML = '';
   rows.forEach(function (r) { const sp = document.createElement('span'), i = document.createElement('i'), u = document.createElement('u'); u.style.width = Math.round(Math.max(0.08, Math.min(1, r[1]))*100) + '%'; u.style.background = statColor(r[1]); i.appendChild(u); sp.appendChild(document.createTextNode(r[0])); sp.appendChild(i); el.appendChild(sp); });
 }
 // a weak side of the car reads red, an average one yellow, a strong one green; the worst and the best car in the garage mark the ends
