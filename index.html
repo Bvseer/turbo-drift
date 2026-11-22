@@ -569,7 +569,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 85</div>
+    <div style="opacity:.5;margin-top:8px">версия 86</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -646,7 +646,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 85</div>
+  <div class="fver">Turbo Drift · версия 86</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -877,7 +877,7 @@ function sfx(kind, vol) {
 // engine speed and gear from road speed: revs climb through a gear, drop on the shift
 function gearbox(G, u, thr, dt, free, e) {
   const top = e.gears, ng = top.length, R = e.red;
-  if (e.ev) { G.gear = 1; G.rpm += (R*Math.max(0, u)/46.3 - G.rpm)*Math.min(1, dt*14); return; }
+  if (e.ev) { G.gear = 1; G.rpm += (R*Math.max(0, u)/(46.3*SPD) - G.rpm)*Math.min(1, dt*14); return; }
   if (free) { const target = e.idle + (R*0.86 - e.idle)*thr; G.rpm += Math.max(-R*0.72*dt, Math.min(R*1.5*dt, target - G.rpm)); G.gear = 1; return; }      // out of gear on the grid
   u = Math.max(0, u); let g = Math.min(G.gear, ng);
   if (G.shift > 0) G.shift -= dt;
@@ -1332,7 +1332,7 @@ const CAR_TYPES = [
 // The two free cars are a match for each other; the heavy one keeps the free cars' pace and sells armour.
 const CAR_STATS = [[1.000,1.00,1.00,1.00,0], [1.050,1.05,1.04,0.85,25000], [1.018,1.07,0.96,1.15,5000], [0.996,1.05,1.07,0.90,0], [1.000,0.96,0.98,1.45,3000], [1.008,1.02,1.09,0.90,2000], [1.041,1.01,1.01,1.00,16000], [1.026,1.10,1.02,0.95,8000], [1.033,1.03,1.00,1.20,12000]];
 // The prices are set against what a regular player earns, about 800-1000 coins a day: the cheapest car in two or three days, a good one in a couple of weeks, the whole garage in about three months.
-CAR_TYPES.forEach(function (c, i) { const q = CAR_STATS[i]; c.st = { top: q[0], acc: q[1], grip: q[2], arm: q[3] }; c.price = q[4]; });
+CAR_TYPES.forEach(function (c, i) { const q = CAR_STATS[i]; c.st = { top: q[0], acc: q[1], grip: q[2], arm: q[3] }; c.price = q[4]; c.eng.gears = c.eng.gears.map(function (g) { return Math.round(g*1.15); }); });          // the gears are stretched with the top speed (SPD)
 let RAIN = false;                     // wet road: less grip for everyone
 const PAINTS = [[0.86,0.08,0.10],[0.10,0.33,0.86],[0.98,0.72,0.06],[0.10,0.62,0.30],[0.95,0.42,0.08],[0.92,0.93,0.95],[0.09,0.10,0.12],[0.50,0.18,0.72],
   [0.03,0.55,0.60],[0.96,0.28,0.56],[0.38,0.02,0.08],[0.48,0.80,0.06],[0.78,0.56,0.08]];          // the last five are taken from the champions of the career, one each
@@ -3006,8 +3006,9 @@ function raceLine() {
 // ---------------------------------------------------------------------------
 // Cars
 // ---------------------------------------------------------------------------
-const V_MAX = 36, V_BOOST = 46, BRAKE = 30;
-function accelAt(u) { const k = Math.max(0, u)/38.5; return Math.max(0.3, 4.03*(1 - k*k)); }       // engine pull fades with speed
+const SPD = 1.15;          // every car's top speed against the first tuning of the game: one number moves the limit, the pull that reaches it, the gearing and the sound together
+const V_MAX = 36*SPD, V_BOOST = 46*SPD, BRAKE = 30;
+function accelAt(u) { const k = Math.max(0, u)/(38.5*SPD); return Math.max(0.3, 4.03*(1 - k*k)); }       // engine pull fades with speed
 const GRIP = 40;                                   // peak cornering acceleration with both axles gripping
 const AX_F = 0.78, AX_R = 0.74, INERTIA = 0.85;     // axle distances from the centre of mass, yaw inertia
 function tyre(alpha, peak) { return peak*Math.sin(1.45*Math.atan(8.5*alpha)); }   // grip builds with slip, peaks, then eases off
