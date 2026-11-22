@@ -80,6 +80,9 @@
   .warn { position: absolute; left: 50%; top: 27%; transform: translateX(-50%); padding: 6px 16px; border-radius: 12px; background: rgba(230,40,40,.9); font-size: 18px; letter-spacing: .06em; animation: blink .35s steps(2) infinite; }
   @keyframes blink { 50% { opacity: .35; } }
   #flash { position: fixed; inset: 0; background: radial-gradient(ellipse at center, rgba(255,60,40,0) 30%, rgba(255,40,30,.95) 100%); opacity: 0; pointer-events: none; }
+  /* the rear-view mirror: only a frame here, the picture inside is drawn by the renderer */
+  .mirror { position: absolute; box-sizing: border-box; border: 3px solid #0b0f1c; border-radius: 9px; box-shadow: 0 4px 12px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.2); }
+  .mirror span { position: absolute; left: 50%; top: 100%; margin-top: 5px; transform: translateX(-50%); font-size: 11px; line-height: 1; padding: 2px 7px; border-radius: 7px; background: rgba(10,13,24,.72); color: #ffd23f; white-space: nowrap; } .mirror span:empty { display: none; }
   .rival { position: absolute; left: 14px; top: 118px; font-size: 13px; background: rgba(15,25,50,.4); padding: 5px 9px; border-radius: 9px; font-weight: 700; }
   .big { position: fixed; left: 0; right: 0; top: 30%; text-align: center; font-size: 96px; font-weight: 900; text-shadow: 0 6px 24px rgba(0,0,0,.45); pointer-events: none; opacity: 0; transition: opacity .15s; }
   .big.show { opacity: 1; }
@@ -199,6 +202,10 @@
   .toplist em.cc { font-style: normal; font-weight: 400; font-size: 15px; flex: 0 0 22px; width: 22px; text-align: center; line-height: 1; margin: 0; opacity: 1; } .toplist div > u { flex: 0 0 78px; width: 78px; text-align: right; overflow: hidden; text-overflow: ellipsis; } .toplist div > b { flex: 0 0 54px; width: 54px; text-align: right; } .toplist u { text-decoration: none; font-size: 11.5px; font-weight: 700; opacity: .7; white-space: nowrap; } .toplist .note2 { justify-content: center; background: none; font-weight: 600; opacity: .85; }
   body.wide .toplist.many { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(8, auto); grid-auto-flow: column; width: min(760px, 100%); column-gap: 10px; } body.land .toplist div { padding: 4px 10px; font-size: 13px; }
   #topme { margin: 0 0 8px; font-size: 13.5px; min-height: 18px; color: #ffd23f; opacity: 1; } #top { padding-bottom: 0; } #top > .btns { position: sticky; bottom: 0; width: 100%; margin: 6px 0 0; padding: 8px 0 12px; align-items: center; background: linear-gradient(180deg, rgba(14,22,48,0), rgba(14,22,48,.97) 35%); } body.land #top > .btns button { padding: 9px 40px; font-size: 15px; }
+  /* looking for an open room: one plain screen, not the menu of the rooms */
+  #mpseek { display: none; flex-direction: column; align-items: center; gap: 10px; margin: 18px 0 8px; } #mp.seeking #mpseek { display: flex; } #mp.seeking #mpstart, #mp.seeking #mpmsg { display: none !important; }
+  #mpseek i { width: 44px; height: 44px; border-radius: 50%; border: 4px solid rgba(255,255,255,.18); border-top-color: #ffd23f; animation: seekspin .9s linear infinite; } #mpseek b { font-size: 20px; color: #ffd23f; } #mpseek span { font-size: 13px; opacity: .75; }
+  @keyframes seekspin { to { transform: rotate(360deg); } }
   .pubstat { font-size: 24px; font-weight: 900; color: #ffd23f; margin: 4px 0 6px; text-shadow: 0 2px 8px rgba(0,0,0,.5); } #mppub .btns { margin: 8px auto 0; }
   .tag { position: absolute; left: 0; top: 0; padding: 1px 7px; border-radius: 8px; background: rgba(10,13,24,.42); font-size: 11px; font-weight: 700; white-space: nowrap; text-shadow: none; pointer-events: none; will-change: transform, opacity; }
   .sw.taken { opacity: .22; pointer-events: none; }
@@ -335,6 +342,7 @@
     <div class="time" id="time">0:00.00</div>
     <div class="gaps" id="gaps"><span id="gapA"></span><span id="gapB"></span></div>
   </div>
+  <div class="mirror" id="mirror" style="display:none"><span id="mirrd"></span></div>
   <div class="rival" id="rival" style="display:none"></div>
   <div class="kobar" id="kobar" style="display:none">Выбывание через <b id="kot">0</b></div>
   <button class="btn-pause btn-ear" id="earbtn2" aria-label="Голоса других игроков" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9.500v5h3.600l5.400 4.300V5.200L6.600 9.500z"/><path class="w" d="M15 8.300a5 5 0 0 1 0 7.400M17.600 5.600a9 9 0 0 1 0 12.800" fill="none" stroke="currentColor" stroke-width="1.900" stroke-linecap="round"/><path class="x" d="M15.500 9.500l5 5M20.500 9.500l-5 5" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round"/></svg></button>
@@ -481,14 +489,14 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 72</div>
+    <div style="opacity:.5;margin-top:8px">версия 74</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
 
 <div class="chatfeed" id="chatfeed"></div>
 <div class="chatbox hidden" id="chatbox">
-  <div class="chathead"><b>Чат комнаты</b><button id="chatmute">выключить чат</button><button id="chatx" aria-label="Закрыть">✕</button></div>
+  <div class="chathead"><b>Чат комнаты</b><button id="chatx" aria-label="Закрыть">✕</button></div>
   <div class="chatlog" id="chatlog"></div>
   <div class="chatrow for-pc"><input id="chatin" maxlength="80" placeholder="Сообщение — Enter" autocomplete="off" spellcheck="false" aria-label="Сообщение"><button id="chatgo" aria-label="Отправить">➤</button></div>
   <button class="ghost" id="chatwrite">Написать</button>
@@ -496,7 +504,8 @@
 <div class="chatpad hidden" id="chatpad"><div class="chatrow"><input id="padin" maxlength="80" placeholder="Сообщение" autocomplete="off" enterkeyhint="send" aria-label="Сообщение"><button id="padgo" aria-label="Отправить">➤</button><button id="padx" class="dim" aria-label="Закрыть">✕</button></div><div class="chatlog" id="padlog"></div></div>
 
 <div class="screen hidden" id="mp">
-  <h1 style="font-size:34px">Играть вместе</h1>
+  <h1 style="font-size:34px" id="mph1">Играть вместе</h1>
+  <div id="mpseek"><i></i><b>Ищу комнату с игроками…</b><span>Обычно это несколько секунд</span></div>
   <div id="mpstart">
     <div class="sub">Гонка с теми, кто сейчас в игре. Старт сам — как только вас двое или больше</div>
     <div class="btns"><button class="main" id="mpfind">Найти соперников</button></div>
@@ -555,7 +564,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 72</div>
+  <div class="fver">Turbo Drift · версия 74</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -2597,8 +2606,18 @@ function render() {
   let vp = mul(perspective(camFov*Math.PI/180, aspect, 0.5, 1900), lookAt(camEye, camLook));
   if (state === 'menu') { const sb = STAGE; if (sb) { const vw2 = viewW(), vh2 = viewH(), k = Math.max(0.3, Math.min(2.2, WIDE ? Math.min(0.66*(sb[2] + 90)/(0.40*vh2), 0.9*sb[3]/(0.31*vh2)) : Math.min(sb[2]/(0.80*vh2), 1.05*sb[3]/(0.43*vh2))));     // between side panels the car may reach under their faded edges; in the one-column showroom it stays inside the box at every angle       // the picture is shrunk and shifted so the car lands in the box
       SHIFT[0] = k; SHIFT[5] = k; SHIFT[12] = sb[0]/vw2*2 - 1; SHIFT[13] = 1 - sb[1]/vh2*2; vp = mul(SHIFT, vp); } }
-  LASTVP = vp;
-  const planes = frustum(vp), tm = (performance.now()/1000) % 1000; STATS.chunks = 0; STATS.tris = 0;
+  LASTVP = vp; STATS.chunks = 0; STATS.tris = 0;
+  scene(vp, camEye, false);
+  // the mirror: the same scene once more, looking back from the tail of the car, into a small window at the top
+  const R = MIRROR.r; if (MIRROR.a > 0.04 && R && state === 'race') { const k = w/viewW(), gx = Math.round((R[0] + 3)*k), gw = Math.round((R[2] - 6)*k), gh = Math.round((R[3] - 6)*k), top = hgt - Math.round((R[1] + 3)*k), cut = Math.max(1, Math.round(gh*MIRROR.a));
+    const sn = Math.sin(player.h), cs = Math.cos(player.h), eye = [player.x - sn*0.35, 1.08, player.z - cs*0.35];          // from the middle of the car, which is itself left out: whoever is alongside the tail is still in the picture
+    const mvp = mul(FLIPX, mul(perspective(31*Math.PI/180, gw/gh, 0.3, 900), lookAt(eye, [eye[0] - sn*10, 0.36, eye[2] - cs*10])));
+    gl.enable(gl.SCISSOR_TEST); gl.scissor(gx, top - cut, gw, cut); gl.viewport(gx, top - gh, gw, gh); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+    scene(mvp, eye, true); gl.disable(gl.SCISSOR_TEST); gl.viewport(0, 0, w, hgt); }
+}
+const FLIPX = new Float32Array([-1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]), MIRROR = { a: 0, on: false, hold: 0, d: 0, r: null };
+function scene(vp, camEye, mir) {
+  const planes = frustum(vp), tm = (performance.now()/1000) % 1000, mfar = mir ? (GFX.fx ? 150 : 100) : 0;
   const use = function (P) { gl.useProgram(P.prog); CUR = P; gl.uniformMatrix4fv(P.vp, false, vp); gl.uniform3fv(P.cam, camEye); gl.uniform3fv(P.sun, SUN); gl.uniform3fv(P.tint, WHITE3);
     gl.uniform3fv(P.HOR, SKY.hor); gl.uniform3fv(P.ZEN, SKY.zen); gl.uniform3fv(P.sunc, SKY.sunc); gl.uniform3fv(P.disc, SKY.disc); gl.uniform3fv(P.ambLo, SKY.lo); gl.uniform3fv(P.ambHi, SKY.hi); gl.uniform3fv(P.gnd, SKY.gnd);
     gl.uniform1f(P.cover, SKY.cover); gl.uniform1f(P.fogK, SKY.fogK); gl.uniform1f(P.expo, SKY.expo); gl.uniform1f(P.wet, RAIN ? 1 : 0); gl.uniform1i(P.tex, 0); gl.uniform1i(P.ntex, 1);
@@ -2607,30 +2626,33 @@ function render() {
   // 1. cars and loose objects: nearest to the camera, they hide the most
   use(PO);
   const parts = cars.map(carParts);
-  cars.forEach(function (c, i) { const p = parts[i]; drawMesh(p.k.body, p.body, c.color, c.braking ? 1 : 0); for (const m of p.wheels) drawMesh(p.k.wheel, m); });
+  // in the mirror only the cars it can show are drawn: a car body is the heaviest thing in the scene
+  const skip = mir ? cars.map(function (c) { if (c === player) return true; const dx = c.x - camEye[0], dz = c.z - camEye[2]; if (dx*dx + dz*dz > 130*130) return true; for (let k = 0; k < 24; k += 4) if (planes[k]*c.x + planes[k+1]*0.5 + planes[k+2]*c.z + planes[k+3] < -3.2) return true; return false; }) : null;
+  cars.forEach(function (c, i) { if (skip && skip[i]) return; const p = parts[i]; drawMesh(p.k.body, p.body, c.color, c.braking ? 1 : 0); for (const m of p.wheels) drawMesh(p.k.wheel, m); });
   if (state !== 'menu') {
     for (const p of pickups) if (p.t <= 0) { const w3 = tpoint(p.i, p.lat, 0); drawMesh(PU_MESH[p.type], bodyMatrix(w3[0], 1.0 + Math.sin(p.spin*1.3)*0.12, w3[2], p.spin, 0, 0)); }
     for (const q of shots) { const w3 = tpoint(q.s, q.lat, 0); if (q.kind === 'mine') drawMesh(MINE_MESH, bodyMatrix(w3[0], 0.03, w3[2], 0, 0, 0)); else if (q.kind === 'dome') { const dm = bodyMatrix(w3[0], 0, w3[2], q.age*1.5, 0, 0); for (let k = 0; k < 12; k++) if (k % 4 !== 3) dm[k] *= 0.68; drawMesh(DOME_MESH, dm); } }
   }
   // 2. the world, near cells first; 3. trees; 4. sky, only where nothing covers it
-  gl.uniform3fv(PO.tint, WHITE3); drawChunks(W.opaque, planes, camEye, true);
-  if (W.fronts.ranges.length || W.fronts.bigCount) { use(PF); drawChunks(W.fronts, planes, camEye, true); }
-  if (W.water.ranges.length || W.water.bigCount) { use(PW); drawChunks(W.water, planes, camEye, false); }
-  use(PT); drawChunks(W.trees, planes, camEye, true, state === 'menu' ? 0 : GFX.far);
+  gl.uniform3fv(PO.tint, WHITE3); drawChunks(W.opaque, planes, camEye, true, mfar);
+  if (W.fronts.ranges.length || W.fronts.bigCount) { use(PF); drawChunks(W.fronts, planes, camEye, true, mfar); }
+  if (W.water.ranges.length || W.water.bigCount) { use(PW); drawChunks(W.water, planes, camEye, false, mfar); }
+  use(PT); drawChunks(W.trees, planes, camEye, true, mir ? (GFX.fx ? 110 : 60) : (state === 'menu' ? 0 : GFX.far));
   use(PS); gl.depthMask(false); SKYM[12] = camEye[0]; SKYM[13] = camEye[1]; SKYM[14] = camEye[2]; drawMesh(W.sky, SKYM);
   // 5. shadows: every pixel is darkened once, however many shapes overlap there
   use(PSH); gl.enable(gl.STENCIL_TEST); gl.stencilFunc(gl.EQUAL, 0, 0xff); gl.stencilOp(gl.KEEP, gl.KEEP, gl.INCR);
   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-  if (GFX.sh) drawChunks(W.shadow, planes, camEye, false);          // the cars keep their shadows on every preset: without one a car floats
-  cars.forEach(function (c, i) { const p = parts[i]; drawMesh(p.k.body, mul(SHADOW, p.body)); for (const m of p.wheels) drawMesh(p.k.wheel, mul(SHADOW, m)); });
+  if (GFX.sh && !mir) drawChunks(W.shadow, planes, camEye, false);          // the cars keep their shadows on every preset: without one a car floats
+  cars.forEach(function (c, i) { if (skip && skip[i]) return; const p = parts[i]; drawMesh(p.k.body, mul(SHADOW, p.body)); for (const m of p.wheels) drawMesh(p.k.wheel, mul(SHADOW, m)); });
   gl.disable(gl.STENCIL_TEST);
   // 6. shields: a dome of energy around the car for as long as the shield holds
   if (state !== 'menu') { let any = false;
-    for (const c of cars) { if (!(c.shield > 0)) continue; if (!any) { use(PD); any = true; }
+    for (const c of cars) { if (!(c.shield > 0) || (mir && c === player)) continue; if (!any) { use(PD); any = true; }
       const grow = Math.min(1, (SHIELD_TIME - c.shield)/0.22 + 0.25), fade = c.shield < 1.3 ? 0.6 + 0.4*Math.sin(c.shield*24) : 1, m = bodyMatrix(c.x, 0.25, c.z, c.h, 0, 0), sc3 = [1.75*grow, 1.45*grow, 2.35*grow];
       for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) m[a*4 + b] *= sc3[a];
       drawMesh(SHIELD_MESH, m, [0.25,0.55,1.0], fade); } }
   gl.depthMask(true);
+  if (mir) { gl.disable(gl.BLEND); return; }
   if (GHOST.car && state === 'race' && !GHOST.car.gone) { use(PO); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(0, 0, 0, 0.52);
     const gp = carParts(GHOST.car); drawMesh(gp.k.body, gp.body, GHOST.car.color, 0); for (const m of gp.wheels) drawMesh(gp.k.wheel, m); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); }
   gl.disable(gl.BLEND);
@@ -3691,9 +3713,10 @@ function netSend(m) { if (!NET.on || !NET.tr) return; if (NET.host) NET.tr.all(m
 function carByNid(n) { for (const c of cars) if (c.nid === n) return c; return null; }
 function mpMsg(t) { document.getElementById('mpmsg').textContent = t || ''; }
 function netError(e) { return ({ 'peer-unavailable': 'Комната с таким кодом не найдена', 'unavailable-id': 'Такой код уже занят, попробуй ещё раз', load: 'Не удалось загрузить модуль связи. Игра должна быть открыта с хостинга или из Telegram, нужен интернет', network: 'Нет связи с сервером, который сводит игроков', blocked: 'Нет связи с сервером, который сводит игроков. Если игра открыта в Claude — открой сам артефакт Turbo Drift, а не предпросмотр файла', denied: 'Нет прав на игру вместе в этом артефакте: владелец должен дать тебе доступ на участие', room: 'Не удалось открыть комнату, попробуй ещё раз', timeout: 'Не удалось соединиться: сеть одного из игроков не пропускает прямое соединение', browser: 'Этот браузер не поддерживает прямое соединение', connect: 'Не удалось соединиться с комнатой' })[e] || ('Ошибка соединения: ' + e); }
+function mpSeek(on) { document.getElementById('mp').classList.toggle('seeking', !!on); document.getElementById('mph1').textContent = on ? 'Онлайн-гонка' : 'Играть вместе'; document.getElementById('mpback').textContent = on ? 'Отмена' : 'Назад'; }
 function netOpen() {
   for (const id of ['menu','finish','paused','setup','prefs','top']) document.getElementById(id).classList.add('hidden');
-  document.getElementById('mp').classList.remove('hidden'); document.getElementById('mp').classList.toggle('inroom', NET.on); stageTick = 0; document.getElementById('mpstart').style.display = NET.on ? 'none' : ''; document.getElementById('mplobby').style.display = NET.on ? '' : 'none'; mpMsg('');
+  document.getElementById('mp').classList.remove('hidden'); document.getElementById('mp').classList.toggle('inroom', NET.on); mpSeek(false); stageTick = 0; document.getElementById('mpstart').style.display = NET.on ? 'none' : ''; document.getElementById('mplobby').style.display = NET.on ? '' : 'none'; mpMsg('');
 }
 function netHost() {
   const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for (let k = 0; k < 5; k++) code += A[Math.floor(Math.random()*A.length)];
@@ -3736,8 +3759,8 @@ function pubEnter(tr, k, nid) {
 }
 function pubPick() { let t = NET.track | 0; if (TRACKS.length > 1) while (t === (NET.track | 0)) t = Math.floor(Math.random()*TRACKS.length); NET.track = t; NET.opt = { rev: Math.random() < 0.3, rain: Math.random() < 0.2, ko: false }; }
 function netQuick(text) {
-  if (NET.busy || NET.on) return; NET.busy = true; NET.qon = true; const tok = NET.qtok = (NET.qtok || 0) + 1; document.getElementById('welcome').classList.add('hidden'); netOpen(); mpMsg(text || 'Ищу комнату с игроками…');
-  const stop = function (t) { if (NET.qtok !== tok) return; NET.busy = false; NET.qon = false; mpMsg(t); };
+  if (NET.busy || NET.on) return; NET.busy = true; NET.qon = true; const tok = NET.qtok = (NET.qtok || 0) + 1; document.getElementById('welcome').classList.add('hidden'); netOpen(); mpSeek(true); if (text) document.querySelector('#mpseek b').textContent = text; else document.querySelector('#mpseek b').textContent = 'Ищу комнату с игроками…';
+  const stop = function (t) { if (NET.qtok !== tok) return; NET.busy = false; NET.qon = false; mpSeek(false); mpMsg(t); };
   const step = function (k, hops, miss) { if (NET.qtok !== tok) return; if (k >= PUB.slots || hops > PUB.slots*2) return stop('Все открытые комнаты заняты, попробуй через минуту');
     netTransport(function (tr) { tr.host(pubCode(k), function (err) {
       if (NET.qtok !== tok) { tr.close(); return; }
@@ -3850,7 +3873,7 @@ function emoRow(el) { if (el.childNodes.length) return;                // the ro
 // ---------------------------------------------------------------------------
 const PHRASES = ['Привет!', 'Удачи!', 'Хорошая гонка!', 'Ещё разок?', 'Вот это да!', 'Прости!', 'Спасибо!', 'Догоняй!'];
 const CHAT = { log: [], out: 0, seen: {}, off: false };
-try { CHAT.off = localStorage.getItem('td_chat') === '0'; } catch (e) {}
+CHAT.off = false;      // the switch is gone: ✕ closes the window, and nobody stays with a chat they cannot turn back on
 function chatClean(t) {                                 // one line, no control characters, the rudest words masked
   t = String(t == null ? '' : t).replace(/[\u0000-\u001f\u007f\u200b-\u200f\u2028-\u202e]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80);
   return t.replace(/[a-zа-яё]+/gi, function (w) { const l = w.toLowerCase(); return /ху[йея]|пизд|бля[дт]|fuck|nigg|(?:за|вы|до|на|разъ|отъ|долбо|у)[ёе]б/.test(l) || /^(?:[ёе]б[аулнтои]|ху[июё]|сук[аи]$|бля+$)/.test(l) ? w[0] + '***' : w; });
@@ -3872,7 +3895,7 @@ function chatIn(m) {
 function chatLine(e) { const d = document.createElement('div'), b = document.createElement('b'); b.textContent = e.name; b.style.color = 'rgb(' + e.col.map(function (v) { return Math.round(110 + Math.pow(v, 0.8)*145); }).join(',') + ')'; d.appendChild(b); d.appendChild(document.createTextNode(e.text)); return d; }
 function chatOpen(slim) {
   if (!NET.on || chatDriving()) return; const b = document.getElementById('chatbox'), mob = document.body.classList.contains('mob'); slim = false;          // no typing at the wheel: in a race people talk by voice
-  b.classList.remove('hidden'); b.classList.toggle('slim', slim); b.classList.toggle('drive', chatDriving() && !slim && !CHAT.off); b.classList.toggle('off', CHAT.off); clearTimeout(CHAT.shut); if (chatDriving() && mob) CHAT.shut = setTimeout(chatClose, 6000); document.getElementById('chatmute').textContent = CHAT.off ? 'включить чат' : 'выключить чат';
+  b.classList.remove('hidden'); b.classList.toggle('slim', slim); b.classList.toggle('drive', chatDriving() && !slim && !CHAT.off); b.classList.toggle('off', CHAT.off); clearTimeout(CHAT.shut); if (chatDriving() && mob) CHAT.shut = setTimeout(chatClose, 6000);
   document.getElementById('chatwrite').style.display = chatDriving() ? 'none' : ''; document.getElementById('chatlog').scrollTop = 1e6;
   if (!mob && !CHAT.off) { for (const k in keys) keys[k] = false; const i = document.getElementById('chatin'); i.value = ''; try { i.focus(); } catch (e) {} }
 }
@@ -3933,7 +3956,7 @@ function chatReset() { CHAT.log = []; CHAT.seen = {}; for (const id of ['chatlog
   document.getElementById('chatx').addEventListener('click', chatClose); document.getElementById('padx').addEventListener('click', padClose);
   document.getElementById('chatgo').addEventListener('click', function () { chatType(document.getElementById('chatin')); }); document.getElementById('padgo').addEventListener('click', function () { chatType(document.getElementById('padin')); });
   document.getElementById('chatwrite').addEventListener('click', padOpen);
-  document.getElementById('chatmute').addEventListener('click', function () { CHAT.off = !CHAT.off; try { localStorage.setItem('td_chat', CHAT.off ? '0' : '1'); } catch (e) {} if (CHAT.off) { document.getElementById('chatfeed').innerHTML = ''; chatClose(); } else chatOpen(false); });
+
   if (window.visualViewport) window.visualViewport.addEventListener('resize', padLayout); })();
 function sendEmo(i) { const now = performance.now(); if (!NET.on || now - emoT < 700) return; emoT = now; const m = { t: 'emo', nid: NET.me, e: i }; netSend(m); netFx(m); }
 function horn() { const now = performance.now(); if (now - hornT < 600 || (state !== 'race' && state !== 'countdown' && state !== 'finished')) return; hornT = now; audio(); const m = { t: 'horn', nid: NET.me }; if (NET.racing) netSend(m); hornSound(1); }
@@ -4122,8 +4145,26 @@ function frame(t) {
   if (++rafCount % div && !window.FORCE_DRAW) return;
   if (!last) last = t; const raw = (t - last)/1000; let dt = Math.min(0.05, raw); last = t; if (raw > 0 && raw < 0.5 && state !== 'paused') adapt(raw, div/screenHz);
   if (state !== 'paused') { const steps = Math.max(1, Math.ceil(dt/(1/90))); for (let i = 0; i < steps; i++) update(dt/steps); }
-  if (player) camera(dt);
+  if (player) { camera(dt); mirrorTick(dt); }
   render(); drawMap(); nameTags(); musFrame();
+}
+// The mirror opens by itself when somebody is close behind, and folds away a moment after he has dropped back or gone past.
+function mirrorTick(dt) {
+  let near = 1e9;
+  if (state === 'race' && !spec && player && !player.done) { const sn = Math.sin(player.h), cs = Math.cos(player.h), N = T.N;
+    for (const b of cars) { if (b === player || b.rival || b.done || b.gone) continue; const dx = b.x - player.x, dz = b.z - player.z, d = Math.hypot(dx, dz); if (d > 26 || dx*sn + dz*cs > -0.6) continue;
+      const di = (((player.idx - b.idx) % N) + N) % N; if (di > 70 && di < N - 8) continue;          // a car on the neighbouring stretch of road is not behind
+      if (d < near) near = d; } }
+  if (near < 17) { MIRROR.on = true; MIRROR.hold = 0.7; } else if (near > 23 || near > 1e8) { MIRROR.hold -= dt; if (MIRROR.hold <= 0) MIRROR.on = false; }
+  if (state !== 'race' || spec) { MIRROR.on = false; MIRROR.a = 0; }          // on pause and after the finish it is gone at once, frame and picture together
+  MIRROR.a = MIRROR.on ? Math.min(1, MIRROR.a + dt*7) : Math.max(0, MIRROR.a - dt*7); MIRROR.d = near;
+  const show = MIRROR.a > 0.04; hstyle('mirror', 'display', show ? '' : 'none'); if (!show) return;
+  const vw = viewW(); let w2, x, y;
+  if (document.body.classList.contains('kbd')) { w2 = Math.min(340, vw*0.3); x = (vw - w2)/2; y = KO.on ? 96 : 10; }
+  else { const l = vw/2 + 72, r = vw - 124; w2 = Math.max(112, Math.min(230, r - l)); x = r - w2; y = 8; }         // on a phone the speed sits in the middle of the top edge: the mirror goes between it and the map
+  x = Math.round(x); w2 = Math.round(w2); const h2 = Math.round(w2/3.1); MIRROR.r = [x, y, w2, h2];
+  hstyle('mirror', 'left', x + 'px'); hstyle('mirror', 'top', y + 'px'); hstyle('mirror', 'width', w2 + 'px'); hstyle('mirror', 'height', Math.max(8, Math.round(h2*MIRROR.a)) + 'px');
+  if (!(hudTick % 6)) hset('mirrd', near < 1e8 ? Math.max(1, Math.round((near - 2.6)/U)) + ' м' : '');
 }
 let camShake = 0;
 function camera(dt) {
