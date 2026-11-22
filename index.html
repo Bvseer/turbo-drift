@@ -570,7 +570,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 88</div>
+    <div style="opacity:.5;margin-top:8px">версия 89</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -647,7 +647,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 88</div>
+  <div class="fver">Turbo Drift · версия 89</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -3144,7 +3144,8 @@ function botReady(b) {                                  // once the track and th
   // In a room every rival is at least as quick as the player's car, as before. Alone against the computer a rival keeps his own car's pace, but only within a few per cent of the player's model:
   // a dearer car is a real edge over cheaper bodies, and a free car is not left behind by a body five classes above it.
   b.K0 = room ? { top: Math.max(own.top, pk.top), acc: Math.max(own.acc, pk.acc), grip: Math.max(own.grip, pk.grip), arm: own.arm }
-    : { top: Math.max(pk.top - 0.04, Math.min(pk.top + 0.02, own.top)), acc: Math.max(pk.acc - 0.03, Math.min(pk.acc + 0.03, own.acc)), grip: Math.max(own.grip, pk.grip), arm: own.arm }; b.K = { top: b.K0.top, acc: b.K0.acc, grip: b.K0.grip, arm: own.arm }; b.chase = 1;      // whatever the body, a rival's car is never slower, weaker off the line or worse in corners than the player's
+    : { top: Math.max(pk.top - 0.04, Math.min(pk.top + 0.02, own.top)), acc: Math.max(pk.acc - 0.03, Math.min(pk.acc + 0.03, own.acc)), grip: Math.max(own.grip, pk.grip), arm: own.arm }; if (b.boss && player && player.K) b.K0 = { top: Math.max(own.top, player.K.top)*1.012, acc: Math.max(own.acc, player.K.acc)*1.02, grip: Math.max(own.grip, player.K.grip)*1.01, arm: own.arm };          // a champion is not to be bought off: whatever the player has built, stage and wheels included, his car is a shade better
+  b.K = { top: b.K0.top, acc: b.K0.acc, grip: b.K0.grip, arm: own.arm }; b.chase = 1;      // whatever the body, a rival's car is never slower, weaker off the line or worse in corners than the player's
   const P = b.drv = driverOf(b.skill); b.vpl = lineSpeed(b.K0, P);
   b.ai.go = Math.max(0.02, P.react*(0.6 + Math.random()*0.8)); b.ai.launch = Math.random() < P.launch; b.ai.ofs = b.lat - T.rl[b.idx]*P.wide; b.ai.abs = null;
 }
@@ -3165,7 +3166,7 @@ function botLook(b) {
   // Chase: the further a person has got away, the harder the computer cars behind push, up to CHASE[level] more pace
   // from 200 m back. It fades to nothing as they close to 25 m, so wheel to wheel the cars are equal.
   if (b.K0) { let gap = 0; for (const o of cars) if (!o.bot && !o.done && !o.rival) gap = Math.max(gap, progress(o) - progress(b));
-    const k = 1 + CHASE[level]*Math.max(0, Math.min(1, (gap - 25)/175)); b.chase += Math.max(-0.01, Math.min(0.01, k - b.chase));
+    const k = 1 + (b.boss ? Math.max(0.10, CHASE[level]) : CHASE[level])*Math.max(0, Math.min(1, (gap - (b.boss ? 12 : 25))/(b.boss ? 110 : 175))); b.chase += Math.max(-0.01, Math.min(0.01, k - b.chase));
     b.K.top = b.K0.top*b.chase; b.K.acc = b.K0.acc*(1 + (b.chase - 1)*3); b.K.grip = b.K0.grip*b.chase*b.chase; }
   A.abs = abs; A.cap = Math.max(3, cap);                                                     // never a dead stop behind a parked car: creep up and nudge past
   b.draft = tow ? Math.min(1.6, b.draft + 0.1) : Math.max(0, b.draft - 0.25);
@@ -3487,15 +3488,15 @@ function note(text, ms) { const el = document.getElementById('note'); el.textCon
 // ---- Career: the world tour. Five stages of three events; the third is a duel with the stage's champion. A place in the first three opens
 // the next event, a duel has to be won. Up to three stars an event: in the first three, first, first without being hit once.
 const CAREER_STAGES = [
-  { name: 'Дом', lvl: 0, skills: [0.00,0.03,0.06,0.09,0.12], tracks: [0, 1, 5], boss: { name: 'Тимур «Барс»', type: 3, skill: 0.19, tn: [1,0,1,0], pay: 300, paint: 'Бирюза',
+  { name: 'Дом', lvl: 0, skills: [0.00,0.03,0.06,0.09,0.12], tracks: [0, 1, 5], boss: { name: 'Тимур «Барс»', type: 3, skill: 0.30, tn: [1,0,1,0], pay: 300, paint: 'Бирюза',
       pre: 'Это мой город. Доедешь до финиша раньше меня — поговорим.', win: 'Быстро. Азия тебя уже ждёт — передай привет Призраку.', lose: 'Тренируйся. Ташкент никуда не денется.' } },
-  { name: 'Азия', lvl: 1, skills: [0.12,0.16,0.20,0.24,0.28], tracks: [2, 4, 3], boss: { name: 'Кэндзи «Призрак»', type: 5, skill: 0.37, tn: [2,1,3,2], pay: 500, paint: 'Сакура',
+  { name: 'Азия', lvl: 1, skills: [0.12,0.16,0.20,0.24,0.28], tracks: [2, 4, 3], boss: { name: 'Кэндзи «Призрак»', type: 5, skill: 0.48, tn: [2,1,3,2], pay: 500, paint: 'Сакура',
       pre: 'Ночью эти улицы мои. Держись за габариты, если сможешь.', win: 'Ты видел мой хвост недолго. Европа будет жёстче.', lose: 'Призрака не догоняют с первого раза.' } },
-  { name: 'Европа', lvl: 1, skills: [0.26,0.31,0.36,0.41,0.46], tracks: [7, 8, 6], boss: { name: 'Марсель «Маэстро»', type: 0, skill: 0.56, tn: [1,1,2,0], pay: 800, paint: 'Бордо',
+  { name: 'Европа', lvl: 1, skills: [0.26,0.31,0.36,0.41,0.46], tracks: [7, 8, 6], boss: { name: 'Марсель «Маэстро»', type: 0, skill: 0.66, tn: [1,1,2,0], pay: 800, paint: 'Бордо',
       pre: 'Гонка — это искусство. Постарайся не испортить мне картину.', win: 'Браво. За океаном любят скорость — тебе туда.', lose: 'Изящно, но медленно. Ещё раз?' } },
-  { name: 'Америка', lvl: 2, skills: [0.42,0.48,0.54,0.60,0.66], tracks: [14, 10, 9], boss: { name: 'Дюк «Хайвей»', type: 2, skill: 0.76, tn: [2,1,1,3], pay: 1200, paint: 'Лайм',
+  { name: 'Америка', lvl: 2, skills: [0.42,0.48,0.54,0.60,0.66], tracks: [14, 10, 9], boss: { name: 'Дюк «Хайвей»', type: 2, skill: 0.84, tn: [2,1,1,3], pay: 1200, paint: 'Лайм',
       pre: 'Здесь выигрывает тот, у кого мотор громче. У меня — громче.', win: 'Чёрт, ты быстр. Осталась только Корона — удачи, она тебе понадобится.', lose: 'Громко ехал, да не туда. Давай ещё.' } },
-  { name: 'Финал', lvl: 3, skills: [0.58,0.66,0.74,0.82,0.90], tracks: [11, 12, 13], boss: { name: 'Виктория «Корона»', type: 1, skill: 0.97, tn: [2,1,2,4], pay: 2000, paint: 'Золото',
+  { name: 'Финал', lvl: 3, skills: [0.58,0.66,0.74,0.82,0.90], tracks: [11, 12, 13], boss: { name: 'Виктория «Корона»', type: 1, skill: 1.0, tn: [2,1,2,4], pay: 2000, paint: 'Золото',
       pre: 'Пять лет никто не забирал у меня этот город. Ты не станешь первым.', win: 'Корона твоя. Носи её быстро.', lose: 'Монако не прощает ошибок. Возвращайся, когда будешь готов.' } } ];
 const CAREER = { ev: null, keep: null, sel: -1, back: false };
 function careerStarsOf(e) { return Math.min(3, progGet('k' + e)); }
