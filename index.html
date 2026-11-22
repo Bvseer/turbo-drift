@@ -100,6 +100,8 @@
   .tracks.many .track, body.wide .tracks.many .track, body.land #menu .tracks.many .track, body:not(.wide) .msheet .tracks.many .track { flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; padding: 8px 10px; border-radius: 13px; font-size: 14.5px; min-width: 0; }
   .tracks.many .track small { display: none; } .tracks.many .track b { font-size: 11.5px; } .tracks.many .track > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; } .tracks.many .medals { display: flex; margin: 3px 0 2px; gap: 3px; } .tracks.many .medals u { width: 6px; height: 6px; }
   .tracks.many .track.long { font-size: 12.5px; letter-spacing: -.3px; } .tracks.many .track.long > span { text-overflow: clip; }
+  /* the host's list in a room is narrower: long names go on two lines there instead of being cut */
+  #mptracks.many .track, body.land #menu #mptracks.many .track, body.wide #mptracks.many .track { align-items: center; text-align: center; padding: 6px 4px; font-size: 13px; min-height: 36px; } #mptracks.many .track > span { white-space: normal; overflow: visible; line-height: 1.1; } #mptracks.many .track.long { font-size: 11.5px; letter-spacing: -.2px; }
   .tdesc { font-size: 12px; font-weight: 600; opacity: .8; margin: 6px 0 0; text-align: center; min-height: 15px; width: 100%; }
   #toptabs { flex-wrap: wrap; } #toptabs .lv { flex: 1 0 30%; }
   .track b { font-variant-numeric: tabular-nums; font-size: 14px; color: #ffd23f; white-space: nowrap; }
@@ -473,14 +475,13 @@
     <div><b>Старт</b> — <span class="for-pc">нажми газ ровно на GO</span><span class="for-mob">держи ТОРМОЗ и отпусти ровно на GO</span>: будет рывок<span class="for-pc">; раньше времени — пробуксовка</span></div>
     <div><b>Слипстрим</b> — держись прямо за соперником, машина разгонится сильнее; <b>обгон впритирку</b> без касания даёт турбо</div>
     <div><b>Графика</b> в настройках — от минимальной до максимальной: чем ниже, тем меньше чёткости, теней и эффектов, зато плавнее на слабом телефоне. <b>Батарея → Экономия</b> рисует вдвое меньше кадров: телефон греется меньше</div>
-    <div><b>Чат</b> — кнопка 💬 в комнате и на финише: готовые фразы в одно касание<span class="for-pc">, свой текст — клавиша <kbd>T</kbd></span><span class="for-mob">, свой текст — «Написать своё»</span>. В заезде писать нельзя — там говорят голосом. Чат можно выключить</div>
+    <div><b>Чат</b> — кнопка 💬 в комнате и на финише<span class="for-pc">, или клавиша <kbd>T</kbd></span><span class="for-mob">, дальше «Написать»</span>. В заезде писать нельзя — там говорят голосом. Чат можно выключить</div>
     <div><b>Звук</b> игры выключается в настройках и на экране паузы</div>
     <div><b>Голос</b> — кнопка с микрофоном в комнате, в заезде и на финише. Микрофон выключен, пока сам не включишь; чужие голоса слышно сразу. Заглушить всех — кнопка «Голоса» в комнате или кнопка с динамиком под паузой в заезде; одного игрока — нажми на 🎤 возле его имени в комнате</div>
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div class="for-pc"><span class="kb"><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd> реакции в гонке с игроками</span></div>
-    <div style="opacity:.5;margin-top:8px;padding:6px 0" id="verline">версия 69</div>
+    <div style="opacity:.5;margin-top:8px">версия 72</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -489,9 +490,8 @@
 <div class="chatbox hidden" id="chatbox">
   <div class="chathead"><b>Чат комнаты</b><button id="chatmute">выключить чат</button><button id="chatx" aria-label="Закрыть">✕</button></div>
   <div class="chatlog" id="chatlog"></div>
-  <div class="phr" id="phr"></div>
   <div class="chatrow for-pc"><input id="chatin" maxlength="80" placeholder="Сообщение — Enter" autocomplete="off" spellcheck="false" aria-label="Сообщение"><button id="chatgo" aria-label="Отправить">➤</button></div>
-  <button class="ghost" id="chatwrite">Написать своё</button>
+  <button class="ghost" id="chatwrite">Написать</button>
 </div>
 <div class="chatpad hidden" id="chatpad"><div class="chatrow"><input id="padin" maxlength="80" placeholder="Сообщение" autocomplete="off" enterkeyhint="send" aria-label="Сообщение"><button id="padgo" aria-label="Отправить">➤</button><button id="padx" class="dim" aria-label="Закрыть">✕</button></div><div class="chatlog" id="padlog"></div></div>
 
@@ -555,7 +555,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 69</div>
+  <div class="fver">Turbo Drift · версия 72</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1886,7 +1886,8 @@ function cityKit(c, o) { o = o || {};
       for (const dir of [-1, 1]) for (let s = 1; s <= 9; s++) { const D = at(i0 + Math.round(km + dir*s*(km - 6)/9), sd*DW, 1.0), T = at(i, sd*(DW + 1.2), PH - 2 - (9 - s)*2.2); mb.quad([D[0], 1.0, D[2]], [D[0], 1.3, D[2]], [T[0], T[1] + 0.3, T[2]], T, [0.80,0.80,0.80], 0, null); } }
     mb.box(p[0], PH*0.62, p[2], 2*(DW + 1.6), 2.0, 2.6, W2, 0, hh); mb.box(p[0], -3, p[2], 2*(DW + 1.6), 3, 5, W2, 0, hh); return DW; };
   // white yacht; a big ship with decks and a funnel
-  K.yacht = function (px, pz, ry, s) { s = s || 1; const WH = [0.93,0.93,0.92]; mb.box(px, WY + 0.7*s, pz, 3.2*s, 1.4*s, 11*s, WH, 0, ry); mb.box(px, WY + 1.9*s, pz, 2.6*s, 1.0*s, 5.5*s, WH, 0, ry); mb.box(px, WY + 2.0*s, pz, 2.66*s, 0.45*s, 4.6*s, [0.06,0.08,0.12], 4, ry); if (rnd() < 0.5) mb.box(px, WY + 5.5*s, pz, 0.14, 7*s, 0.14, [0.8,0.8,0.8], 0, ry); };
+  K.yacht = function (px, pz, ry, s) { s = s || 1; if (K.road(px, pz) < HW + 9) return;      // not under a bridge: its mast would stand up through the roadway
+    const WH = [0.93,0.93,0.92]; mb.box(px, WY + 0.7*s, pz, 3.2*s, 1.4*s, 11*s, WH, 0, ry); mb.box(px, WY + 1.9*s, pz, 2.6*s, 1.0*s, 5.5*s, WH, 0, ry); mb.box(px, WY + 2.0*s, pz, 2.66*s, 0.45*s, 4.6*s, [0.06,0.08,0.12], 4, ry); if (rnd() < 0.5) mb.box(px, WY + 5.5*s, pz, 0.14, 7*s, 0.14, [0.8,0.8,0.8], 0, ry); };
   K.ship = function (px, pz, ry) { const WH = [0.94,0.94,0.93], F = loc(px, pz, ry); mb.box(px, WY + 4, pz, 17, 8, 118, WH, 0, ry); for (let k = 0; k < 4; k++) { mb.box(px, WY + 9.3 + k*2.6, pz, 15.5 - k, 2.6, 100 - k*9, WH, 0, ry); mb.box(px, WY + 9.5 + k*2.6, pz, 15.6 - k, 0.9, 96 - k*9, [0.06,0.08,0.12], 4, ry); } const q = F(0, -22); mb.box(q[0], WY + 22, q[1], 6, 6, 9, [0.85,0.20,0.14], 0, ry); mb.box(px, WY + 0.9, pz, 17.1, 1.4, 118.1, [0.10,0.14,0.30], 0, ry); };
   // grandstand: steps with seats under a roof; it faces along +z of its own axes
   K.stand = function (px, pz, ry, L2) { const F = loc(px, pz, ry), SEAT = [[0.85,0.15,0.15],[0.95,0.95,0.95],[0.15,0.35,0.80]]; for (let s = 0; s < 6; s++) { const q = F(0, -s*1.3); mb.box(q[0], 0.5 + s*0.55, q[1], L2, 1.0 + s*1.1, 1.3, [0.62,0.64,0.68], 0, ry); mb.box(q[0], 1.25 + s*1.1, q[1], L2 - 1, 0.4, 0.9, SEAT[s % 3], 0, ry); }
@@ -3066,9 +3067,6 @@ function walletSync() {
     if (WSRV.again) { WSRV.again = false; walletSoon(); } });
 }
 function owns(t) { return WALLET.owned.indexOf(t) >= 0; }
-// For the author of the game: seven quick taps on the version line under «Как играть» fill the purse.
-(function () { let n = 0, t0 = 0; const el = document.getElementById('verline'); if (!el) return;
-  el.addEventListener('click', function () { const now = performance.now(); if (now - t0 > 1500) n = 0; t0 = now; if (++n < 7) return; n = 0; WALLET.coins += 50000; saveWallet(); try { buildGarage(); } catch (e) {} toast('+50 000 монет'); beep(660, 0.25, 'triangle', 0.07, 1320); }); })();
 function earn(n) { n = Math.max(0, Math.round(n)); WALLET.coins += n; saveWallet(); return n; }
 const PLACE_PTS = [10, 7, 5, 3, 2, 1];
 // Championship: the three tracks in a row, points for places, one table at the end.
@@ -3534,7 +3532,6 @@ function key(e, down) {
   else if (down && !e.repeat && (k === 'e' || k === 'у' || k === 'tab')) { selectStep(1); e.preventDefault(); }
   else if (down && !e.repeat && (k === 'q' || k === 'й')) selectStep(-1);
   else if (down && !e.repeat && (k === '1' || k === '2' || k === '3')) selectSlot(parseInt(k, 10) - 1);
-  else if (down && !e.repeat && NET.racing && k >= '5' && k <= '8') sendEmo(parseInt(k, 10) - 5);
   else if (down && (k === 'escape' || k === 'p')) pause(state === 'race' || state === 'countdown');
 }
 window.addEventListener('keydown', function (e) { key(e, true); }); window.addEventListener('keyup', function (e) { key(e, false); });
@@ -3812,7 +3809,7 @@ function netLobby() {
   voiceUI();
   { const me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0], guests = NET.roster.filter(function (p) { return p.nid !== 0; }), k = guests.filter(function (p) { return p.rdy; }).length;
     document.getElementById('mprdybox').style.display = !NET.host && !NET.pub ? '' : 'none'; const rb = document.getElementById('mprdy'); rb.textContent = me && me.rdy ? 'Готов ✓' : 'Готов'; rb.className = me && me.rdy ? 'ghost' : 'main';
-    document.getElementById('mpgo').textContent = guests.length ? 'Старт · готовы ' + k + ' из ' + guests.length : 'Старт'; }
+    document.getElementById('mpgo').textContent = guests.length ? 'Старт · готовы ' + k + '/' + guests.length : 'Старт'; }
   { const me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0]; if (me) { garage.type = me.type; garage.color = me.color; }
     document.getElementById('mpcarname').textContent = CAR_TYPES[garage.type].name; document.getElementById('mpcareng').textContent = CAR_TYPES[garage.type].eng.label; statBars(document.getElementById('mpcarstats'), garage.type);
     { const o = NET.opt || {}, names = []; if (o.rev) names.push('обратно'); if (o.rain) names.push('дождь'); if (o.ko) names.push('выбывание'); document.getElementById('mpoptline').textContent = names.length ? ' Заезд: ' + names.join(', ') + '.' : ''; }
@@ -3844,7 +3841,7 @@ function netAward() {
 }
 const EMO = ['👍', '😂', '😡', '🔥'];
 let emoT = 0, hornT = 0;
-function emoRow(el) { if (el.childNodes.length) return; EMO.forEach(function (e, i) { const b = document.createElement('button'); b.textContent = e; b.setAttribute('aria-label', 'Реакция'); b.addEventListener('click', function () { sendEmo(i); }); el.appendChild(b); });
+function emoRow(el) { if (el.childNodes.length) return;                // the row under the list of players: chat and, on the results screen, the microphone (the reaction faces were taken out)
   const c = document.createElement('button'); c.textContent = '💬'; c.setAttribute('aria-label', 'Чат'); c.addEventListener('click', function () { chatOpen(false); }); el.appendChild(c);
   if (el.id === 'femo') { const m = document.createElement('button'); m.textContent = '🎤'; m.className = 'micbtn'; m.setAttribute('aria-label', 'Микрофон'); m.addEventListener('click', function () { voiceMic(!VOICE.stream); }); el.appendChild(m); } }
 // ---------------------------------------------------------------------------
@@ -3932,7 +3929,7 @@ function voiceUI() {
   const ear = function () { VOICE.deaf = !VOICE.deaf; voiceSync(); voiceUI(); toast(VOICE.deaf ? 'Голоса других игроков выключены' : 'Голоса других игроков включены'); };
   document.getElementById('earbtn').addEventListener('click', ear); tapMob(document.getElementById('earbtn2'), ear); })();
 function chatReset() { CHAT.log = []; CHAT.seen = {}; for (const id of ['chatlog', 'padlog', 'chatfeed']) document.getElementById(id).innerHTML = ''; chatClose(); padClose(); }
-(function () { const g = document.getElementById('phr'); PHRASES.forEach(function (t, i) { const b = document.createElement('button'); b.textContent = t; b.addEventListener('click', function () { if (chatSend(null, i) && chatDriving()) chatClose(); }); g.appendChild(b); });
+(function () {
   document.getElementById('chatx').addEventListener('click', chatClose); document.getElementById('padx').addEventListener('click', padClose);
   document.getElementById('chatgo').addEventListener('click', function () { chatType(document.getElementById('chatin')); }); document.getElementById('padgo').addEventListener('click', function () { chatType(document.getElementById('padin')); });
   document.getElementById('chatwrite').addEventListener('click', padOpen);
@@ -4101,14 +4098,16 @@ const GFX_SET = { min:  { name: 'Минимальная',  rs: 0.58, sh: false, 
                   max:  { name: 'Максимальная', rs: 1,    sh: true,  far: 0,   fx: true,  tip: 'Полная чёткость, все тени и эффекты' } };
 let gfx = 'max', GFX = GFX_SET.max, gfxAuto = false, benchN = 0, benchSlow = 0, benchOk = 0, benchMoved = false;
 try { const g = localStorage.getItem('td_gfx'), old = localStorage.getItem('td_fps'); if (GFX_SET[g]) gfx = g; else if (old === 'light') gfx = 'mid'; else { gfxAuto = true; gfx = gfxFirst(); }          // settings saved by earlier versions carry over; a new player gets a preset measured on his device
+  // versions 66-70 moved the preset down too readily: whoever was left below the top by them is measured once more, by the gentler rule
+  if (!localStorage.getItem('td_g71')) { localStorage.setItem('td_g71', '1'); if (!gfxAuto && gfx !== 'max') { gfxAuto = true; gfx = gfxFirst(); localStorage.removeItem('td_gfx'); localStorage.removeItem('td_scale'); } }
   const e = localStorage.getItem('td_eco'); fpsEco = e === null ? old === 'eco' : e === '1'; GFX = GFX_SET[gfx]; } catch (e) {}
-function gfxFirst() { let touch = false; try { touch = matchMedia('(pointer: coarse)').matches; } catch (e) {} return touch ? 'high' : 'max'; }
-// While the preset is still being picked: count the late frames of the race in windows of 240. More than a quarter late: one preset down, measure again.
+function gfxFirst() { return 'max'; }                 // start from the best picture, as the game always did; only a device that cannot keep up is moved down
+// While the preset is still being picked: count the late frames of the race in windows of 240. More than four in ten badly late: one preset down, measure again.
 // Two clean windows in a row (or the lowest preset): that is the device's preset, it is saved and the player is told.
 function autoBench(dt, expected) {
-  benchN++; if (dt > expected*1.35) benchSlow++; if (benchN < 240) return;
+  benchN++; if (dt > expected*1.6) benchSlow++; if (benchN < 240) return;                 // late: under some 37 frames a second where 60 are wanted. A little slowness is the business of the resolution (adapt), not of the preset
   const share = benchSlow/benchN, order = ['min', 'mid', 'high', 'max'], k = order.indexOf(gfx); benchN = 0; benchSlow = 0;
-  if (share > 0.25 && k > 0) { gfx = order[k - 1]; GFX = GFX_SET[gfx]; benchOk = 0; benchMoved = true; warmFrames = 40; resize(); buildFpsSwitch(); return; }
+  if (share > 0.4 && k > 0) { gfx = order[k - 1]; GFX = GFX_SET[gfx]; benchOk = 0; benchMoved = true; warmFrames = 40; resize(); buildFpsSwitch(); return; }
   if (++benchOk >= 2 || k === 0) { gfxAuto = false; try { localStorage.setItem('td_gfx', gfx); } catch (e) {} buildFpsSwitch(); toast('Графика подобрана под устройство: ' + GFX.name.toLowerCase() + (benchMoved ? '' : '. Изменить можно в настройках')); }
 }
 function frame(t) {
