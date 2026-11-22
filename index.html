@@ -127,6 +127,29 @@
   .arrow { width: 44px; height: 44px; border-radius: 14px; border: 0; background: rgba(255,255,255,.18); color: #fff; font-size: 26px; font-weight: 800; line-height: 1; }
   .carname { min-width: 200px; font-size: 20px; font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,.5); }
   .swatches { display: flex; gap: 8px; margin-bottom: 14px; }
+  /* the garage: the car in the middle, what can be changed on the left, the choices along the bottom */
+  #garage { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; gap: 8px; padding: 12px 14px 14px; text-align: left; align-items: stretch; justify-content: stretch; overflow: hidden; background: radial-gradient(ellipse 62% 58% at 57% 46%, rgba(8,11,24,0) 40%, rgba(8,11,24,.78) 100%); }
+  .gtop { grid-column: 1 / 3; display: flex; align-items: center; gap: 14px; padding: 7px 12px 7px 7px; border-radius: 16px; background: rgba(10,13,24,.86); min-width: 0; }
+  .gtop .gback { padding: 9px 16px; font-size: 14px; border-radius: 12px; white-space: nowrap; } .gtitle { display: flex; flex-direction: column; min-width: 0; margin-right: auto; } .gtitle b { font-size: 19px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .gtitle small { font-size: 12px; opacity: .72; white-space: nowrap; }
+  .gtop .stats { margin: 0; gap: 12px; } .gtop .stats i { display: flex; width: 54px; height: 6px; } .gtop .stats u { flex: 0 0 auto; border-radius: 3px 0 0 3px; } .gtop .stats u.dl { background: #6dff9b; border-radius: 0 3px 3px 0; } .gtop .stats span em { font-style: normal; color: #6dff9b; margin-left: 3px; } .gtop .coins { margin: 0; font-size: 15px; padding: 5px 14px 5px 7px; background: rgba(255,255,255,.08); }
+  .gtabs { grid-row: 2 / 4; display: flex; flex-direction: column; gap: 5px; width: 150px; padding: 7px; border-radius: 16px; background: rgba(10,13,24,.86); overflow-y: auto; box-sizing: border-box; }
+  .gtab { border: 0; border-left: 3px solid transparent; border-radius: 11px; padding: 0 11px; flex: 1 1 0; min-height: 36px; max-height: 60px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 1px; background: rgba(255,255,255,.06); color: #fff; font: inherit; text-align: left; cursor: pointer; }
+  .gtab b { font-size: 14.5px; font-weight: 800; } .gtab small { font-size: 11.5px; opacity: .65; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; } .gtab.on { background: rgba(255,210,63,.17); border-left-color: #ffd23f; } .gtab.on small { color: #ffd23f; opacity: 1; }
+  .gstage { position: relative; min-height: 0; min-width: 0; touch-action: none; cursor: grab; -webkit-user-select: none; user-select: none; } .gstage span { position: absolute; left: 50%; bottom: 2px; transform: translateX(-50%); font-size: 11.5px; padding: 3px 10px; border-radius: 10px; background: rgba(10,13,24,.55); opacity: .8; white-space: nowrap; transition: opacity .4s; pointer-events: none; } .gstage.used span { opacity: 0; }
+  .gbot { display: flex; flex-direction: column; gap: 7px; min-width: 0; padding: 9px; border-radius: 16px; background: rgba(10,13,24,.86); } .grow { display: flex; gap: 8px; align-items: stretch; min-width: 0; }
+  .gopts { flex: 1 1 0; min-width: 0; display: flex; gap: 7px; overflow-x: auto; padding: 2px; scrollbar-width: none; align-items: stretch; touch-action: pan-x; } .gopts::-webkit-scrollbar { display: none; }
+  .gopt { flex: 0 0 auto; min-width: 118px; box-sizing: border-box; border: 0; border-radius: 12px; padding: 9px 13px; background: rgba(255,255,255,.08); color: #fff; font: inherit; text-align: left; display: grid; grid-template-columns: auto 1fr; column-gap: 10px; row-gap: 2px; align-items: center; align-content: center; cursor: pointer; outline: 2px solid transparent; outline-offset: -2px; }
+  .gopt i { grid-row: 1 / 3; width: 24px; height: 24px; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255,255,255,.28); } .gopt b { font-size: 14.5px; font-weight: 800; white-space: nowrap; grid-column: 2; } .gopt small { font-size: 12px; white-space: nowrap; opacity: .7; grid-column: 2; }
+  .gopt.nodot b, .gopt.nodot small { grid-column: 1 / 3; } .gopt small.price { color: #ffd23f; opacity: 1; font-weight: 800; display: flex; align-items: center; gap: 5px; } .gopt small.price::before { content: ''; width: 11px; height: 11px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff3b0, #ffc21f 55%, #c98a00); }
+  .gopt.sel { outline-color: #ffd23f; background: rgba(255,210,63,.15); } .gopt.inst small { color: #5fe08a; opacity: 1; font-weight: 800; } .gopt.locked b { opacity: .55; }
+  .ginfo { font-size: 12.5px; line-height: 1.3; opacity: .9; padding: 0 4px; min-height: 16px; } .ginfo b { color: #ffd23f; font-weight: 800; }
+  #gbuy { flex: 0 0 220px; box-sizing: border-box; padding: 10px 8px; font-size: 16px; border-radius: 12px; white-space: nowrap; } #gbuy.off { background: rgba(255,255,255,.12); color: rgba(255,255,255,.75); box-shadow: none; cursor: default; } #gbuy.poor { background: rgba(235,64,52,.22); color: #ffb9b2; box-shadow: none; }
+  @keyframes gpop { 0% { transform: scale(1); } 40% { transform: scale(1.06); } 100% { transform: scale(1); } } .gopt.pop { animation: gpop .35s ease-out; }
+  body.land #garage { gap: 6px; padding: 7px 9px 9px; } body.land .gtop { padding: 4px 9px 4px 4px; gap: 9px; border-radius: 13px; } body.land .gtop .gback { padding: 7px 11px; font-size: 12.5px; } body.land .gtitle b { font-size: 15px; } body.land .gtitle small { font-size: 10.5px; } body.land .gtop .stats { gap: 7px; } body.land .gtop .stats i { width: 40px; height: 5px; } body.land .gtop .coins { font-size: 13px; padding: 4px 10px 4px 5px; }
+  body.land .gtabs { width: 108px; padding: 5px; gap: 4px; border-radius: 13px; } body.land .gtab { padding: 0 8px; min-height: 30px; border-radius: 9px; } body.land .gtab b { font-size: 12.5px; } body.land .gtab small { font-size: 10px; }
+  body.land .gbot { padding: 6px; gap: 4px; border-radius: 13px; } body.land .grow { gap: 6px; } body.land .gopts { gap: 5px; } body.land .gopt { min-width: 92px; padding: 6px 10px; border-radius: 10px; column-gap: 8px; } body.land .gopt i { width: 20px; height: 20px; } body.land .gopt b { font-size: 12.5px; } body.land .gopt small { font-size: 10.5px; }
+  body.land .ginfo { font-size: 11px; min-height: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } body.land #gbuy { flex-basis: 170px; padding: 6px; font-size: 13.5px; border-radius: 10px; } body.land .gstage span { font-size: 10px; }
+  body.tiny .gtabs { width: 98px; } body.tiny #gbuy { flex-basis: 150px; font-size: 13px; }
   /* career */
   .cstages { display: flex; gap: 8px; width: 100%; max-width: 900px; overflow-x: auto; padding: 4px 2px 8px; box-sizing: border-box; justify-content: safe center; } .cstage { flex: 1 1 0; min-width: 106px; max-width: 170px; display: flex; flex-direction: column; gap: 5px; padding: 9px; border-radius: 14px; background: rgba(255,255,255,.07); } .cstage > b { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; opacity: .85; margin-bottom: 1px; } .cstage.locked { opacity: .5; }
   .cev { border: 0; border-radius: 10px; padding: 7px 9px; font: inherit; color: #fff; background: rgba(255,255,255,.1); display: flex; flex-direction: column; align-items: flex-start; gap: 1px; cursor: pointer; text-align: left; } .cev span { font-size: 13px; font-weight: 700; } .cev i { font-style: normal; font-size: 13px; color: #ffd23f; letter-spacing: 1px; } .cev.boss { background: rgba(255,90,60,.2); } .cev.on { outline: 2.5px solid #ffd23f; } .cev.locked i { color: #fff; opacity: .6; font-size: 11px; letter-spacing: 0; }
@@ -142,17 +165,6 @@
   .dtask b { color: #ffd23f; font-size: 13px; white-space: nowrap; } .dtask i { grid-column: 1 / 3; height: 6px; border-radius: 3px; background: rgba(255,255,255,.14); overflow: hidden; } .dtask u { display: block; height: 100%; background: #ffd23f; border-radius: 3px; } .dtask.done { opacity: .7; } .dtask.done b { color: #34c759; } .dtask.done u { background: #34c759; }
   .fdaily { width: min(340px, 100%); margin: 6px 0 2px; font-size: 13px; font-weight: 700; color: #ffd23f; display: flex; flex-direction: column; gap: 3px; }
   body.land #daily h1 { font-size: 22px !important; margin: 0 0 6px; } body.land .dstreak { padding: 6px 12px; gap: 4px; margin-bottom: 6px; } body.land .dstreak i { padding: 3px 0; } body.land .dtask { padding: 6px 12px; font-size: 12.5px; } body.land .dlist { gap: 5px; margin-bottom: 4px; } body.land #daily .btns { margin-top: 2px; } body.land #daily .btns button { padding: 8px; }
-  /* tuning: the play buttons give way to the parts list, the car stays on its turntable */
-  .tunebox { display: none; flex-direction: column; gap: 8px; width: min(380px, 100%); box-sizing: border-box; padding: 12px 14px; border-radius: 18px; background: rgba(10,13,24,.78); text-align: left; max-height: 100%; overflow-y: auto; }
-  #menu.tuning .tunebox { display: flex; } #menu.tuning .mright > *:not(.tunebox), #menu.tuning .mleft > * { display: none !important; } body.wide #menu.tuning .mleft > * { display: flex !important; } #menu.tuning #tuneopen { outline: 2px solid #ffd23f; }
-  .tunehead { display: flex; align-items: center; justify-content: space-between; } .tunehead b { font-size: 19px; } .tunehead button { padding: 6px 14px; font-size: 13px; }
-  .tunestage { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,.07); } .tunestage .pips { display: flex; gap: 4px; } .tunestage .pips i { width: 16px; height: 8px; border-radius: 3px; background: rgba(255,255,255,.2); } .tunestage .pips i.on { background: #ffd23f; }
-  .tunestage .txt { flex: 1; min-width: 0; font-size: 13px; font-weight: 700; line-height: 1.25; } .tunestage .txt small { display: block; font-weight: 500; opacity: .75; font-size: 11.5px; } .tunestage button { padding: 7px 10px; font-size: 12.5px; white-space: nowrap; border-radius: 10px; } .tunestage button.poor { opacity: .55; }
-  .tunerow { display: flex; align-items: center; gap: 8px; } .tunerow > span { flex: 0 0 62px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; opacity: .7; font-weight: 700; }
-  .tunerow > div { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; } .tchip { border: 0; border-radius: 9px; padding: 6px 9px; font: inherit; font-size: 12px; font-weight: 700; color: #fff; background: rgba(255,255,255,.1); display: flex; align-items: center; gap: 5px; cursor: pointer; }
-  .tchip i { width: 11px; height: 11px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,.35); } .tchip small { font-weight: 600; color: #ffd23f; font-size: 10.5px; } .tchip.on { background: #ffd23f; color: #1a1400; } .tchip.pv { outline: 2px dashed #ffd23f; }
-  .tunebuy { padding: 9px 12px; font-size: 14px; } .tunebuy.poor { opacity: .6; }
-  body.land .tunebox { padding: 8px 10px; gap: 5px; border-radius: 14px; } body.land .tunehead b { font-size: 15px; } body.land .tunehead button { padding: 4px 10px; font-size: 12px; } body.land .tunestage { padding: 5px 8px; } body.land .tchip { padding: 5px 7px; font-size: 11px; } body.land .tunerow > span { flex-basis: 50px; font-size: 9.5px; } body.land .tchip.dot span { display: none; } body.land .tchip.dot i { width: 15px; height: 15px; } body.land .tunestage .txt small { display: none; } body.land .tunestage .pips { display: none; } body.land .tunestage .txt { white-space: nowrap; } body.land .tunestage .txt { font-size: 12px; } body.land .tunestage button { padding: 5px 8px; font-size: 11.5px; } body.land .tunebox { max-height: calc(100% - 12px); } body.land .tunebuy { padding: 6px 10px; font-size: 12.5px; }
   .sw { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); padding: 0; }
   .sw.on { border: 3px solid #fff; box-shadow: 0 0 0 3px rgba(255,210,63,.9); }
   .levels { display: flex; gap: 6px; margin-bottom: 12px; width: min(340px, 100%); }
@@ -422,12 +434,6 @@
       <div class="homelinks o4"><button class="ghost hl2" id="careeropen">Карьера</button><button class="ghost hl2" id="tuneopen">Тюнинг</button><button class="ghost hl2" id="dailyopen">Задания</button><button class="ghost hl2" id="weekopen">Турнир</button><button class="ghost" id="topopen" style="display:none">🏆 Рекорды</button><button class="ghost" id="prefsopen">Настройки</button><button class="ghost" id="helpopen">Как играть</button></div>
     </div>
     <div class="mcol mright">
-      <div class="tunebox" id="tunebox">
-        <div class="tunehead"><b>Тюнинг</b><button class="ghost" id="tuneclose">Готово</button></div>
-        <div class="tunestage" id="tunestage"></div>
-        <div class="tunerows" id="tunerows"></div>
-        <button class="main tunebuy" id="tunebuy" style="display:none"></button>
-      </div>
       <div class="challenge o2" id="challenge" style="display:none"></div>
       <button class="main playbtn o2" id="play"><span>Играть</span><small id="playsub"></small></button>
       <button class="ghost setupbtn o2" id="setupopen">Трасса и соперники ›</button>
@@ -452,6 +458,21 @@
       <div class="levels opts" id="opts"></div>
       <div class="btns"><button class="main" id="setupgo">Играть</button><button class="ghost" id="setupclose">Назад</button></div>
     </div>
+  </div>
+</div>
+
+<div class="screen hidden" id="garage">
+  <div class="gtop">
+    <button class="ghost gback" id="gback">‹ Назад</button>
+    <div class="gtitle"><b id="gname"></b><small id="gsub"></small></div>
+    <div class="stats" id="gstats"></div>
+    <div class="coins" id="gcoins"></div>
+  </div>
+  <div class="gtabs" id="gtabs"></div>
+  <div class="gstage" id="gstage"><span id="ghint">веди по экрану, чтобы повернуть машину</span></div>
+  <div class="gbot">
+    <div class="ginfo" id="ginfo"></div>
+    <div class="grow"><div class="gopts" id="gopts"></div><button class="main" id="gbuy"></button></div>
   </div>
 </div>
 
@@ -546,7 +567,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 80</div>
+    <div style="opacity:.5;margin-top:8px">версия 81</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -623,7 +644,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 80</div>
+  <div class="fver">Turbo Drift · версия 81</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1543,8 +1564,8 @@ function dressPlayer(c) { c.K = carK(c.type || 0, stageOf(c.type || 0)); c.tn = 
 const NET_REF = { top: 1.03, acc: 1.05, grip: 1.03 }, NET_KEEP = 0.3;
 function netK(k) { return { top: NET_REF.top + (k.top - NET_REF.top)*NET_KEEP, acc: NET_REF.acc + (k.acc - NET_REF.acc)*NET_KEEP, grip: NET_REF.grip + (k.grip - NET_REF.grip)*NET_KEEP, arm: k.arm }; }
 const TMESH = {};
-function tuneMesh(t, sp, kit) {              // the bolted-on parts of one car as a mesh of their own, drawn with the body's matrix and paint
-  if (!sp && !kit) return null; const key = 'b' + t + '_' + sp + '_' + kit; if (TMESH[key]) return TMESH[key];
+function tuneMesh(t, sp, kit, neon) {        // the bolted-on parts of one car as a mesh of their own, drawn with the body's matrix and paint
+  neon = neon | 0; if (!sp && !kit && !neon) return null; const key = 'b' + t + '_' + sp + '_' + kit + '_' + neon; if (TMESH[key]) return TMESH[key];
   const S = CAR_TYPES[t], mb = new MB(), half = S.len/2, DARK = [0.035,0.036,0.04], WHITE = [1,1,1], hatch = S.cab[1] < -0.9, yb = curve(S.belt, -0.86), up = S.extra === 'wing' ? 0.20 : 0;
   if (sp === 1) { if (hatch) { mb.box(0, S.hgt + 0.005, S.cab[1]*half - 0.13, S.wid*0.76, 0.045, 0.42, WHITE, 3); for (const sd of [-1, 1]) mb.box(sd*S.wid*0.375, S.hgt - 0.04, S.cab[1]*half - 0.13, 0.03, 0.11, 0.40, DARK, 11); }
     else { mb.box(0, yb + 0.055 + up, -half + 0.13, S.wid*0.80, 0.075, 0.17, WHITE, 3); mb.box(0, yb + 0.105 + up, -half + 0.075, S.wid*0.80, 0.035, 0.06, WHITE, 3); } }
@@ -1555,6 +1576,9 @@ function tuneMesh(t, sp, kit) {              // the bolted-on parts of one car a
     for (const sd of [-1, 1]) { mb.box(sd*(S.wid/2 - 0.015), S.clr + 0.045, (S.zF + S.zR)/2, 0.075, 0.09, (S.zF - S.zR) - S.r*2.5, DARK, 11);        // skirts
       mb.box(sd*S.wid*0.43, S.clr + 0.16, half - 0.10, 0.20, 0.025, 0.16, DARK, 11, sd*0.5); }                                 // canards
     mb.box(0, S.clr + 0.03, -half + 0.03, S.wid*0.74, 0.05, 0.26, DARK, 11); for (const x of [-0.27, -0.09, 0.09, 0.27]) mb.box(x*S.wid, S.clr + 0.07, -half - 0.03, 0.025, 0.13, 0.20, DARK, 11); }      // diffuser
+  if (neon && NEON_COL[neon]) { const c = NEON_COL[neon], tube = [c[0]*0.5, c[1]*0.5, c[2]*0.5], y = S.clr - 0.005;          // the tubes themselves: lit strips along the sills and across both ends
+    for (const sd of [-1, 1]) mb.box(sd*(S.wid/2 - 0.09), y, (S.zF + S.zR)/2, 0.04, 0.035, (S.zF - S.zR) - S.r*2.5, tube, 5);
+    mb.box(0, y, half - 0.22, S.wid*0.62, 0.035, 0.04, tube, 5); mb.box(0, y, -half + 0.22, S.wid*0.62, 0.035, 0.04, tube, 5); }
   for (let k = 0; k < mb.v.length; k += 10) { mb.v[k] *= U; mb.v[k+1] *= U; mb.v[k+2] *= U; }
   return TMESH[key] = upload(mb);
 }
@@ -1566,7 +1590,7 @@ function wheelVar(t, rim) {                  // the car's own wheel with the rim
 }
 function neonMesh(t, n) {                    // a pool of light on the road under the car: bright under the sills, gone a step away
   const key = 'n' + t + '_' + n; if (TMESH[key]) return TMESH[key];
-  const S = CAR_TYPES[t], mb = new MB(), a = (S.wid/2 - 0.08)*U, b = (S.len/2 - 0.15)*U, g = 0.95*U, y = 0.035*U, c = NEON_COL[n], ci = [c[0]*0.11, c[1]*0.11, c[2]*0.11], Z = [0,0,0], N = [0,1,0];
+  const S = CAR_TYPES[t], mb = new MB(), a = (S.wid/2 + 0.02)*U, b = (S.len/2 - 0.05)*U, g = 1.35*U, y = 0.035*U, c = NEON_COL[n], ci = [c[0]*0.30, c[1]*0.30, c[2]*0.30], Z = [0,0,0], N = [0,1,0];
   const q = function (p1, c1, p2, c2, p3, c3, p4, c4) { mb.sv([p1[0], y, p1[1]], N, c1, 5); mb.sv([p2[0], y, p2[1]], N, c2, 5); mb.sv([p3[0], y, p3[1]], N, c3, 5); mb.sv([p1[0], y, p1[1]], N, c1, 5); mb.sv([p3[0], y, p3[1]], N, c3, 5); mb.sv([p4[0], y, p4[1]], N, c4, 5); };
   q([-a,-b], ci, [a,-b], ci, [a,b], ci, [-a,b], ci);
   q([-a,b], ci, [a,b], ci, [a,b+g], Z, [-a,b+g], Z); q([-a,-b], ci, [a,-b], ci, [a,-b-g], Z, [-a,-b-g], Z); q([a,-b], ci, [a,b], ci, [a+g,b], Z, [a+g,-b], Z); q([-a,-b], ci, [-a,b], ci, [-a-g,b], Z, [-a-g,-b], Z);
@@ -2732,7 +2756,7 @@ function render() {
   gl.viewport(0, 0, w, hgt); gl.clearStencil(0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
   if (!T || !W || !player) return;
   let vp = mul(perspective(camFov*Math.PI/180, aspect, 0.5, 1900), lookAt(camEye, camLook));
-  if (state === 'menu') { const sb = STAGE; if (sb) { const vw2 = viewW(), vh2 = viewH(), k = Math.max(0.3, Math.min(2.2, WIDE ? Math.min(0.66*(sb[2] + 90)/(0.40*vh2), 0.9*sb[3]/(0.31*vh2)) : Math.min(sb[2]/(0.80*vh2), 1.05*sb[3]/(0.43*vh2))));     // between side panels the car may reach under their faded edges; in the one-column showroom it stays inside the box at every angle       // the picture is shrunk and shifted so the car lands in the box
+  if (state === 'menu') { const sb = STAGE; if (sb) { const vw2 = viewW(), vh2 = viewH(), k = Math.max(0.3, Math.min(2.2, GAR.open ? Math.min(sb[2]/(0.92*vh2), sb[3]/(0.35*vh2)) : WIDE ? Math.min(0.66*(sb[2] + 90)/(0.40*vh2), 0.9*sb[3]/(0.31*vh2)) : Math.min(sb[2]/(0.80*vh2), 1.05*sb[3]/(0.43*vh2))));     // between side panels the car may reach under their faded edges; in the one-column showroom it stays inside the box at every angle       // the picture is shrunk and shifted so the car lands in the box
       SHIFT[0] = k; SHIFT[5] = k; SHIFT[12] = sb[0]/vw2*2 - 1; SHIFT[13] = 1 - sb[1]/vh2*2; vp = mul(SHIFT, vp); } }
   LASTVP = vp; STATS.chunks = 0; STATS.tris = 0;
   scene(vp, camEye, false);
@@ -2757,7 +2781,7 @@ function scene(vp, camEye, mir) {
   // in the mirror only the cars it can show are drawn: a car body is the heaviest thing in the scene
   const skip = mir ? cars.map(function (c) { if (c === player) return true; const dx = c.x - camEye[0], dz = c.z - camEye[2]; if (dx*dx + dz*dz > 130*130) return true; for (let k = 0; k < 24; k += 4) if (planes[k]*c.x + planes[k+1]*0.5 + planes[k+2]*c.z + planes[k+3] < -3.2) return true; return false; }) : null;
   cars.forEach(function (c, i) { if (skip && skip[i]) return; const p = parts[i], tn = c.tn, wm = tn && tn[2] ? wheelVar(c.type || 0, tn[2]) : p.k.wheel; drawMesh(p.k.body, p.body, c.color, c.braking ? 1 : 0);
-    if (tn && (tn[0] || tn[1])) drawMesh(tuneMesh(c.type || 0, tn[0], tn[1]), p.body, c.color, 0); for (const m of p.wheels) drawMesh(wm, m); });
+    if (tn && (tn[0] || tn[1] || tn[3])) drawMesh(tuneMesh(c.type || 0, tn[0], tn[1], tn[3]), p.body, c.color, 0); for (const m of p.wheels) drawMesh(wm, m); });
   if (state !== 'menu') {
     for (const p of pickups) if (p.t <= 0) { const w3 = tpoint(p.i, p.lat, 0); drawMesh(PU_MESH[p.type], bodyMatrix(w3[0], 1.0 + Math.sin(p.spin*1.3)*0.12, w3[2], p.spin, 0, 0)); }
     for (const q of shots) { const w3 = tpoint(q.s, q.lat, 0); if (q.kind === 'mine') drawMesh(MINE_MESH, bodyMatrix(w3[0], 0.03, w3[2], 0, 0, 0)); else if (q.kind === 'dome') { const dm = bodyMatrix(w3[0], 0, w3[2], q.age*1.5, 0, 0); for (let k = 0; k < 12; k++) if (k % 4 !== 3) dm[k] *= 0.68; drawMesh(DOME_MESH, dm); } }
@@ -3803,8 +3827,8 @@ function update(dt) {
   if (state === 'menu') {                       // background: a car on autopilot
     const vt = NET.on || garage.view === undefined ? garage.type : garage.view;
     if (!demo) { demo = newCar(PAINTS[garage.color], vt); const i = T.N - 6; demo.x = T.x[i]; demo.z = T.z[i]; demo.h = T.h[i]; demo.idx = i; player = demo; cars = [demo]; bots = []; }     // the chosen car on the grid
-    if (demo.type !== vt || demo.color !== PAINTS[garage.color]) { demo.type = vt; demo.K = CAR_TYPES[vt].st; demo.color = PAINTS[garage.color]; demo.css = null; }
-    demo.tn = TUNEUI.open && TUNEUI.pv ? tnClean(TUNEUI.pv) : (owns(vt) ? tuneSel(vt) : null);
+    if (demo.type !== vt || (!GAR.open && demo.color !== PAINTS[garage.color])) { demo.type = vt; demo.K = CAR_TYPES[vt].st; demo.color = PAINTS[garage.color]; demo.css = null; }
+    { const lk = garLook(vt); demo.tn = lk.tn; if (demo.color !== PAINTS[lk.color]) { demo.color = PAINTS[lk.color]; demo.css = null; } }
     menuT += dt;
   } else if (state === 'countdown') {
     countT -= dt; const n = Math.ceil(countT - 0.2), label = n >= 1 ? String(n) : 'GO!';
@@ -3944,7 +3968,7 @@ function mpMsg(t) { document.getElementById('mpmsg').textContent = t || ''; }
 function netError(e) { return ({ 'peer-unavailable': 'Комната с таким кодом не найдена', 'unavailable-id': 'Такой код уже занят, попробуй ещё раз', load: 'Не удалось загрузить модуль связи. Игра должна быть открыта с хостинга или из Telegram, нужен интернет', network: 'Нет связи с сервером, который сводит игроков', blocked: 'Нет связи с сервером, который сводит игроков. Если игра открыта в Claude — открой сам артефакт Turbo Drift, а не предпросмотр файла', denied: 'Нет прав на игру вместе в этом артефакте: владелец должен дать тебе доступ на участие', room: 'Не удалось открыть комнату, попробуй ещё раз', timeout: 'Не удалось соединиться: сеть одного из игроков не пропускает прямое соединение', browser: 'Этот браузер не поддерживает прямое соединение', connect: 'Не удалось соединиться с комнатой' })[e] || ('Ошибка соединения: ' + e); }
 function mpSeek(on) { document.getElementById('mp').classList.toggle('seeking', !!on); document.getElementById('mph1').textContent = on ? 'Онлайн-гонка' : 'Играть вместе'; document.getElementById('mpback').textContent = on ? 'Отмена' : 'Назад'; }
 function netOpen() {
-  for (const id of ['menu','finish','paused','setup','prefs','top','daily','career','week']) document.getElementById(id).classList.add('hidden');
+  for (const id of ['menu','finish','paused','setup','prefs','top','daily','career','week','garage']) document.getElementById(id).classList.add('hidden');
   document.getElementById('mp').classList.remove('hidden'); document.getElementById('mp').classList.toggle('inroom', NET.on); mpSeek(false); stageTick = 0; document.getElementById('mpstart').style.display = NET.on ? 'none' : ''; document.getElementById('mplobby').style.display = NET.on ? '' : 'none'; mpMsg('');
 }
 function netHost() {
@@ -4400,6 +4424,8 @@ let camShake = 0;
 function camera(dt) {
   const portrait = canvas.width < canvas.height;
   if (state === 'menu') {                       // slow orbit around the chosen car
+    if (GAR.open) { const f = Math.min(1, dt*6); GAR.ang += wrap(GAR.angT - GAR.ang)*f; GAR.hgt += (GAR.hgtT - GAR.hgt)*f; GAR.dist += (GAR.distT - GAR.dist)*f; stageBox(dt);         // in the garage the car is looked at from where the chosen part shows best, or from wherever the finger has turned it
+      const ga = player.h + GAR.ang; camEye = [player.x + Math.sin(ga)*GAR.dist, GAR.hgt, player.z + Math.cos(ga)*GAR.dist]; camLook = [player.x, 0.42, player.z]; camFov = 44; return; }
     const a = player.h + 2.5 + menuT*0.35, D = portrait ? 5.4 : 4.6;
     if (stageBox(dt)) { camEye = [player.x + Math.sin(a)*4.6, 1.25 + Math.sin(menuT*0.5)*0.25, player.z + Math.cos(a)*4.6]; camLook = [player.x, 0.45, player.z]; camFov = 44; return; }
     camEye = [player.x + Math.sin(a)*D, 1.25 + Math.sin(menuT*0.5)*0.25, player.z + Math.cos(a)*D]; camLook = [player.x, portrait ? -0.95 : 0.15, player.z]; camFov = portrait ? 62 : 44; return;
@@ -4418,8 +4444,8 @@ let STAGE = null, STAGE_T = null, stageTick = 0;
 // Measured every few frames (at once after a layout change); the car glides to a new place instead of jumping.
 function stageBox(dt) {
   if (!(stageTick++ % 6)) { stageTick = 1;
-    const lob = NET.on && !document.getElementById('mp').classList.contains('hidden'), el = document.getElementById(lob ? 'mpstage' : 'stage');
-    if (!el || !el.offsetWidth || (!lob && document.getElementById('menu').classList.contains('hidden'))) STAGE_T = null;
+    const lob = NET.on && !document.getElementById('mp').classList.contains('hidden'), gar = GAR.open && !lob, el = document.getElementById(lob ? 'mpstage' : gar ? 'gstage' : 'stage');
+    if (!el || !el.offsetWidth || (!lob && !gar && document.getElementById('menu').classList.contains('hidden'))) STAGE_T = null;
     else { let x = 0, y = 0, e = el; while (e && e !== document.body) { x += e.offsetLeft - (e.scrollLeft || 0); y += e.offsetTop - (e.scrollTop || 0); e = e.offsetParent; }
       STAGE_T = [x + el.offsetWidth/2, y + el.offsetHeight/2, el.offsetWidth, el.offsetHeight]; } }
   if (!STAGE_T) return (STAGE = null);
@@ -4476,7 +4502,7 @@ let UPD = null;
     setTimeout(function () { if (UPD) UPD(); }, 600); }, function () {});
 } catch (e) {} })();
 function toMenu() {
-  TUNEUI.open = false; TUNEUI.pv = null; document.getElementById('menu').classList.remove('tuning'); const cback = CAREER.back && !!CAREER.ev; careerEnd(); CAREER.back = false; if (cback) setTimeout(function () { if (state === 'menu') { buildCareer(); document.getElementById('career').classList.remove('hidden'); } }, 0);
+  GAR.open = false; GAR.pv = null; document.getElementById('garage').classList.add('hidden'); const cback = CAREER.back && !!CAREER.ev; careerEnd(); CAREER.back = false; if (cback) setTimeout(function () { if (state === 'menu') { buildCareer(); document.getElementById('career').classList.remove('hidden'); } }, 0);
   specStop(false); CHAMP.on = false; koSetup(false); document.body.classList.remove('rain'); if (NET.qon) { NET.qon = false; NET.busy = false; NET.qtok = (NET.qtok || 0) + 1; } if (NET.on) netLeave();
   state = 'menu'; demo = null; particles = []; skids = []; engine(0, false); if (UPD) setTimeout(function () { if (UPD) UPD(); }, 400);
   for (const id of ['finish','paused','mp','setup','prefs','top','daily','career','week']) document.getElementById(id).classList.add('hidden');
@@ -4492,7 +4518,6 @@ function statColor(v) { const t = Math.max(0, Math.min(1, (v - 0.13)/0.78)), A =
   return 'rgb(' + A.map(function (a, i) { return Math.round(a + (B[i] - a)*k); }).join(',') + ')'; }
 function buildGarage() {
   if (garage.view === undefined || !(garage.view >= 0 && garage.view < CAR_TYPES.length)) garage.view = garage.type;
-  if (TUNEUI.open) { if (owns(garage.view)) { TUNEUI.pv = null; TUNEUI.part = null; setTimeout(buildTune, 0); } else tuneClose(); }
   document.getElementById('tuneopen').style.display = owns(garage.view) ? '' : 'none';
   const vt = garage.view, mine = owns(vt), C = CAR_TYPES[vt];
   document.getElementById('carname').textContent = C.name; document.getElementById('careng').textContent = C.eng.label; statBars(document.getElementById('carstats'), vt);
@@ -4503,27 +4528,84 @@ function buildGarage() {
     b.style.background = 'rgb(' + p.map(function (v) { return Math.round(Math.pow(v, 0.8)*255); }).join(',') + ')';
     b.setAttribute('aria-label', 'Цвет ' + (i + 1)); b.addEventListener('click', function () { garage.color = i; saveGarage(); buildGarage(); }); sw.appendChild(b); });
 }
-// ---- the tuning panel
-const TUNEUI = { open: false, pv: null, part: null };
-function tuneOpen() { const t = garage.view === undefined ? garage.type : garage.view; if (!owns(t)) { note('Сначала купи эту машину', 1800); return; } TUNEUI.open = true; TUNEUI.pv = null; TUNEUI.part = null; document.getElementById('menu').classList.add('tuning'); buildTune(); stageTick = 0; }
-function tuneClose() { if (!TUNEUI.open) return; TUNEUI.open = false; TUNEUI.pv = null; document.getElementById('menu').classList.remove('tuning'); stageTick = 0; buildGarage(); }
-function buildTune() {
-  const t = garage.view === undefined ? garage.type : garage.view; if (!TUNEUI.open) return; if (!owns(t)) { tuneClose(); return; }
-  const sel = tuneSel(t) || [0, 0, 0, 0], stg = stageOf(t), st = document.getElementById('tunestage'), rows = document.getElementById('tunerows'), buy = document.getElementById('tunebuy'); st.innerHTML = ''; rows.innerHTML = '';
-  document.getElementById('coins').textContent = String(WALLET.coins); statBars(document.getElementById('carstats'), t);
-  const pips = document.createElement('div'); pips.className = 'pips'; for (let k = 1; k <= 3; k++) { const i = document.createElement('i'); if (k <= stg) i.className = 'on'; pips.appendChild(i); } st.appendChild(pips);
-  const tx = document.createElement('div'); tx.className = 'txt'; tx.textContent = STAGE_INFO[stg][0]; const sm = document.createElement('small'); sm.textContent = stg >= 3 ? 'максимум: скорость, разгон и управление' : 'дальше: ' + STAGE_INFO[stg + 1][1] + ' · быстрее и цепче'; tx.appendChild(sm); st.appendChild(tx);
-  if (stg < 3) { const p = stagePrice(t, stg + 1), b = document.createElement('button'); b.className = 'main' + (WALLET.coins < p ? ' poor' : ''); b.textContent = STAGE_INFO[stg + 1][0] + ' · ' + p;
-    b.addEventListener('click', function () { if (WALLET.coins < p) { note('Не хватает ' + (p - WALLET.coins) + ' монет', 2000); return; } WALLET.coins -= p; saveWallet(); progSet('s' + t, stg + 1); beep(660, 0.25, 'triangle', 0.07, 1320); haptic('win'); note(STAGE_INFO[stg + 1][0] + ' стоит на ' + CAR_TYPES[t].name, 2000); buildTune(); }); st.appendChild(b); }
-  TUNE_KEYS.forEach(function (key, ki) { const P = TUNE_PARTS[key], row = document.createElement('div'), lab = document.createElement('span'), box = document.createElement('div'); row.className = 'tunerow'; lab.textContent = P.name; row.appendChild(lab);
-    P.opts.forEach(function (o, i) { const own = tuneOwns(t, key, i), b = document.createElement('button'), pv = TUNEUI.pv && TUNEUI.part === key && TUNEUI.pv[ki] === i && !own; b.className = 'tchip' + (sel[ki] === i && !(TUNEUI.pv && TUNEUI.part === key) ? ' on' : '') + (pv ? ' pv' : '');
-      if (P.css) { const d = document.createElement('i'); d.style.background = P.css[i]; b.appendChild(d); b.className += ' dot'; b.title = o[0]; } { const nm = document.createElement('span'); nm.textContent = o[0]; b.appendChild(nm); } if (!own) { const pr = document.createElement('small'); pr.textContent = String(o[1]); b.appendChild(pr); }
-      b.addEventListener('click', function () { if (own) { const q = tuneSel(t) || [0, 0, 0, 0]; q[ki] = i; TUNE_SEL[t] = q; tuneSave(); TUNEUI.pv = null; TUNEUI.part = null; } else { const q = (tuneSel(t) || [0, 0, 0, 0]).slice(); q[ki] = i; TUNEUI.pv = q; TUNEUI.part = key; } buildTune(); }); box.appendChild(b); });
-    row.appendChild(box); rows.appendChild(row); });
-  if (TUNEUI.pv && TUNEUI.part) { const key = TUNEUI.part, ki = TUNE_KEYS.indexOf(key), i = TUNEUI.pv[ki], o = TUNE_PARTS[key].opts[i]; buy.style.display = ''; buy.classList.toggle('poor', WALLET.coins < o[1]); buy.textContent = WALLET.coins < o[1] ? TUNE_PARTS[key].name + ' «' + o[0] + '» · ' + o[1] + ' · не хватает ' + (o[1] - WALLET.coins) : 'Купить: ' + TUNE_PARTS[key].name.toLowerCase() + ' «' + o[0] + '» за ' + o[1];
-    buy.onclick = function () { if (WALLET.coins < o[1]) { note('Не хватает ' + (o[1] - WALLET.coins) + ' монет — они даются за заезды', 2200); return; } WALLET.coins -= o[1]; saveWallet(); progSet('o' + t, 1 << (TUNE_PARTS[key].bit + i)); const q = tuneSel(t) || [0, 0, 0, 0]; q[ki] = i; TUNE_SEL[t] = q; tuneSave(); TUNEUI.pv = null; TUNEUI.part = null; beep(660, 0.25, 'triangle', 0.07, 1320); haptic('win'); buildTune(); }; }
-  else { buy.style.display = 'none'; buy.onclick = null; }
+// ---- The garage: stage, outside parts and paint of the car that stands in the showroom. The car fills the middle of the screen and can be turned with a finger;
+// what can be changed is listed on the left with what is on the car now; the choices run along the bottom. A choice not yet bought is shown on the car at once, before any money is spent.
+const GAR = { open: false, cat: 'stage', pv: null, ang: 0.8, angT: 0.8, hgt: 1.15, hgtT: 1.15, dist: 4.6, distT: 4.6, drag: null, pop: -1 };
+const GAR_CATS = [['stage', 'Стейдж'], ['sp', 'Спойлер'], ['kit', 'Обвес'], ['rim', 'Диски'], ['neon', 'Неон'], ['paint', 'Краска']];
+const GAR_VIEW = { stage: [0.78, 1.15, 4.6], sp: [2.5, 1.6, 4.5], kit: [0.52, 0.72, 4.5], rim: [1.42, 0.8, 4.4], neon: [2.05, 0.62, 4.9], paint: [0.95, 1.3, 4.6] };          // angle from the nose, eye height, distance
+const PART_INFO = { sp: ['Заводской вид, без спойлера.', 'Аккуратный спойлер на кромке багажника.', 'Высокое гоночное антикрыло на стойках.'], kit: ['Заводские бамперы и пороги.', 'Сплиттер, пороги, канарды и диффузор.'],
+  rim: ['Заводской цвет дисков.', 'Глянцевые чёрные диски.', 'Золотые диски.', 'Белые диски.', 'Красные диски.'], neon: ['Без подсветки.', 'Синие трубки под порогами и свет на дороге.', 'Розовые трубки под порогами и свет на дороге.', 'Зелёные трубки под порогами и свет на дороге.', 'Белые трубки под порогами и свет на дороге.'] };
+const PAINT_NAMES = ['Красный', 'Синий', 'Жёлтый', 'Зелёный', 'Оранжевый', 'Белый', 'Чёрный', 'Фиолетовый', 'Бирюза', 'Сакура', 'Бордо', 'Лайм', 'Золото'];
+function fmtN(n) { return String(n).replace(/\B(?=(\d{3})+$)/g, ' '); }
+function paintCss(i) { return 'rgb(' + PAINTS[i].map(function (v) { return Math.round(Math.pow(v, 0.8)*255); }).join(',') + ')'; }
+function garCar() { return garage.view === undefined ? garage.type : garage.view; }
+function garLook(vt) {                             // what the showroom car wears right now: the build, with the choice being looked at put on top
+  if (!GAR.open) return { color: garage.color, tn: owns(vt) ? tuneSel(vt) : null };
+  const tn = (tuneSel(vt) || [0, 0, 0, 0]).slice(), ki = TUNE_KEYS.indexOf(GAR.cat); if (ki >= 0 && GAR.pv !== null) tn[ki] = GAR.pv;
+  return { color: GAR.cat === 'paint' && GAR.pv !== null ? GAR.pv : garage.color, tn: tnClean(tn) };
 }
+function garOpen() { const t = garCar(); if (!owns(t)) { note('Сначала купи эту машину', 1800); return; } GAR.open = true; document.getElementById('menu').classList.add('hidden'); document.getElementById('garage').classList.remove('hidden'); garCat(GAR.cat, true); stageTick = 0; STAGE = null; }
+function garClose() { if (!GAR.open) return; GAR.open = false; GAR.pv = null; document.getElementById('garage').classList.add('hidden'); if (state === 'menu') { document.getElementById('menu').classList.remove('hidden'); buildMenu(); } stageTick = 0; STAGE = null; }
+function garCat(cat, snap) { const t = garCar(), v = GAR_VIEW[cat]; GAR.cat = cat; GAR.angT = v[0]; GAR.hgtT = v[1]; GAR.distT = v[2]; if (snap) { GAR.ang = v[0]; GAR.hgt = v[1]; GAR.dist = v[2]; }
+  const ki = TUNE_KEYS.indexOf(cat); GAR.pv = cat === 'stage' ? Math.min(3, stageOf(t) + 1) : cat === 'paint' ? garage.color : (tuneSel(t) || [0, 0, 0, 0])[ki]; buildGar(); const box = document.getElementById('gopts'); if (box) box.scrollLeft = 0; }
+// one description of the choice being looked at: what the card says, what the button says and does
+function garState(i) {
+  const t = garCar(), cat = GAR.cat, coins = WALLET.coins, buyBtn = function (p) { return coins >= p ? ['Купить · ' + fmtN(p), ''] : ['Не хватает ' + fmtN(p - coins), 'poor']; };
+  if (cat === 'stage') { const stg = stageOf(t), p = i > 0 ? stagePrice(t, i) : 0, gain = i ? ' · к стоку +' + (STAGE_GAIN.top*i*100).toFixed(1).replace('.', ',') + '% скорость, +' + Math.round(STAGE_GAIN.acc*i*100) + '% разгон, +' + Math.round(STAGE_GAIN.grip*i*100) + '% управление' : '';
+    const info = i ? STAGE_INFO[i][1].charAt(0).toUpperCase() + STAGE_INFO[i][1].slice(1) + gain : 'Заводские настройки мотора и шасси';
+    if (i <= stg) return { name: STAGE_INFO[i][0], line: i === stg ? 'стоит' : 'пройден', cls: i === stg ? 'inst' : '', btn: [i === stg ? 'Уже стоит' : 'Пройден', 'off'], info: info };
+    if (i === stg + 1) return { name: STAGE_INFO[i][0], price: p, btn: buyBtn(p), info: info, buy: p };
+    return { name: STAGE_INFO[i][0], line: 'после «' + STAGE_INFO[i - 1][0] + '»', cls: 'locked', btn: ['Сначала ' + STAGE_INFO[i - 1][0], 'off'], info: info }; }
+  if (cat === 'paint') { const own = paintOwned(i), on = garage.color === i, boss = i >= 8 ? CAREER_STAGES[i - 8].boss : null;
+    if (!own) return { name: PAINT_NAMES[i], line: 'трофей карьеры', cls: 'locked', dot: paintCss(i), btn: ['Трофей карьеры', 'off'], info: 'Краска чемпиона. Победи в карьере: ' + boss.name + '.' };
+    return { name: PAINT_NAMES[i], line: on ? 'выбрана' : (boss ? 'трофей' : 'бесплатно'), cls: on ? 'inst' : '', dot: paintCss(i), btn: [on ? 'Выбрана' : 'Выбрать', on ? 'off' : ''], info: boss ? 'Трофейная краска: ' + boss.name + ' побеждён.' : 'Цвет кузова. Обычные цвета бесплатны.', use: !on }; }
+  const P = TUNE_PARTS[cat], ki = TUNE_KEYS.indexOf(cat), o = P.opts[i], own = tuneOwns(t, cat, i), on = ((tuneSel(t) || [0, 0, 0, 0])[ki]) === i, dot = P.css ? P.css[i] : null;
+  if (own) return { name: o[0], line: on ? 'установлено' : (i ? 'куплено' : 'бесплатно'), cls: on ? 'inst' : '', dot: dot, btn: [on ? 'Установлено' : 'Установить', on ? 'off' : ''], info: PART_INFO[cat][i], use: !on };
+  return { name: o[0], price: o[1], dot: dot, btn: buyBtn(o[1]), info: PART_INFO[cat][i] + ' Покупается для этой машины.', buy: o[1] };
+}
+function garCount(cat) { return cat === 'stage' ? 4 : cat === 'paint' ? PAINTS.length : TUNE_PARTS[cat].opts.length; }
+function buildGar() {
+  if (!GAR.open) return; const t = garCar(); if (!owns(t)) { garClose(); return; }
+  const C = CAR_TYPES[t], stg = stageOf(t), sel = tuneSel(t) || [0, 0, 0, 0], parts = sel.filter(function (v) { return v > 0; }).length;
+  document.getElementById('gname').textContent = C.name; document.getElementById('gsub').textContent = (stg ? 'Стейдж ' + stg : 'Сток') + ' · ' + (parts ? parts + plural(parts, ' деталь', ' детали', ' деталей') : 'без деталей'); document.getElementById('gcoins').textContent = fmtN(WALLET.coins);
+  // the four bars; a stage being looked at shows what it would add
+  { const el = document.getElementById('gstats'), a = carK(t, stg), b = GAR.cat === 'stage' && GAR.pv > stg ? carK(t, GAR.pv) : a, rows = [['Скорость', 'top', 0.92, 0.15], ['Разгон', 'acc', 0.90, 0.22], ['Управление', 'grip', 0.90, 0.21], ['Броня', 'arm', 0.75, 0.75]]; el.innerHTML = '';
+    rows.forEach(function (r) { const v0 = Math.max(0.08, Math.min(1, (a[r[1]] - r[2])/r[3])), v1 = Math.max(v0, Math.min(1, (b[r[1]] - r[2])/r[3])), sp = document.createElement('span'), i = document.createElement('i'), u = document.createElement('u'); u.style.width = Math.round(v0*100) + '%'; u.style.background = statColor(v0); i.appendChild(u);
+      if (v1 > v0 + 0.004) { const d = document.createElement('u'); d.className = 'dl'; d.style.width = Math.max(4, Math.round((v1 - v0)*100)) + '%'; i.appendChild(d); } sp.appendChild(document.createTextNode(r[0])); sp.appendChild(i); el.appendChild(sp); }); }
+  // the list on the left: every part with what is on the car now
+  { const el = document.getElementById('gtabs'); el.innerHTML = ''; GAR_CATS.forEach(function (c) { const b = document.createElement('button'), nm = document.createElement('b'), st = document.createElement('small'), ki = TUNE_KEYS.indexOf(c[0]); b.className = 'gtab' + (c[0] === GAR.cat ? ' on' : ''); nm.textContent = c[1];
+      st.textContent = c[0] === 'stage' ? (stg ? stg + ' из 3' : 'сток') : c[0] === 'paint' ? PAINT_NAMES[garage.color].toLowerCase() : TUNE_PARTS[c[0]].opts[sel[ki]][0].toLowerCase(); b.appendChild(nm); b.appendChild(st); b.addEventListener('click', function () { if (GAR.cat !== c[0]) { haptic('light'); garCat(c[0]); } }); el.appendChild(b); }); }
+  // the choices
+  { const el = document.getElementById('gopts'), keep = el.scrollLeft, n = garCount(GAR.cat); el.innerHTML = '';
+    for (let i = 0; i < n; i++) { const q = garState(i), b = document.createElement('button'), nm = document.createElement('b'), ln = document.createElement('small'); b.className = 'gopt' + (q.dot ? '' : ' nodot') + (i === GAR.pv ? ' sel' : '') + (q.cls ? ' ' + q.cls : '') + (GAR.pop === i ? ' pop' : '');
+      if (q.dot) { const d = document.createElement('i'); d.style.background = q.dot; b.appendChild(d); } nm.textContent = q.name; if (q.price !== undefined) { ln.className = 'price'; ln.textContent = fmtN(q.price); } else ln.textContent = q.line; b.appendChild(nm); b.appendChild(ln);
+      b.addEventListener('click', function () { garPick(i); }); el.appendChild(b); }
+    el.scrollLeft = keep; GAR.pop = -1; const sc = el.children[GAR.pv]; if (sc) { if (sc.offsetLeft + sc.offsetWidth > el.scrollLeft + el.clientWidth - 6) el.scrollLeft = sc.offsetLeft + sc.offsetWidth - el.clientWidth + 10; else if (sc.offsetLeft < el.scrollLeft + 6) el.scrollLeft = Math.max(0, sc.offsetLeft - 10); } }
+  { const q = garState(GAR.pv), btn = document.getElementById('gbuy'); btn.textContent = q.btn[0]; btn.className = 'main' + (q.btn[1] ? ' ' + q.btn[1] : ''); const gi = document.getElementById('ginfo'), hd = document.createElement('b'); gi.innerHTML = ''; hd.textContent = q.name + ' · '; gi.appendChild(hd); gi.appendChild(document.createTextNode(q.info)); }
+}
+function garPick(i) {                              // a card is tapped: it is shown on the car; what is already owned goes on at once
+  const t = garCar(); GAR.pv = i; const q = garState(i);
+  if (q.use) { garUse(i); return; } haptic('light'); buildGar();
+}
+function garUse(i) { const t = garCar(), cat = GAR.cat; if (cat === 'paint') { garage.color = i; saveGarage(); } else { const ki = TUNE_KEYS.indexOf(cat), q = tuneSel(t) || [0, 0, 0, 0]; q[ki] = i; TUNE_SEL[t] = q; tuneSave(); } GAR.pop = i; haptic('light'); beep(520, 0.07, 'triangle', 0.04, 700); buildGar(); }
+function garAct() {                                // the big button: buy what is being looked at, or put on what is owned
+  if (!GAR.open) return; const t = garCar(), cat = GAR.cat, i = GAR.pv, q = garState(i);
+  if (q.use) { garUse(i); return; }
+  if (q.buy === undefined) { if (cat === 'paint' && !paintOwned(i)) note('Эту краску дают за победу над чемпионом в карьере', 2400); return; }
+  if (WALLET.coins < q.buy) { note('Не хватает ' + fmtN(q.buy - WALLET.coins) + ' монет — они даются за гонки, задания и карьеру', 2600); haptic('light'); return; }
+  WALLET.coins -= q.buy; saveWallet();
+  if (cat === 'stage') { progSet('s' + t, i); note(STAGE_INFO[i][0] + ' стоит на ' + CAR_TYPES[t].name, 2200); GAR.pop = i; GAR.pv = Math.min(3, i + 1); }
+  else { const ki = TUNE_KEYS.indexOf(cat), sel = tuneSel(t) || [0, 0, 0, 0]; progSet('o' + t, 1 << (TUNE_PARTS[cat].bit + i)); sel[ki] = i; TUNE_SEL[t] = sel; tuneSave(); note(TUNE_PARTS[cat].name + ' «' + TUNE_PARTS[cat].opts[i][0] + '» — установлено', 2000); GAR.pop = i; }
+  beep(660, 0.25, 'triangle', 0.07, 1320); haptic('win'); buildGar();
+}
+// the car turns under the finger: sideways to walk around it, up and down to look from above or from the road
+(function () { const el = document.getElementById('gstage'); if (!el) return;
+  el.addEventListener('pointerdown', function (e) { GAR.drag = { x: e.clientX, y: e.clientY, id: e.pointerId }; try { el.setPointerCapture(e.pointerId); } catch (e2) {} });
+  el.addEventListener('pointermove', function (e) { const d = GAR.drag; if (!d || d.id !== e.pointerId) return; const sx = e.clientX - d.x, sy = e.clientY - d.y, dx = ROT ? sy : sx, dy = ROT ? -sx : sy; d.x = e.clientX; d.y = e.clientY;
+    GAR.angT = GAR.ang = GAR.ang - dx*0.011; GAR.hgtT = GAR.hgt = Math.max(0.4, Math.min(2.6, GAR.hgt + dy*0.008)); if (Math.abs(dx) + Math.abs(dy) > 2 && !el.classList.contains('used')) { el.classList.add('used'); try { localStorage.setItem('td_ghint', '1'); } catch (e2) {} } });
+  try { if (localStorage.getItem('td_ghint')) el.classList.add('used'); } catch (e2) {}
+  const end = function (e) { if (GAR.drag && GAR.drag.id === e.pointerId) GAR.drag = null; }; el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+})();
 function buyCar() { const t = garage.view, C = CAR_TYPES[t]; if (owns(t)) return; if (WALLET.coins < C.price) { note('Не хватает ' + (C.price - WALLET.coins) + ' монет — они даются за заезды', 2200); return; }
   WALLET.coins -= C.price; WALLET.owned.push(t); saveWallet(); garage.type = t; saveGarage(); buildGarage(); beep(660, 0.25, 'triangle', 0.07, 1320); haptic('win'); }
 function buildOpts() {
@@ -4697,7 +4779,7 @@ document.getElementById('mpjoin').addEventListener('click', function () { netJoi
 document.getElementById('mpgo').addEventListener('click', netStart); document.getElementById('mprdy').addEventListener('click', function () { netReady(); }); document.getElementById('pubrdy').addEventListener('click', function () { netReady(); });
 document.getElementById('mpshare').addEventListener('click', netShare);
 document.getElementById('mpback').addEventListener('click', toMenu);
-document.getElementById('tuneopen').addEventListener('click', function () { audio(); if (TUNEUI.open) tuneClose(); else tuneOpen(); }); document.getElementById('tuneclose').addEventListener('click', tuneClose);
+document.getElementById('tuneopen').addEventListener('click', function () { audio(); garOpen(); }); document.getElementById('gback').addEventListener('click', garClose); document.getElementById('gbuy').addEventListener('click', garAct);
 document.getElementById('careeropen').addEventListener('click', function () { audio(); buildCareer(); document.getElementById('career').classList.remove('hidden'); }); document.getElementById('careerclose').addEventListener('click', function () { document.getElementById('career').classList.add('hidden'); }); document.getElementById('careergo').addEventListener('click', function () { careerGo(CAREER.sel); });
 document.getElementById('weekopen').addEventListener('click', function () { audio(); weekOpen(); }); document.getElementById('weekclose').addEventListener('click', function () { document.getElementById('week').classList.add('hidden'); }); document.getElementById('weekgo').addEventListener('click', weekGo);
 document.getElementById('dailyopen').addEventListener('click', function () { audio(); buildDaily(); document.getElementById('daily').classList.remove('hidden'); }); document.getElementById('dailyclose').addEventListener('click', function () { document.getElementById('daily').classList.add('hidden'); });
