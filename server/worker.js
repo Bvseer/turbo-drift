@@ -75,23 +75,64 @@ async function score(env, q, request) {
 // A device that comes here for the first time sends everything it holds (`first`); that is joined to what is already kept: every car of both, the larger purse.
 const COINS_MAX = 10000000;
 async function withSave(env, work) {          // the table is made the first time it is needed: no new setup step
-  try { return await work(); } catch (e) { if (!/no such table/i.test(String(e && e.message || e))) throw e; await env.DB.prepare('CREATE TABLE IF NOT EXISTS save (uid INTEGER PRIMARY KEY, coins INTEGER NOT NULL, owned TEXT NOT NULL, best TEXT NOT NULL, at INTEGER NOT NULL)').run(); return await work(); }
+  try { return await work(); } catch (e) { const m = String(e && e.message || e);
+    if (/no such table/i.test(m)) { await env.DB.prepare('CREATE TABLE IF NOT EXISTS save (uid INTEGER PRIMARY KEY, coins INTEGER NOT NULL, owned TEXT NOT NULL, best TEXT NOT NULL, at INTEGER NOT NULL, prog TEXT)').run(); return await work(); }
+    if (/no such column|no column named|has no column/i.test(m)) { try { await env.DB.prepare('ALTER TABLE save ADD COLUMN prog TEXT').run(); } catch (e2) {} return await work(); }       // a table made before stages and the career existed
+    throw e; }
 }
+// Progress that only grows (stages of the cars, parts bought, career stars): a flat map of small integers. The larger number wins;
+// for the keys that begin with 'o', which are sets of bought things, the bits are joined.
+function progJoin(into, from) { if (!from || typeof from !== 'object') return into; let n = 0;
+  for (const k in from) { if (++n > 300) break; const v = Math.round(+from[k]); if (!/^[a-z0-9]{1,8}$/.test(k) || !(v >= 0 && v <= 1048575)) continue; const was = into[k] | 0; into[k] = k[0] === 'o' ? (was | v) : Math.max(was, v); }
+  const keys = Object.keys(into); if (keys.length > 300) for (const k of keys.slice(300)) delete into[k]; return into; }
 async function save(env, q) {
   const me = await whoIs(q.init, env); if (!me) return json({ ok: false, err: 'auth' }, 401);
   const cars = (a) => { const r = []; if (Array.isArray(a)) for (const t of a.slice(0, 64)) if (Number.isInteger(t) && t >= 0 && t < CARS && r.indexOf(t) < 0) r.push(t); return r; };
   const num = (v) => Math.max(-COINS_MAX, Math.min(COINS_MAX, Math.round(+v) || 0)), clamp = (v) => Math.max(0, Math.min(COINS_MAX, v));
-  const row = await withSave(env, () => env.DB.prepare('SELECT coins, owned, best FROM save WHERE uid = ?').bind(me.id).first());
-  let coins = 0, owned = [0, 3], best = {}, fresh = !row;
-  if (row) { coins = row.coins | 0; try { owned = cars(JSON.parse(row.owned)); } catch (e) {} try { best = JSON.parse(row.best) || {}; } catch (e) { best = {}; } }
+  const row = await withSave(env, () => env.DB.prepare('SELECT coins, owned, best, prog FROM save WHERE uid = ?').bind(me.id).first());
+  let coins = 0, owned = [0, 3], best = {}, prog = {}, fresh = !row;
+  if (row) { coins = row.coins | 0; try { owned = cars(JSON.parse(row.owned)); } catch (e) {} try { best = JSON.parse(row.best) || {}; } catch (e) { best = {}; } try { prog = progJoin({}, JSON.parse(row.prog || '{}')); } catch (e) { prog = {}; } }
+  progJoin(prog, q.prog);
   if (q.first && typeof q.first === 'object') { const fc = clamp(num(q.first.coins)); coins = fresh ? fc : Math.max(coins, fc); for (const t of cars(q.first.owned)) if (owned.indexOf(t) < 0) owned.push(t); }
   else { coins = clamp(coins + num(q.d)); for (const t of cars(q.buy)) if (owned.indexOf(t) < 0) owned.push(t); }
   for (const t of [0, 3]) if (owned.indexOf(t) < 0) owned.push(t);
   if (q.best && typeof q.best === 'object') { let n = 0; for (const k in q.best) { if (++n > 300) break; const ms = Math.round(+q.best[k]); if (!/^[a-z0-9]{1,8}$/.test(k) || !(ms >= 20000 && ms <= MAX_MS)) continue; if (!best[k] || ms < best[k]) best[k] = ms; } }
   const keys = Object.keys(best); if (keys.length > 400) best = Object.fromEntries(keys.slice(0, 400).map((k) => [k, best[k]]));
-  await env.DB.prepare('INSERT INTO save (uid, coins, owned, best, at) VALUES (?1, ?2, ?3, ?4, ?5) ON CONFLICT (uid) DO UPDATE SET coins = excluded.coins, owned = excluded.owned, best = excluded.best, at = excluded.at')
-    .bind(me.id, coins, JSON.stringify(owned), JSON.stringify(best), Math.floor(Date.now()/1000)).run();
-  return json({ ok: true, coins: coins, owned: owned, best: best });
+  await env.DB.prepare('INSERT INTO save (uid, coins, owned, best, at, prog) VALUES (?1, ?2, ?3, ?4, ?5, ?6) ON CONFLICT (uid) DO UPDATE SET coins = excluded.coins, owned = excluded.owned, best = excluded.best, at = excluded.at, prog = excluded.prog')
+    .bind(me.id, coins, JSON.stringify(owned), JSON.stringify(best), Math.floor(Date.now()/1000), JSON.stringify(prog)).run();
+  return json({ ok: true, coins: coins, owned: owned, best: best, prog: prog });
+}
+
+// The tournament of the week: one track, Monday to Sunday (UTC), everybody's best time on it in the usual conditions. When the week is over,
+// each player who took part is paid by his place the next time he looks at the table: the coins go straight into what the server keeps for him.
+const WEEK_S = 7*86400, WEEK_IDS = [0, 1, 2, 3, 4, 15, 6, 7, 8, 9, 10, 11, 12, 13, 14];          // the game's track list in the numbers the records go by
+const weekNow = () => Math.floor((Date.now()/1000 + 3*86400)/WEEK_S);                              // 1 January 1970 was a Thursday: three days on, and the weeks turn on Mondays
+const weekTrack = (wk) => (wk*7 + 3) % 15;
+const weekPrize = (rank) => rank === 1 ? 3000 : rank === 2 ? 2000 : rank === 3 ? 1500 : rank <= 10 ? 700 : rank <= 50 ? 300 : 100;
+async function withWeek(env, work) {
+  try { return await work(); } catch (e) { if (!/no such table/i.test(String(e && e.message || e))) throw e;
+    await env.DB.batch([env.DB.prepare('CREATE TABLE IF NOT EXISTS week (wk INTEGER NOT NULL, uid INTEGER NOT NULL, name TEXT NOT NULL, ms INTEGER NOT NULL, car INTEGER NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (wk, uid))'),
+      env.DB.prepare('CREATE INDEX IF NOT EXISTS week_ms ON week (wk, ms)'), env.DB.prepare('CREATE TABLE IF NOT EXISTS wpaid (uid INTEGER NOT NULL, wk INTEGER NOT NULL, PRIMARY KEY (uid, wk))')]); return await work(); }
+}
+async function week(env, q) {
+  const me = await whoIs(q.init, env), wk = weekNow(), ti = weekTrack(wk), out = { ok: true, wk: wk, track: ti, ends: wk*WEEK_S - 3*86400 + WEEK_S };
+  if (me && q.ms !== undefined) { const ms = Math.round(+q.ms), car = q.car | 0;
+    if (!(car >= 0 && car < CARS) || !(ms >= (MIN_MS[WEEK_IDS[ti]] || MIN_DEF) && ms <= MAX_MS) || (q.track | 0) !== ti) return json({ ok: false, err: 'range' }, 400);
+    await withWeek(env, () => env.DB.prepare('INSERT INTO week (wk, uid, name, ms, car, at) VALUES (?1, ?2, ?3, ?4, ?5, ?6) ON CONFLICT (wk, uid) DO UPDATE SET name = excluded.name, car = CASE WHEN excluded.ms < week.ms THEN excluded.car ELSE week.car END, at = CASE WHEN excluded.ms < week.ms THEN excluded.at ELSE week.at END, ms = MIN(week.ms, excluded.ms)')
+      .bind(wk, me.id, me.name, ms, car, Math.floor(Date.now()/1000)).run()); }
+  const rows = (await withWeek(env, () => env.DB.prepare('SELECT uid, name, ms, car FROM week WHERE wk = ? ORDER BY ms ASC, at ASC LIMIT ?').bind(wk, TOP).all())).results || [];
+  out.total = (await env.DB.prepare('SELECT COUNT(*) AS n FROM week WHERE wk = ?').bind(wk).first()).n | 0; out.me = null;
+  out.top = rows.map((r) => ({ name: r.name, ms: r.ms, car: r.car, me: !!(me && r.uid === me.id) }));
+  if (me) { const b = await env.DB.prepare('SELECT ms, car FROM week WHERE wk = ? AND uid = ?').bind(wk, me.id).first();
+    if (b) out.me = { rank: ((await env.DB.prepare('SELECT COUNT(*) AS n FROM week WHERE wk = ? AND ms < ?').bind(wk, b.ms).first()).n | 0) + 1, ms: b.ms, car: b.car };
+    // last week's prize, once, and only into a purse the server already keeps (a device that has never sent its purse would overwrite it)
+    const last = await env.DB.prepare('SELECT ms FROM week WHERE wk = ? AND uid = ?').bind(wk - 1, me.id).first();
+    if (last && !(await env.DB.prepare('SELECT 1 AS x FROM wpaid WHERE uid = ? AND wk = ?').bind(me.id, wk - 1).first())) {
+      const has = await withSave(env, () => env.DB.prepare('SELECT coins FROM save WHERE uid = ?').bind(me.id).first());
+      if (has) { const rank = ((await env.DB.prepare('SELECT COUNT(*) AS n FROM week WHERE wk = ? AND ms < ?').bind(wk - 1, last.ms).first()).n | 0) + 1, coins = weekPrize(rank);
+        const ins = await env.DB.prepare('INSERT OR IGNORE INTO wpaid (uid, wk) VALUES (?, ?)').bind(me.id, wk - 1).run();
+        if (ins && ins.meta && ins.meta.changes) { await env.DB.prepare('UPDATE save SET coins = MIN(?, coins + ?) WHERE uid = ?').bind(COINS_MAX, coins, me.id).run(); out.won = { wk: wk - 1, rank: rank, coins: coins }; } } } }
+  return json(out);
 }
 
 async function telegram(env, request) {
@@ -113,11 +154,12 @@ export default {
     try {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
       if (path === '/tg' && request.method === 'POST') return await telegram(env, request);
-      if (path === '/top' || path === '/score' || path === '/save') {
+      if (path === '/top' || path === '/score' || path === '/save' || path === '/week') {
         let q = {}; if (request.method === 'POST') { const t = await request.text(); if (t.length > (path === '/save' ? 20000 : 6000)) return json({ ok: false, err: 'big' }, 413); try { q = JSON.parse(t) || {}; } catch (e) { return json({ ok: false, err: 'json' }, 400); } }
         else q = { track: url.searchParams.get('track') };
         if (path === '/score') return request.method === 'POST' ? await score(env, q, request) : json({ ok: false, err: 'method' }, 405);
         if (path === '/save') return request.method === 'POST' ? await save(env, q) : json({ ok: false, err: 'method' }, 405);
+        if (path === '/week') return request.method === 'POST' ? await week(env, q) : json({ ok: false, err: 'method' }, 405);
         const track = q.track | 0; if (!(track >= 0 && track < TRACKS)) return json({ ok: false, err: 'range' }, 400);
         return json(await board(env, track, await whoIs(q.init, env)));
       }

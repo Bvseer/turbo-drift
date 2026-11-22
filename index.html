@@ -127,6 +127,32 @@
   .arrow { width: 44px; height: 44px; border-radius: 14px; border: 0; background: rgba(255,255,255,.18); color: #fff; font-size: 26px; font-weight: 800; line-height: 1; }
   .carname { min-width: 200px; font-size: 20px; font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,.5); }
   .swatches { display: flex; gap: 8px; margin-bottom: 14px; }
+  /* career */
+  .cstages { display: flex; gap: 8px; width: 100%; max-width: 900px; overflow-x: auto; padding: 4px 2px 8px; box-sizing: border-box; justify-content: safe center; } .cstage { flex: 1 1 0; min-width: 106px; max-width: 170px; display: flex; flex-direction: column; gap: 5px; padding: 9px; border-radius: 14px; background: rgba(255,255,255,.07); } .cstage > b { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; opacity: .85; margin-bottom: 1px; } .cstage.locked { opacity: .5; }
+  .cev { border: 0; border-radius: 10px; padding: 7px 9px; font: inherit; color: #fff; background: rgba(255,255,255,.1); display: flex; flex-direction: column; align-items: flex-start; gap: 1px; cursor: pointer; text-align: left; } .cev span { font-size: 13px; font-weight: 700; } .cev i { font-style: normal; font-size: 13px; color: #ffd23f; letter-spacing: 1px; } .cev.boss { background: rgba(255,90,60,.2); } .cev.on { outline: 2.5px solid #ffd23f; } .cev.locked i { color: #fff; opacity: .6; font-size: 11px; letter-spacing: 0; }
+  .cinfo { width: min(620px, 100%); min-height: 44px; display: flex; flex-direction: column; gap: 3px; font-size: 13px; margin: 4px 0 6px; } .cinfo b { font-size: 15px; color: #ffd23f; } .cinfo span { opacity: .9; line-height: 1.3; }
+  .btns.crow { flex-direction: row; width: min(440px, 100%); } .btns.crow button { flex: 1; }
+  body.land #career h1 { font-size: 20px !important; margin: 0; } body.land #career #cstars { margin-bottom: 3px; font-size: 12.5px; } body.land .cstage { padding: 6px; gap: 4px; border-radius: 12px; } body.land .cstage > b { font-size: 11px; } body.land .cev { padding: 4px 7px; } body.land .cev span { font-size: 11.5px; } body.land .cev i { font-size: 11.5px; } body.land .cinfo { font-size: 11.5px; min-height: 36px; margin: 2px 0 4px; } body.land .cinfo b { font-size: 13px; } body.land .btns.crow button { padding: 8px; }
+  body.land #week h1 { font-size: 20px !important; margin: 0; } body.land #week #wtrack { font-size: 12.5px; margin-bottom: 2px; } body.land #week #wme { font-size: 11.5px; margin-bottom: 3px; } body.land #week #wprize { font-size: 10px; margin: 3px 0; } body.land #week .btns.crow button { padding: 8px; } #week .toplist { max-height: 46vh; overflow-y: auto; }
+  /* daily tasks */
+  #daily, #career, #week { justify-content: flex-start; background: rgba(14,22,48,.97); touch-action: pan-y; } #daily::before, #daily::after, #career::before, #career::after, #week::before, #week::after { content: ''; flex: 1 0 0px; } #daily > *, #career > *, #week > * { flex-shrink: 0; }
+  .dstreak { width: min(440px, 100%); box-sizing: border-box; padding: 10px 14px; border-radius: 16px; background: rgba(14,22,48,.8); margin-bottom: 10px; display: flex; flex-direction: column; gap: 7px; align-items: center; } .dstreak b { font-size: 16px; color: #ffd23f; } .dstreak small { font-size: 12px; opacity: .8; }
+  .dstreak > div { display: flex; gap: 5px; width: 100%; } .dstreak i { flex: 1; font-style: normal; font-size: 11px; font-weight: 700; padding: 6px 0; border-radius: 8px; background: rgba(255,255,255,.09); opacity: .75; } .dstreak i.on { background: #ffd23f; color: #1a1400; opacity: 1; } .dstreak i.next { outline: 2px dashed #ffd23f; opacity: 1; }
+  .dlist { width: min(440px, 100%); display: flex; flex-direction: column; gap: 7px; margin-bottom: 8px; } .dtask { display: grid; grid-template-columns: 1fr auto; gap: 5px 10px; align-items: center; text-align: left; padding: 10px 14px; border-radius: 14px; background: rgba(14,22,48,.8); font-size: 14px; font-weight: 600; }
+  .dtask b { color: #ffd23f; font-size: 13px; white-space: nowrap; } .dtask i { grid-column: 1 / 3; height: 6px; border-radius: 3px; background: rgba(255,255,255,.14); overflow: hidden; } .dtask u { display: block; height: 100%; background: #ffd23f; border-radius: 3px; } .dtask.done { opacity: .7; } .dtask.done b { color: #34c759; } .dtask.done u { background: #34c759; }
+  .fdaily { width: min(340px, 100%); margin: 6px 0 2px; font-size: 13px; font-weight: 700; color: #ffd23f; display: flex; flex-direction: column; gap: 3px; }
+  body.land #daily h1 { font-size: 22px !important; margin: 0 0 6px; } body.land .dstreak { padding: 6px 12px; gap: 4px; margin-bottom: 6px; } body.land .dstreak i { padding: 3px 0; } body.land .dtask { padding: 6px 12px; font-size: 12.5px; } body.land .dlist { gap: 5px; margin-bottom: 4px; } body.land #daily .btns { margin-top: 2px; } body.land #daily .btns button { padding: 8px; }
+  /* tuning: the play buttons give way to the parts list, the car stays on its turntable */
+  .tunebox { display: none; flex-direction: column; gap: 8px; width: min(380px, 100%); box-sizing: border-box; padding: 12px 14px; border-radius: 18px; background: rgba(10,13,24,.78); text-align: left; max-height: 100%; overflow-y: auto; }
+  #menu.tuning .tunebox { display: flex; } #menu.tuning .mright > *:not(.tunebox), #menu.tuning .mleft > * { display: none !important; } body.wide #menu.tuning .mleft > * { display: flex !important; } #menu.tuning #tuneopen { outline: 2px solid #ffd23f; }
+  .tunehead { display: flex; align-items: center; justify-content: space-between; } .tunehead b { font-size: 19px; } .tunehead button { padding: 6px 14px; font-size: 13px; }
+  .tunestage { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,.07); } .tunestage .pips { display: flex; gap: 4px; } .tunestage .pips i { width: 16px; height: 8px; border-radius: 3px; background: rgba(255,255,255,.2); } .tunestage .pips i.on { background: #ffd23f; }
+  .tunestage .txt { flex: 1; min-width: 0; font-size: 13px; font-weight: 700; line-height: 1.25; } .tunestage .txt small { display: block; font-weight: 500; opacity: .75; font-size: 11.5px; } .tunestage button { padding: 7px 10px; font-size: 12.5px; white-space: nowrap; border-radius: 10px; } .tunestage button.poor { opacity: .55; }
+  .tunerow { display: flex; align-items: center; gap: 8px; } .tunerow > span { flex: 0 0 62px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; opacity: .7; font-weight: 700; }
+  .tunerow > div { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; } .tchip { border: 0; border-radius: 9px; padding: 6px 9px; font: inherit; font-size: 12px; font-weight: 700; color: #fff; background: rgba(255,255,255,.1); display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .tchip i { width: 11px; height: 11px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,.35); } .tchip small { font-weight: 600; color: #ffd23f; font-size: 10.5px; } .tchip.on { background: #ffd23f; color: #1a1400; } .tchip.pv { outline: 2px dashed #ffd23f; }
+  .tunebuy { padding: 9px 12px; font-size: 14px; } .tunebuy.poor { opacity: .6; }
+  body.land .tunebox { padding: 8px 10px; gap: 5px; border-radius: 14px; } body.land .tunehead b { font-size: 15px; } body.land .tunehead button { padding: 4px 10px; font-size: 12px; } body.land .tunestage { padding: 5px 8px; } body.land .tchip { padding: 5px 7px; font-size: 11px; } body.land .tunerow > span { flex-basis: 50px; font-size: 9.5px; } body.land .tchip.dot span { display: none; } body.land .tchip.dot i { width: 15px; height: 15px; } body.land .tunestage .txt small { display: none; } body.land .tunestage .pips { display: none; } body.land .tunestage .txt { white-space: nowrap; } body.land .tunestage .txt { font-size: 12px; } body.land .tunestage button { padding: 5px 8px; font-size: 11.5px; } body.land .tunebox { max-height: calc(100% - 12px); } body.land .tunebuy { padding: 6px 10px; font-size: 12.5px; }
   .sw { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); padding: 0; }
   .sw.on { border: 3px solid #fff; box-shadow: 0 0 0 3px rgba(255,210,63,.9); }
   .levels { display: flex; gap: 6px; margin-bottom: 12px; width: min(340px, 100%); }
@@ -195,7 +221,7 @@
   body.land #prefs { flex-direction: row; flex-wrap: wrap; align-content: center; justify-content: center; column-gap: 22px; } body.land #prefs::before, body.land #prefs::after { display: none; } body.land #prefs h1, body.land #prefs .btns { flex: 0 0 100%; text-align: center; }
   body.land #prefs .levels { width: min(360px, 46%); margin-bottom: 8px; } body.land #prefs .btns { margin-top: 4px; display: flex; justify-content: center; align-items: center; } body.land #prefs .uisw .lv { font-size: 11px; padding: 6px 2px; } body.land #prefs .fpssw { width: min(742px, 95%); order: -1; } body.land #prefs h1 { order: -2; } body.land #prefs .btns button { flex: 0 0 auto; width: min(300px, 60%); padding-top: 10px; padding-bottom: 10px; }
   /* world records */
-  .homelinks { flex-wrap: wrap; justify-content: center; } #topopen { flex: 1 1 100%; color: #ffd23f; }
+  .homelinks { flex-wrap: wrap; justify-content: center; } #topopen { flex: 1 1 auto; color: #ffd23f; } .homelinks .hl2 { flex: 1 1 40%; }
   #top { justify-content: flex-start; background: rgba(14,22,48,.97); touch-action: pan-y; } #top::before, #top::after { content: ''; flex: 1 0 0px; } #top > * { flex-shrink: 0; } #top h1 { font-size: 26px; margin: 0 0 10px; } body.land #top h1 { font-size: 20px; margin-bottom: 6px; }
   #toptabs { width: min(440px, 100%); margin-bottom: 10px; } .toplist { width: min(440px, 100%); gap: 4px; display: flex; flex-direction: column; } .toplist div { padding: 6px 12px; font-size: 14px; gap: 8px; }
   .toplist div > span { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; } .toplist i.rk { all: unset; display: inline-block; min-width: 22px; margin-right: 6px; color: #ffd23f; font-style: normal; font-variant-numeric: tabular-nums; }
@@ -393,9 +419,15 @@
   </div>
   <div class="msheet">
     <div class="mcol mleft">
-      <div class="homelinks o4"><button class="ghost" id="topopen" style="display:none">🏆 Рекорды</button><button class="ghost" id="prefsopen">Настройки</button><button class="ghost" id="helpopen">Как играть</button></div>
+      <div class="homelinks o4"><button class="ghost hl2" id="careeropen">Карьера</button><button class="ghost hl2" id="tuneopen">Тюнинг</button><button class="ghost hl2" id="dailyopen">Задания</button><button class="ghost hl2" id="weekopen">Турнир</button><button class="ghost" id="topopen" style="display:none">🏆 Рекорды</button><button class="ghost" id="prefsopen">Настройки</button><button class="ghost" id="helpopen">Как играть</button></div>
     </div>
     <div class="mcol mright">
+      <div class="tunebox" id="tunebox">
+        <div class="tunehead"><b>Тюнинг</b><button class="ghost" id="tuneclose">Готово</button></div>
+        <div class="tunestage" id="tunestage"></div>
+        <div class="tunerows" id="tunerows"></div>
+        <button class="main tunebuy" id="tunebuy" style="display:none"></button>
+      </div>
       <div class="challenge o2" id="challenge" style="display:none"></div>
       <button class="main playbtn o2" id="play"><span>Играть</span><small id="playsub"></small></button>
       <button class="ghost setupbtn o2" id="setupopen">Трасса и соперники ›</button>
@@ -421,6 +453,31 @@
       <div class="btns"><button class="main" id="setupgo">Играть</button><button class="ghost" id="setupclose">Назад</button></div>
     </div>
   </div>
+</div>
+
+<div class="screen hidden" id="week">
+  <h1 style="font-size:28px;margin-bottom:2px">Турнир недели</h1>
+  <div class="sub" id="wtrack" style="color:#ffd23f;margin-bottom:4px"></div>
+  <div class="sub" id="wme" style="font-size:13px;margin-bottom:6px;min-height:16px"></div>
+  <div class="plist toplist" id="wlist"></div>
+  <div class="sub" id="wprize" style="font-size:11.5px;margin:6px 0 4px;max-width:560px;opacity:.8"></div>
+  <div class="btns crow"><button class="ghost" id="weekclose">Назад</button><button class="main" id="weekgo">Ехать</button></div>
+</div>
+
+<div class="screen hidden" id="career">
+  <h1 style="font-size:28px;margin-bottom:2px">Мировой тур</h1>
+  <div class="sub" id="cstars" style="color:#ffd23f;margin-bottom:8px"></div>
+  <div class="cstages" id="cstages"></div>
+  <div class="cinfo" id="cinfo"></div>
+  <div class="btns crow"><button class="ghost" id="careerclose">Назад</button><button class="main" id="careergo">Старт</button></div>
+</div>
+
+<div class="screen hidden" id="daily">
+  <h1 style="font-size:30px">Задания на сегодня</h1>
+  <div class="dstreak" id="dstreak"></div>
+  <div class="dlist" id="dlist"></div>
+  <div class="sub" id="dnote" style="font-size:13px"></div>
+  <div class="btns"><button class="main" id="dailyclose">Назад</button></div>
 </div>
 
 <div class="screen hidden" id="top">
@@ -489,7 +546,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 74</div>
+    <div style="opacity:.5;margin-top:8px">версия 79</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -551,6 +608,7 @@
     <div class="row" id="fworldrow" style="display:none"><span>В мире</span><b id="fworld"></b></div>
     <div class="row"><span>Монеты</span><b id="fcoins" style="color:#ffd23f">+0</b></div>
   </div>
+  <div class="fdaily" id="fdaily" style="display:none"></div>
   <div class="plist" id="fresults" style="display:none"></div>
   <div class="verdict" id="verdict"></div>
   <div class="btns">
@@ -564,7 +622,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 74</div>
+  <div class="fver">Turbo Drift · версия 79</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -620,11 +678,11 @@ function latin(name) {
   for (const ch of String(name)) { const low = ch.toLowerCase(); let t = TR[low]; if (t === undefined) t = /[A-Za-z0-9]/.test(ch) ? ch : ''; else if (ch !== low && t) t = t[0].toUpperCase() + t.slice(1); out += t; }
   return out.slice(0, 20) || 'Player';
 }
-function makeCode(track, ms, sep) { return ['d', track + (T && T.rev ? 10 : 0) + (RAIN ? 20 : 0), Math.round(ms).toString(36), latin(playerName)].join(sep); }
+function makeCode(track, ms, sep) { return ['e', track + (T && T.rev ? 32 : 0) + (RAIN ? 64 : 0), Math.round(ms).toString(36), latin(playerName)].join(sep); }
 function parseChallenge(code) {
   const p = String(code || '').replace(/^#/, '').split(/[_-]/);
-  if (p[0] !== 'd' || p.length < 3) return null;        // 'c' codes belong to the old, shorter tracks
-  const tc = parseInt(p[1], 10), track = tc % 10, vr = Math.floor(tc/10), ms = parseInt(p[2], 36);
+  if ((p[0] !== 'd' && p[0] !== 'e') || p.length < 3) return null;        // 'c' codes belong to the old, shorter tracks; 'd' codes counted tracks in tens, which broke once there were more than ten
+  const tc = parseInt(p[1], 10), base = p[0] === 'e' ? 32 : 10, track = tc % base, vr = Math.floor(tc/base), ms = parseInt(p[2], 36);
   if (!(track >= 0 && track < TRACKS.length) || !(vr >= 0 && vr < 4) || !(ms > 5000 && ms < 3600000)) return null;
   return { track: track, rev: !!(vr & 1), rain: !!(vr & 2), ms: ms, name: (p[3] || 'Друг').slice(0, 20) };
 }
@@ -641,6 +699,8 @@ function saveBest() {
 function loadCloud() {
   try { if (!tg.CloudStorage) return;
     // what Telegram's own storage kept from the time before the server: joined to this device's wallet once (every car of both, the larger purse); from then on the server keeps the wallet
+    tg.CloudStorage.getItem('daily', function (err, v) { if (err || !v) return; try { const d = JSON.parse(v); if (dailyOk(d) && ((d.last | 0) > DAILY.last || ((d.day | 0) === DAILY.day && d.tasks.filter(function (q) { return q.done; }).length > DAILY.tasks.filter(function (q) { return q.done; }).length))) { DAILY = { day: d.day | 0, tasks: d.tasks, all: !!d.all, streak: d.streak | 0, last: d.last | 0 }; if (state === 'menu') buildMenu(); } } catch (e) {} });
+    tg.CloudStorage.getItem('prog', function (err, v) { if (err || !v) return; try { if (progMerge(JSON.parse(v)) && state === 'menu') buildMenu(); } catch (e) {} });
     tg.CloudStorage.getItem('wallet', function (err, v) { if (err) return; try { if (localStorage.getItem('td_wcloud')) return; localStorage.setItem('td_wcloud', '1');
         const w = v ? JSON.parse(v) : null, co = w && Array.isArray(w.owned) ? w.owned.filter(function (t) { return t >= 0 && t < CAR_TYPES.length; }) : [], cc = w ? Math.max(0, w.coins | 0) : 0; let got = false;
         for (const t of co) if (!owns(t)) { WALLET.owned.push(t); got = true; } if (cc > WALLET.coins) { WALLET.coins = cc; got = true; }
@@ -1249,7 +1309,9 @@ const CAR_TYPES = [
 const CAR_STATS = [[1.000,1.00,1.00,1.00,0], [1.050,1.05,1.04,0.85,2000], [1.018,1.07,0.96,1.15,600], [0.996,1.05,1.07,0.90,0], [1.000,0.96,0.98,1.45,400], [1.008,1.02,1.09,0.90,300], [1.041,1.01,1.01,1.00,1400], [1.026,1.10,1.02,0.95,900], [1.033,1.03,1.00,1.20,1200]];
 CAR_TYPES.forEach(function (c, i) { const q = CAR_STATS[i]; c.st = { top: q[0], acc: q[1], grip: q[2], arm: q[3] }; c.price = q[4]; });
 let RAIN = false;                     // wet road: less grip for everyone
-const PAINTS = [[0.86,0.08,0.10],[0.10,0.33,0.86],[0.98,0.72,0.06],[0.10,0.62,0.30],[0.95,0.42,0.08],[0.92,0.93,0.95],[0.09,0.10,0.12],[0.50,0.18,0.72]];
+const PAINTS = [[0.86,0.08,0.10],[0.10,0.33,0.86],[0.98,0.72,0.06],[0.10,0.62,0.30],[0.95,0.42,0.08],[0.92,0.93,0.95],[0.09,0.10,0.12],[0.50,0.18,0.72],
+  [0.03,0.55,0.60],[0.96,0.28,0.56],[0.38,0.02,0.08],[0.48,0.80,0.06],[0.78,0.56,0.08]];          // the last five are taken from the champions of the career, one each
+function paintOwned(i) { return i < 8 || !!(progGet('op') & (1 << (i - 8))); }
 function sstep(a, b, x) { x = Math.max(0, Math.min(1, (x-a)/(b-a))); return x*x*(3-2*x); }
 function curve(K, t) {                                         // smooth curve through key points
   if (t <= K[0][0]) return K[0][1]; if (t >= K[K.length-1][0]) return K[K.length-1][1];
@@ -1442,9 +1504,69 @@ function buildCar(S) {
     else { wm.quad(P(xd,ri*0.90,c0,s0), P(xd,ri*0.90,c1,s1), P(xd,ri*0.62,c1,s1), P(xd,ri*0.62,c0,s0), RIMD, 0, [xd-1,0,0]); wm.quad(P(xd,ri*0.62,c0,s0), P(xd,ri*0.62,c1,s1), P(xd,ri*0.20,c1,s1), P(xd,ri*0.20,c0,s0), DISC, 6, [xd-1,0,0]); }
     wm.tri(P(xl + 0.02*U,ri*0.20,c0,s0), P(xl + 0.02*U,ri*0.20,c1,s1), [xl + 0.035*U,0,0], RIMD, 6, [xl-1,0,0]);     // hub cap
   }
-  return { spec: S, body: upload(mb), wheel: upload(wm), r: r, wx: WX*U, zF: S.zF*U, zR: S.zR*U, len: S.len*U, half: S.len*U/2 };
+  return { spec: S, body: upload(mb), wheel: upload(wm), wv: new Float32Array(wm.v), rimCol: RIM, r: r, wx: WX*U, zF: S.zF*U, zR: S.zR*U, len: S.len*U, half: S.len*U/2 };
 }
 let CARS = [];
+// ---- Progress that only ever grows: stages, bought parts, career stars. One flat map of small integers, kept on the device, in Telegram's storage
+// and on the game's server; wherever two copies meet, the larger number wins (for the keys that begin with 'o', which are sets of bought things, the bits are joined).
+let PROG = {};
+try { const q = JSON.parse(localStorage.getItem('td_prog') || 'null'); if (q && typeof q === 'object') for (const k in q) if (/^[a-z0-9]{1,8}$/.test(k)) PROG[k] = Math.max(0, q[k] | 0); } catch (e) {}
+function progGet(k) { return PROG[k] | 0; }
+function progJoin(k, v) { v = Math.max(0, v | 0); const was = PROG[k] | 0, now = k[0] === 'o' ? (was | v) : Math.max(was, v); if (now === was) return false; PROG[k] = now; return true; }
+function progSave(quiet) { try { localStorage.setItem('td_prog', JSON.stringify(PROG)); } catch (e) {} try { if (typeof tg !== 'undefined' && tg && tg.CloudStorage) tg.CloudStorage.setItem('prog', JSON.stringify(PROG)); } catch (e) {} if (!quiet) { try { walletSoon(); } catch (e) {} } }
+function progSet(k, v) { if (progJoin(k, v)) progSave(); }
+function progMerge(o) { let ch = false; if (o && typeof o === 'object') for (const k in o) if (/^[a-z0-9]{1,8}$/.test(k) && progJoin(k, o[k])) ch = true; if (ch) progSave(true); return ch; }
+// ---- Stages: three steps of engine and chassis work on each car, bought one after another. Each step adds a little top speed and a good deal of pull and grip.
+const STAGE_INFO = [['Сток', ''], ['Стейдж 1', 'прошивка и впуск'], ['Стейдж 2', 'выпуск и подвеска'], ['Стейдж 3', 'турбина и тормоза']], STAGE_BASE = [0, 300, 700, 1500], STAGE_GAIN = { top: 0.008, acc: 0.03, grip: 0.02 };
+function stageOf(t) { return Math.min(3, progGet('s' + t)); }
+function stagePrice(t, n) { return STAGE_BASE[n] + Math.round(CAR_TYPES[t].price*0.2/50)*50; }
+const CARK = {};
+function carK(t, stg) { const b = CAR_TYPES[t].st; if (!stg) return b; const k = t + '_' + stg; return CARK[k] || (CARK[k] = { top: b.top*(1 + STAGE_GAIN.top*stg), acc: b.acc*(1 + STAGE_GAIN.acc*stg), grip: b.grip*(1 + STAGE_GAIN.grip*stg), arm: b.arm }); }
+// ---- Outside tuning: spoiler, body kit, wheels, light under the floor. Each part is bought for one car and can then be put on and taken off freely.
+const TUNE_KEYS = ['sp', 'kit', 'rim', 'neon'], TUNE_PARTS = {
+  sp:   { name: 'Спойлер', bit: 0,  opts: [['Сток', 0], ['Лип', 250], ['Крыло', 600]] },
+  kit:  { name: 'Обвес',   bit: 3,  opts: [['Сток', 0], ['Спорт', 500]] },
+  rim:  { name: 'Диски',   bit: 5,  opts: [['Сток', 0], ['Чёрные', 200], ['Золото', 300], ['Белые', 200], ['Красные', 200]], css: ['#c9ccd4', '#15161a', '#d6a02e', '#eceef2', '#c21616'] },
+  neon: { name: 'Неон',    bit: 10, opts: [['Нет', 0], ['Синий', 350], ['Розовый', 350], ['Зелёный', 350], ['Белый', 350]], css: ['#3a3f52', '#2a6bff', '#ff2a9a', '#35f05a', '#ffffff'] } };
+const RIM_PAINT = [null, [[0.03,0.03,0.035], 11], [[0.83,0.60,0.16], 6], [[0.90,0.90,0.92], 11], [[0.72,0.05,0.05], 11]], NEON_COL = [null, [0.10,0.36,1.0], [1.0,0.14,0.58], [0.18,1.0,0.30], [0.9,0.9,1.0]];
+let TUNE_SEL = {};
+try { const q = JSON.parse(localStorage.getItem('td_tune') || 'null'); if (q && typeof q === 'object') TUNE_SEL = q; } catch (e) {}
+function tuneOwns(t, part, i) { return i === 0 || !!(progGet('o' + t) & (1 << (TUNE_PARTS[part].bit + i))); }
+function tnClean(a) { if (!Array.isArray(a)) return null; const r = TUNE_KEYS.map(function (k, i) { const v = a[i] | 0; return v > 0 && v < TUNE_PARTS[k].opts.length ? v : 0; }); return r[0] || r[1] || r[2] || r[3] ? r : null; }
+function tuneSel(t) { const q = TUNE_SEL[t]; return tnClean(TUNE_KEYS.map(function (k, i) { const v = q && Array.isArray(q) ? q[i] | 0 : 0; return v > 0 && v < TUNE_PARTS[k].opts.length && tuneOwns(t, k, v) ? v : 0; })); }
+function tuneSave() { try { localStorage.setItem('td_tune', JSON.stringify(TUNE_SEL)); } catch (e) {} }
+function dressPlayer(c) { c.K = carK(c.type || 0, stageOf(c.type || 0)); c.tn = tuneSel(c.type || 0); }
+const TMESH = {};
+function tuneMesh(t, sp, kit) {              // the bolted-on parts of one car as a mesh of their own, drawn with the body's matrix and paint
+  if (!sp && !kit) return null; const key = 'b' + t + '_' + sp + '_' + kit; if (TMESH[key]) return TMESH[key];
+  const S = CAR_TYPES[t], mb = new MB(), half = S.len/2, DARK = [0.035,0.036,0.04], WHITE = [1,1,1], hatch = S.cab[1] < -0.9, yb = curve(S.belt, -0.86), up = S.extra === 'wing' ? 0.20 : 0;
+  if (sp === 1) { if (hatch) { mb.box(0, S.hgt + 0.005, S.cab[1]*half - 0.13, S.wid*0.76, 0.045, 0.42, WHITE, 3); for (const sd of [-1, 1]) mb.box(sd*S.wid*0.375, S.hgt - 0.04, S.cab[1]*half - 0.13, 0.03, 0.11, 0.40, DARK, 11); }
+    else { mb.box(0, yb + 0.055 + up, -half + 0.13, S.wid*0.80, 0.075, 0.17, WHITE, 3); mb.box(0, yb + 0.105 + up, -half + 0.075, S.wid*0.80, 0.035, 0.06, WHITE, 3); } }
+  if (sp === 2) { const y = hatch ? S.hgt - 0.02 : yb + up, z = hatch ? S.cab[1]*half - 0.06 : -half + 0.30, hgt2 = hatch ? 0.20 : 0.40;
+    for (const sd of [-1, 1]) { mb.box(sd*S.wid*0.26, y + hgt2/2, z + 0.02, 0.045, hgt2, 0.15, DARK, 11); mb.box(sd*S.wid*0.50, y + hgt2 + 0.01, z - 0.02, 0.03, 0.20, 0.46, DARK, 11); }
+    mb.box(0, y + hgt2 + 0.03, z, S.wid*1.0, 0.04, 0.36, WHITE, 3); mb.box(0, y + hgt2 + 0.065, z - 0.16, S.wid*1.0, 0.05, 0.04, DARK, 11); }
+  if (kit === 1) { mb.box(0, S.clr + 0.015, half - 0.02, S.wid*0.92, 0.035, 0.34, DARK, 11);                                   // splitter
+    for (const sd of [-1, 1]) { mb.box(sd*(S.wid/2 - 0.015), S.clr + 0.045, (S.zF + S.zR)/2, 0.075, 0.09, (S.zF - S.zR) - S.r*2.5, DARK, 11);        // skirts
+      mb.box(sd*S.wid*0.43, S.clr + 0.16, half - 0.10, 0.20, 0.025, 0.16, DARK, 11, sd*0.5); }                                 // canards
+    mb.box(0, S.clr + 0.03, -half + 0.03, S.wid*0.74, 0.05, 0.26, DARK, 11); for (const x of [-0.27, -0.09, 0.09, 0.27]) mb.box(x*S.wid, S.clr + 0.07, -half - 0.03, 0.025, 0.13, 0.20, DARK, 11); }      // diffuser
+  for (let k = 0; k < mb.v.length; k += 10) { mb.v[k] *= U; mb.v[k+1] *= U; mb.v[k+2] *= U; }
+  return TMESH[key] = upload(mb);
+}
+function wheelVar(t, rim) {                  // the car's own wheel with the rim repainted
+  const k = CARS[t]; if (!rim || !RIM_PAINT[rim] || !k.wv) return k.wheel; const key = 'w' + t + '_' + rim; if (TMESH[key]) return TMESH[key];
+  const v = new Float32Array(k.wv), c0 = k.rimCol, P = RIM_PAINT[rim];
+  for (let i = 0; i < v.length; i += 10) if (v[i+9] === 6 && Math.abs(v[i+6] - c0[0]) + Math.abs(v[i+7] - c0[1]) + Math.abs(v[i+8] - c0[2]) < 0.02) { v[i+6] = P[0][0]; v[i+7] = P[0][1]; v[i+8] = P[0][2]; v[i+9] = P[1]; }
+  return TMESH[key] = upload({ v: v });
+}
+function neonMesh(t, n) {                    // a pool of light on the road under the car: bright under the sills, gone a step away
+  const key = 'n' + t + '_' + n; if (TMESH[key]) return TMESH[key];
+  const S = CAR_TYPES[t], mb = new MB(), a = (S.wid/2 - 0.08)*U, b = (S.len/2 - 0.15)*U, g = 0.95*U, y = 0.035*U, c = NEON_COL[n], ci = [c[0]*0.11, c[1]*0.11, c[2]*0.11], Z = [0,0,0], N = [0,1,0];
+  const q = function (p1, c1, p2, c2, p3, c3, p4, c4) { mb.sv([p1[0], y, p1[1]], N, c1, 5); mb.sv([p2[0], y, p2[1]], N, c2, 5); mb.sv([p3[0], y, p3[1]], N, c3, 5); mb.sv([p1[0], y, p1[1]], N, c1, 5); mb.sv([p3[0], y, p3[1]], N, c3, 5); mb.sv([p4[0], y, p4[1]], N, c4, 5); };
+  q([-a,-b], ci, [a,-b], ci, [a,b], ci, [-a,b], ci);
+  q([-a,b], ci, [a,b], ci, [a,b+g], Z, [-a,b+g], Z); q([-a,-b], ci, [a,-b], ci, [a,-b-g], Z, [-a,-b-g], Z); q([a,-b], ci, [a,b], ci, [a+g,b], Z, [a+g,-b], Z); q([-a,-b], ci, [-a,b], ci, [-a-g,b], Z, [-a-g,-b], Z);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const p = [sx*a, sz*b]; q(p, ci, [sx*(a+g), sz*b], Z, [sx*(a+g*0.7), sz*(b+g*0.7)], Z, [sx*a, sz*(b+g)], Z); }
+  return TMESH[key] = upload(mb);
+}
 
 // ---------------------------------------------------------------------------
 // World: ground, road ribbon with markings and kerbs, scenery, mountains, clouds, and the
@@ -2591,7 +2713,7 @@ function carParts(c) {            // body matrix, shadow matrix and the four whe
 const TAGS = [], SHIFT = new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]); let LASTVP = null;
 function nameTags() {
   const host = document.getElementById('tags'); if (!host) return; let n = 0;
-  if (LASTVP && (NET.racing || spec) && (state === 'race' || state === 'countdown' || state === 'finished')) for (const c of cars) { if (spec ? (c === spec || !c.name) : (!c.net || !c.name || c.nid >= 100)) continue;       // while watching, every other car is named, the player's own too
+  if (LASTVP && (NET.racing || spec || (CAREER.ev && CAREER.ev.boss)) && (state === 'race' || state === 'countdown' || state === 'finished')) for (const c of cars) { if (spec ? (c === spec || !c.name) : (c.boss ? false : (!c.net || !c.name || c.nid >= 100))) continue;       // while watching, every other car is named, the player's own too
     const m = LASTVP, y = 1.9, cw = m[3]*c.x + m[7]*y + m[11]*c.z + m[15]; if (cw < 1 || cw > 150) continue;
     const sx = ((m[0]*c.x + m[4]*y + m[8]*c.z + m[12])/cw*0.5 + 0.5)*viewW(), sy = (0.5 - (m[1]*c.x + m[5]*y + m[9]*c.z + m[13])/cw*0.5)*viewH();
     let t = TAGS[n]; if (!t) { t = TAGS[n] = { el: document.createElement('div'), name: '' }; t.el.className = 'tag'; host.appendChild(t.el); }
@@ -2628,7 +2750,8 @@ function scene(vp, camEye, mir) {
   const parts = cars.map(carParts);
   // in the mirror only the cars it can show are drawn: a car body is the heaviest thing in the scene
   const skip = mir ? cars.map(function (c) { if (c === player) return true; const dx = c.x - camEye[0], dz = c.z - camEye[2]; if (dx*dx + dz*dz > 130*130) return true; for (let k = 0; k < 24; k += 4) if (planes[k]*c.x + planes[k+1]*0.5 + planes[k+2]*c.z + planes[k+3] < -3.2) return true; return false; }) : null;
-  cars.forEach(function (c, i) { if (skip && skip[i]) return; const p = parts[i]; drawMesh(p.k.body, p.body, c.color, c.braking ? 1 : 0); for (const m of p.wheels) drawMesh(p.k.wheel, m); });
+  cars.forEach(function (c, i) { if (skip && skip[i]) return; const p = parts[i], tn = c.tn, wm = tn && tn[2] ? wheelVar(c.type || 0, tn[2]) : p.k.wheel; drawMesh(p.k.body, p.body, c.color, c.braking ? 1 : 0);
+    if (tn && (tn[0] || tn[1])) drawMesh(tuneMesh(c.type || 0, tn[0], tn[1]), p.body, c.color, 0); for (const m of p.wheels) drawMesh(wm, m); });
   if (state !== 'menu') {
     for (const p of pickups) if (p.t <= 0) { const w3 = tpoint(p.i, p.lat, 0); drawMesh(PU_MESH[p.type], bodyMatrix(w3[0], 1.0 + Math.sin(p.spin*1.3)*0.12, w3[2], p.spin, 0, 0)); }
     for (const q of shots) { const w3 = tpoint(q.s, q.lat, 0); if (q.kind === 'mine') drawMesh(MINE_MESH, bodyMatrix(w3[0], 0.03, w3[2], 0, 0, 0)); else if (q.kind === 'dome') { const dm = bodyMatrix(w3[0], 0, w3[2], q.age*1.5, 0, 0); for (let k = 0; k < 12; k++) if (k % 4 !== 3) dm[k] *= 0.68; drawMesh(DOME_MESH, dm); } }
@@ -2645,6 +2768,8 @@ function scene(vp, camEye, mir) {
   if (GFX.sh && !mir) drawChunks(W.shadow, planes, camEye, false);          // the cars keep their shadows on every preset: without one a car floats
   cars.forEach(function (c, i) { if (skip && skip[i]) return; const p = parts[i]; drawMesh(p.k.body, mul(SHADOW, p.body)); for (const m of p.wheels) drawMesh(p.k.wheel, mul(SHADOW, m)); });
   gl.disable(gl.STENCIL_TEST);
+  { let any = false; cars.forEach(function (c, i) { if (!c.tn || !c.tn[3] || (skip && skip[i])) return; if (!any) { use(PO); gl.uniform3fv(PO.tint, WHITE3); gl.blendFunc(gl.ONE, gl.ONE); any = true; } drawMesh(neonMesh(c.type || 0, c.tn[3]), bodyMatrix(c.x, 0, c.z, c.h, 0, 0)); });          // the light under the floor is added to the road, never darkens it
+    if (any) gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); }
   // 6. shields: a dome of energy around the car for as long as the shield holds
   if (state !== 'menu') { let any = false;
     for (const c of cars) { if (!(c.shield > 0) || (mir && c === player)) continue; if (!any) { use(PD); any = true; }
@@ -2908,7 +3033,7 @@ function lineSpeed(K, P) {
 function newBot(color, skill, lane, name, type) { const b = newCar(color, type); b.bot = true; if (name === 'Бот') name = CAR_TYPES[type || 0].name; b.skill = skill; b.lane = lane; b.s = 0; b.v = 0; b.name = name; b.seed = Math.random()*6;
   b.ai = { ofs: 0, abs: null, think: Math.random()*0.1, stuck: 0, wrong: 0, cap: 99, go: 0 }; return b; }
 function botReady(b) {                                  // once the track and the weather are known
-  if (b.rival) return; const own = CAR_TYPES[b.type || 0].st, pk = player && player !== b && player.K ? player.K : own;
+  if (b.rival) return; const own = CAR_TYPES[b.type || 0].st, pk = player && player !== b && player.K ? CAR_TYPES[player.type || 0].st : own;      // the model, not its stage: what the player paid for is his to keep
   b.K0 = { top: Math.max(own.top, pk.top), acc: Math.max(own.acc, pk.acc), grip: Math.max(own.grip, pk.grip), arm: own.arm }; b.K = { top: b.K0.top, acc: b.K0.acc, grip: b.K0.grip, arm: own.arm }; b.chase = 1;      // whatever the body, a rival's car is never slower, weaker off the line or worse in corners than the player's
   const P = b.drv = driverOf(b.skill); b.vpl = lineSpeed(b.K0, P);
   b.ai.go = Math.max(0.02, P.react*(0.6 + Math.random()*0.8)); b.ai.launch = Math.random() < P.launch; b.ai.ofs = b.lat - T.rl[b.idx]*P.wide; b.ai.abs = null;
@@ -3056,7 +3181,7 @@ let lastTrack = 0; try { const lt = parseInt(localStorage.getItem('td_last') || 
 let level = 1, wins = {};
 try { const l = parseInt(localStorage.getItem('td_level') || (FRESH ? '0' : '1'), 10); if (l >= 0 && l < 4) level = l; wins = JSON.parse(localStorage.getItem('td_wins') || '{}') || {}; } catch (e) {}
 let menuT = 0, garage = { type: 0, color: 0 };
-try { const g = JSON.parse(localStorage.getItem('td_car') || 'null'); if (g && g.type >= 0 && g.type < CAR_TYPES.length && g.color >= 0 && g.color < 8) garage = { type: g.type | 0, color: g.color | 0 }; } catch (e) {}
+try { const g = JSON.parse(localStorage.getItem('td_car') || 'null'); if (g && g.type >= 0 && g.type < CAR_TYPES.length && g.color >= 0 && g.color < PAINTS.length && paintOwned(g.color | 0)) garage = { type: g.type | 0, color: g.color | 0 }; } catch (e) {}
 // What the next solo race is: direction, weather, and whether the last car is knocked out every few seconds.
 let opt = { rev: false, rain: false, ko: false };
 try { const o = JSON.parse(localStorage.getItem('td_opt') || 'null'); if (o) opt = { rev: !!o.rev, rain: !!o.rain, ko: !!o.ko }; } catch (e) {}
@@ -3076,7 +3201,7 @@ try { const q = JSON.parse(localStorage.getItem('td_wsrv') || 'null'); if (q && 
 function walletSoon() { clearTimeout(walletSoon.t); walletSoon.t = setTimeout(walletSync, 1500); }
 function walletSync() {
   if (!lbOn() || !lbInit()) return; if (WSRV.busy) { WSRV.again = true; return; }
-  const sent = { coins: WALLET.coins, owned: WALLET.owned.slice() }, body = { init: lbInit(), best: bestTimes };
+  const sent = { coins: WALLET.coins, owned: WALLET.owned.slice() }, body = { init: lbInit(), best: bestTimes, prog: PROG };
   if (!WSRV.srv) body.first = sent; else { body.d = sent.coins - WSRV.srv.coins; body.buy = sent.owned.filter(function (t) { return WSRV.srv.owned.indexOf(t) < 0; }); }
   WSRV.busy = true;
   lbCall('/save', body, function (r) { WSRV.busy = false;
@@ -3084,7 +3209,8 @@ function walletSync() {
       WSRV.srv = { coins: Math.max(0, r.coins | 0), owned: r.owned.filter(function (t) { return t >= 0 && t < CAR_TYPES.length; }) }; try { localStorage.setItem('td_wsrv', JSON.stringify(WSRV.srv)); } catch (e) {}
       WALLET = { coins: Math.max(0, WSRV.srv.coins + dc), owned: WSRV.srv.owned.slice() }; for (const t of nb) if (!owns(t)) WALLET.owned.push(t); for (const t of [0, 3]) if (!owns(t)) WALLET.owned.push(t); saveWallet(true);
       let nbest = false; if (r.best) for (const k in r.best) { const ms = r.best[k] | 0; if (ms > 0 && (!bestTimes[k] || ms < bestTimes[k])) { bestTimes[k] = ms; nbest = true; } } if (nbest) { try { localStorage.setItem('td_best', JSON.stringify(bestTimes)); } catch (e) {} }
-      if ((JSON.stringify(WALLET) !== was || nbest) && state === 'menu') { try { buildMenu(); } catch (e) {} }
+      const nprog = progMerge(r.prog);
+      if ((JSON.stringify(WALLET) !== was || nbest || nprog) && state === 'menu') { try { buildMenu(); } catch (e) {} }
       if (dc || nb.length) WSRV.again = true; }
     if (WSRV.again) { WSRV.again = false; walletSoon(); } });
 }
@@ -3146,15 +3272,17 @@ function gridPlace(c, slot) {      // slot 0 is pole position, just behind the l
   if (c.rival) { c.s = N*40 + i; c.s0 = N*41; c.lane = side; c.laneT = side; }
 }
 function setupRace(trackId, useChallenge) {
+  rstatReset();
   if (NET.on && !NET.racing) netLeave();
   const ch = useChallenge && challenge && challenge.track === trackId; garage.view = garage.type;
   RAIN = ch ? !!challenge.rain : opt.rain; buildTrack(trackId, ch ? !!challenge.rev : opt.rev);
-  player = newCar(PAINTS[garage.color], garage.type); player.name = playerName;
+  player = newCar(PAINTS[garage.color], garage.type); player.name = playerName; dressPlayer(player);
   // rivals drive the other body styles, in colours the player is not using
   const types = CAR_TYPES.map(function (q, i) { return i; }).filter(function (t) { return t !== garage.type; }), cols = [0,1,2,3,4,5,6,7].filter(function (c) { return c !== garage.color; });
-  const L = LEVELS[level]; bots = [];
-  for (let k = 0; k < 5; k++) bots.push(newBot(PAINTS[cols[k]], L.skills[4 - k], 0, 'Бот', types[(k + (CHAMP.on ? 0 : T.id*2)) % types.length]));        // the quickest starts in front
+  const L = LEVELS[level], SK = CAREER.ev ? CAREER.ev.skills : L.skills; bots = [];
+  for (let k = 0; k < 5; k++) bots.push(newBot(PAINTS[cols[k]], SK[4 - k], 0, 'Бот', types[(k + (CHAMP.on ? 0 : T.id*2)) % types.length]));        // the quickest starts in front
   rivalBot = null;
+  if (CAREER.ev && CAREER.ev.boss) { const B = CAREER.ev.boss, b = newBot(PAINTS[8 + CAREER.ev.st], B.skill, 0, B.name, B.type); b.boss = true; b.tn = tnClean(B.tn); bots = [b]; }          // the duel: the champion alone, in his own colours
   if (useChallenge && challenge && challenge.track === trackId) { rivalBot = newBot(PAINTS[cols[6]], skillForTime(challenge.ms), 0, challenge.name, types[3]); rivalBot.rival = true; bots.push(rivalBot); }
   cars = bots.concat([player]);
   bots.forEach(function (b, k) { gridPlace(b, k); if (b.rival) placeBot(b); b.lap = 0; botReady(b); });
@@ -3246,6 +3374,94 @@ let noteTimer = 0;
 function toast(text) { const el = document.getElementById('emotoast'); el.textContent = text; el.classList.add('show'); clearTimeout(netFx.t); netFx.t = setTimeout(function () { el.classList.remove('show'); }, 3000); }      // a line over any screen, the menu too
 function note(text, ms) { const el = document.getElementById('note'); el.textContent = text; el.classList.add('show'); clearTimeout(noteTimer); noteTimer = setTimeout(function () { el.classList.remove('show'); }, ms || 1200); }
 
+// ---- Career: the world tour. Five stages of three events; the third is a duel with the stage's champion. A place in the first three opens
+// the next event, a duel has to be won. Up to three stars an event: in the first three, first, first without being hit once.
+const CAREER_STAGES = [
+  { name: 'Дом', lvl: 0, skills: [0.00,0.03,0.06,0.09,0.12], tracks: [0, 1, 5], boss: { name: 'Тимур «Барс»', type: 3, skill: 0.19, tn: [1,0,1,0], pay: 300, paint: 'Бирюза',
+      pre: 'Это мой город. Доедешь до финиша раньше меня — поговорим.', win: 'Быстро. Азия тебя уже ждёт — передай привет Призраку.', lose: 'Тренируйся. Ташкент никуда не денется.' } },
+  { name: 'Азия', lvl: 1, skills: [0.12,0.16,0.20,0.24,0.28], tracks: [2, 4, 3], boss: { name: 'Кэндзи «Призрак»', type: 5, skill: 0.37, tn: [2,1,3,2], pay: 500, paint: 'Сакура',
+      pre: 'Ночью эти улицы мои. Держись за габариты, если сможешь.', win: 'Ты видел мой хвост недолго. Европа будет жёстче.', lose: 'Призрака не догоняют с первого раза.' } },
+  { name: 'Европа', lvl: 1, skills: [0.26,0.31,0.36,0.41,0.46], tracks: [7, 8, 6], boss: { name: 'Марсель «Маэстро»', type: 0, skill: 0.56, tn: [1,1,2,0], pay: 800, paint: 'Бордо',
+      pre: 'Гонка — это искусство. Постарайся не испортить мне картину.', win: 'Браво. За океаном любят скорость — тебе туда.', lose: 'Изящно, но медленно. Ещё раз?' } },
+  { name: 'Америка', lvl: 2, skills: [0.42,0.48,0.54,0.60,0.66], tracks: [14, 10, 9], boss: { name: 'Дюк «Хайвей»', type: 2, skill: 0.76, tn: [2,1,1,3], pay: 1200, paint: 'Лайм',
+      pre: 'Здесь выигрывает тот, у кого мотор громче. У меня — громче.', win: 'Чёрт, ты быстр. Осталась только Корона — удачи, она тебе понадобится.', lose: 'Громко ехал, да не туда. Давай ещё.' } },
+  { name: 'Финал', lvl: 3, skills: [0.58,0.66,0.74,0.82,0.90], tracks: [11, 12, 13], boss: { name: 'Виктория «Корона»', type: 1, skill: 0.97, tn: [2,1,2,4], pay: 2000, paint: 'Золото',
+      pre: 'Пять лет никто не забирал у меня этот город. Ты не станешь первым.', win: 'Корона твоя. Носи её быстро.', lose: 'Монако не прощает ошибок. Возвращайся, когда будешь готов.' } } ];
+const CAREER = { ev: null, keep: null, sel: -1, back: false };
+function careerStarsOf(e) { return Math.min(3, progGet('k' + e)); }
+function careerOpen(e) { if (e <= 0) return true; return careerStarsOf(e - 1) >= ((e - 1) % 3 === 2 ? 2 : 1); }
+function careerTotal() { let n = 0; for (let e = 0; e < 15; e++) n += careerStarsOf(e); return n; }
+function starStr(n) { return '★★★'.slice(0, n) + '☆☆☆'.slice(0, 3 - n); }
+function careerGo(e) {
+  if (!careerOpen(e)) return; const st = Math.floor(e/3), i = e % 3, S = CAREER_STAGES[st];
+  if (!CAREER.keep) CAREER.keep = { level: level, opt: opt, last: lastTrack, champ: champPick };
+  level = S.lvl; opt = { rev: false, rain: false, ko: false }; champPick = false; CHAMP.on = false; CAREER.ev = { e: e, st: st, i: i, boss: i === 2 ? S.boss : null, skills: S.skills }; CAREER.back = true;
+  document.getElementById('career').classList.add('hidden'); startRace(S.tracks[i], false);
+  if (i === 2) note(S.boss.name + ': «' + S.boss.pre + '»', 4500);
+}
+function careerEnd() { if (CAREER.keep) { level = CAREER.keep.level; opt = CAREER.keep.opt; lastTrack = CAREER.keep.last; champPick = CAREER.keep.champ; try { localStorage.setItem('td_last', String(lastTrack)); } catch (e) {} CAREER.keep = null; } CAREER.ev = null; }
+function careerFinish(place) {                     // stars, coins and the champion's parting words; called once on the line
+  const ev = CAREER.ev, S = CAREER_STAGES[ev.st], B = ev.boss, lines = [], was = careerStarsOf(ev.e), got = place === 1 ? (RSTAT.taken === 0 ? 3 : 2) : place <= 3 ? 1 : 0; let coins = 0;
+  if (got > was) { const pay = (got - was)*(30 + ev.st*20); coins += pay; progSet('k' + ev.e, got); lines.push('Карьера: ' + starStr(got) + ' · +' + pay); } else lines.push('Карьера: ' + starStr(got) + (got < was ? ' · лучший результат ' + starStr(was) : ''));
+  if (B) { if (place === 1) { lines.push(B.name + ': «' + B.win + '»'); if (was < 2) { coins += B.pay; progSet('op', 1 << ev.st); lines.push('Награда: краска «' + B.paint + '» и +' + B.pay + ' монет'); if (ev.st === 4) lines.push('Ты — чемпион мирового тура!'); } } else lines.push(B.name + ': «' + B.lose + '»'); }
+  else if (got === 0) lines.push('Чтобы пройти дальше, финишируй в тройке');
+  return { coins: coins, lines: lines };
+}
+function buildCareer() {
+  const host = document.getElementById('cstages'); host.innerHTML = ''; document.getElementById('cstars').textContent = '★ ' + careerTotal() + ' из 45' + (careerStarsOf(14) >= 2 ? ' · чемпион мирового тура' : '');
+  if (CAREER.sel < 0 || !careerOpen(CAREER.sel)) { CAREER.sel = 0; for (let e = 0; e < 15; e++) if (careerOpen(e)) { CAREER.sel = e; if (careerStarsOf(e) < (e % 3 === 2 ? 2 : 1)) break; } }
+  CAREER_STAGES.forEach(function (S, st) { const card = document.createElement('div'), h = document.createElement('b'); card.className = 'cstage' + (careerOpen(st*3) ? '' : ' locked'); h.textContent = (st + 1) + ' · ' + S.name; card.appendChild(h);
+    for (let i = 0; i < 3; i++) { const e = st*3 + i, b = document.createElement('button'), nm = document.createElement('span'), sr = document.createElement('i'), open = careerOpen(e); b.className = 'cev' + (i === 2 ? ' boss' : '') + (e === CAREER.sel ? ' on' : '') + (open ? '' : ' locked');
+      nm.textContent = (i === 2 ? 'Босс · ' : '') + TRACKS[S.tracks[i]].name; sr.textContent = open ? starStr(careerStarsOf(e)) : 'закрыто'; b.appendChild(nm); b.appendChild(sr); b.disabled = !open; b.addEventListener('click', function () { CAREER.sel = e; buildCareer(); }); card.appendChild(b); }
+    host.appendChild(card); });
+  const e = CAREER.sel, st = Math.floor(e/3), i = e % 3, S = CAREER_STAGES[st], info = document.getElementById('cinfo'); info.innerHTML = '';
+  const a = document.createElement('b'), t = document.createElement('span'); a.textContent = TRACKS[S.tracks[i]].name + (i === 2 ? ' · дуэль: ' + S.boss.name : ' · гонка, 6 машин'); info.appendChild(a);
+  t.textContent = i === 2 ? '«' + S.boss.pre + '» ' + (careerStarsOf(e) >= 2 ? 'Побеждён.' : 'За победу: краска «' + S.boss.paint + '» и ' + S.boss.pay + ' монет.') : (careerTotal() === 0 ? 'Пять чемпионов держат пять этапов тура. Обгони каждого — и корона Монако твоя. ' : '') + '★ в тройке · ★★ победа · ★★★ победа без единого попадания по тебе';
+  info.appendChild(t); const go = document.getElementById('careergo'); go.textContent = i === 2 ? 'Вызвать на дуэль' : 'Старт';
+  const el = host.children[st]; if (el && el.scrollIntoView) { try { el.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e2) {} }
+}
+function careerBadge() { const b = document.getElementById('careeropen'); if (b) b.textContent = 'Карьера ★' + careerTotal(); }
+// ---- What happened in this race, for the daily tasks and the career stars
+const RSTAT = { hits: 0, taken: 0, items: 0, drift: 0, over: 0, pos: 0 };
+function rstatReset() { RSTAT.hits = 0; RSTAT.taken = 0; RSTAT.items = 0; RSTAT.drift = 0; RSTAT.over = 0; RSTAT.pos = 0; }
+// ---- Three tasks a day, the same for everybody, and a streak of days on which at least one race was finished.
+const DAILY_POOL = [
+  { id: 'races', n: 3, r: 60, t: 'Проедь 3 гонки' }, { id: 'win', n: 1, r: 90, t: 'Выиграй гонку' }, { id: 'podium', n: 2, r: 70, t: 'Финишируй в тройке 2 раза' },
+  { id: 'hits', n: 4, r: 90, t: 'Попади бонусом в соперников 4 раза' }, { id: 'items', n: 6, r: 60, t: 'Используй 6 бонусов' }, { id: 'over', n: 10, r: 80, t: 'Соверши 10 обгонов' },
+  { id: 'drift', n: 30, r: 80, t: 'Продержись в заносе 30 секунд' }, { id: 'online', n: 1, r: 100, t: 'Проедь онлайн-гонку' }, { id: 'city', n: 1, r: 80, t: 'Финишируй на трассе' }, { id: 'clean', n: 1, r: 100, t: 'Финишируй, не получив ни одного попадания' } ];
+const STREAK_PAY = [30, 40, 50, 70, 90, 120, 200], DAILY_ALL = 100;
+function dayNum() { return Math.floor((Date.now() - new Date().getTimezoneOffset()*60000)/86400000); }
+function dailyPick(day) { let sd = (day*2654435761) >>> 0; sd = Math.imul(sd ^ (sd >>> 15), 2246822519) >>> 0; sd = Math.imul(sd ^ (sd >>> 13), 3266489917) >>> 0; sd = (sd ^ (sd >>> 16)) >>> 0; const rnd = function () { sd = (sd*1664525 + 1013904223) >>> 0; return sd/4294967296; }, ids = DAILY_POOL.map(function (q, i) { return i; }), out = [];
+  while (out.length < 3) { const k = Math.floor(rnd()*ids.length), q = DAILY_POOL[ids.splice(k, 1)[0]]; if ((q.id === 'win' && out.some(function (o) { return o.id === 'podium'; })) || (q.id === 'podium' && out.some(function (o) { return o.id === 'win'; }))) continue; out.push({ id: q.id, p: 0, done: false }); }
+  return out; }
+let DAILY = { day: 0, tasks: [], all: false, streak: 0, last: 0 };
+function dailyOk(d) { return d && typeof d === 'object' && Array.isArray(d.tasks) && d.tasks.every(function (q) { return q && DAILY_POOL.some(function (z) { return z.id === q.id; }); }); }
+try { const d = JSON.parse(localStorage.getItem('td_daily') || 'null'); if (dailyOk(d)) DAILY = { day: d.day | 0, tasks: d.tasks, all: !!d.all, streak: d.streak | 0, last: d.last | 0 }; } catch (e) {}
+function dailySave() { try { localStorage.setItem('td_daily', JSON.stringify(DAILY)); } catch (e) {} try { if (tg && tg.CloudStorage) tg.CloudStorage.setItem('daily', JSON.stringify(DAILY)); } catch (e) {} }
+function dailyRoll() { const d = dayNum(); if (DAILY.day !== d || DAILY.tasks.length !== 3) { DAILY.day = d; DAILY.tasks = dailyPick(d); DAILY.all = false; dailySave(); } if (DAILY.last < d - 1) DAILY.streak = 0; return DAILY; }
+function dailyDef(q) { return DAILY_POOL.filter(function (z) { return z.id === q.id; })[0]; }
+function dailyText(q) { const D = dailyDef(q); return q.id === 'city' ? 'Финишируй на трассе «' + TRACKS[DAILY.day % TRACKS.length].name + '»' : D.t; }
+function dailyDone() { return dailyRoll().tasks.filter(function (q) { return q.done; }).length; }
+// called once when the player crosses the line; returns the coins earned by tasks and streak, and lines for the finish screen
+function dailyRace(r) {
+  dailyRoll(); const d = DAILY.day, lines = []; let coins = 0;
+  if (DAILY.last !== d) { DAILY.streak = DAILY.last === d - 1 ? DAILY.streak + 1 : 1; DAILY.last = d; const pay = STREAK_PAY[Math.min(STREAK_PAY.length, DAILY.streak) - 1]; coins += pay; lines.push('Серия: ' + DAILY.streak + plural(DAILY.streak, ' день', ' дня', ' дней') + ' подряд · +' + pay); }
+  const rivals = r.total >= 2, add = { races: 1, win: rivals && r.place === 1 ? 1 : 0, podium: r.total >= 4 && r.place <= 3 ? 1 : 0, hits: RSTAT.hits, items: RSTAT.items, over: rivals ? RSTAT.over : 0, drift: RSTAT.drift, online: r.mp ? 1 : 0, city: r.track === DAILY.day % TRACKS.length ? 1 : 0, clean: rivals && RSTAT.taken === 0 ? 1 : 0 };
+  for (const q of DAILY.tasks) { if (q.done) continue; const D = dailyDef(q); q.p = Math.min(D.n, q.p + (add[q.id] || 0)); if (q.p >= D.n - 1e-6) { q.done = true; coins += D.r; lines.push('Задание: ' + dailyText(q) + ' · +' + D.r); } }
+  if (!DAILY.all && DAILY.tasks.every(function (q) { return q.done; })) { DAILY.all = true; coins += DAILY_ALL; lines.push('Все задания дня · +' + DAILY_ALL); }
+  dailySave(); return { coins: coins, lines: lines };
+}
+function plural(n, one, few, many) { const a = Math.abs(n) % 100, b = a % 10; return a > 10 && a < 20 ? many : b === 1 ? one : b >= 2 && b <= 4 ? few : many; }
+function buildDaily() {
+  dailyRoll(); const st = document.getElementById('dstreak'), list = document.getElementById('dlist'); st.innerHTML = ''; list.innerHTML = '';
+  const today = DAILY.last === DAILY.day, shown = today ? DAILY.streak : (DAILY.last === DAILY.day - 1 ? DAILY.streak : 0), lab = document.createElement('b'); lab.textContent = shown ? 'Серия: ' + shown + plural(shown, ' день', ' дня', ' дней') : 'Серия дней'; st.appendChild(lab);
+  const row = document.createElement('div'); for (let k = 1; k <= 7; k++) { const i = document.createElement('i'); i.textContent = '+' + STREAK_PAY[k - 1]; if (k <= Math.min(7, shown)) i.className = 'on'; else if (k === Math.min(7, shown + 1) && !today) i.className = 'next'; row.appendChild(i); } st.appendChild(row);
+  const hint = document.createElement('small'); hint.textContent = today ? 'Сегодняшний день засчитан. Приходи завтра — награда растёт.' : 'Финишируй сегодня в любой гонке, чтобы продолжить серию.'; st.appendChild(hint);
+  for (const q of DAILY.tasks) { const D = dailyDef(q), d = document.createElement('div'), tx = document.createElement('span'), pr = document.createElement('b'), bar = document.createElement('i'), u = document.createElement('u'); d.className = 'dtask' + (q.done ? ' done' : '');
+    tx.textContent = dailyText(q); pr.textContent = q.done ? 'готово · +' + D.r : Math.floor(q.p) + '/' + D.n + ' · +' + D.r; u.style.width = Math.round(Math.min(1, q.p/D.n)*100) + '%'; bar.appendChild(u); d.appendChild(tx); d.appendChild(pr); d.appendChild(bar); list.appendChild(d); }
+  document.getElementById('dnote').textContent = DAILY.all ? 'Все три выполнены: +' + DAILY_ALL + ' получено. Новые задания завтра.' : 'За все три задания — ещё +' + DAILY_ALL + ' монет. Награды начисляются сами на финише.';
+}
+function dailyBadge() { const b = document.getElementById('dailyopen'); if (b) b.textContent = 'Задания ' + dailyDone() + '/3'; }
 function finishRace(koPlace) {
   const ko = KO.on, mp = NET.racing;
   state = 'finished'; finishMs = Math.round(raceT*1000); player.done = true; haptic('win'); if (!ko || koPlace === 1) beep(660, 0.5, 'triangle', 0.08, 1320);
@@ -3266,7 +3482,11 @@ function finishRace(koPlace) {
     if (CHAMP.i >= CHAMP.list.length - 1) { const tb = champTable(), my = tb.findIndex(function (r) { return r.c === player; }) + 1; coins += [150, 80, 40][my - 1] || 0; v = my === 1 ? 'Чемпион!' : 'Чемпионат окончен: ' + my + ' место'; }
     else v = 'Чемпионат · этап ' + (CHAMP.i + 1) + ' из ' + CHAMP.list.length;
   }
+  const dq = dailyRace({ place: place, total: total, mp: !!mp, track: T.id }); coins += dq.coins;
+  if (!ko && key === trackKey(T.id, false, false) && T.id === weekTrack() && lbOn() && lbInit()) { const stamp = finishMs; weekSend(finishMs, player.type | 0, function (r) { if (r && r.me && state === 'finished' && finishMs === stamp) { const fd = document.getElementById('fdaily'), d = document.createElement('div'); d.textContent = 'Турнир недели: ' + r.me.rank + ' место из ' + r.total; fd.appendChild(d); fd.style.display = ''; } }); }
+  if (CAREER.ev && !mp) { const cq = careerFinish(place); coins += cq.coins; dq.lines = cq.lines.concat(dq.lines); }
   coins = earn(coins);
+  { const fd = document.getElementById('fdaily'); fd.innerHTML = ''; for (const l of dq.lines) { const d = document.createElement('div'); d.textContent = l; fd.appendChild(d); } fd.style.display = dq.lines.length ? '' : 'none'; }
   document.getElementById('fplace').textContent = place + ' место';
   document.getElementById('ftime').textContent = fmt(finishMs);
   document.getElementById('flap').textContent = bestLap ? fmt(bestLap) : '—';
@@ -3279,7 +3499,7 @@ function finishRace(koPlace) {
   document.getElementById('verdict').textContent = v;
   const champMid = CHAMP.on && !mp && CHAMP.i < CHAMP.list.length - 1, champEnd = CHAMP.on && !mp && !champMid;
   for (const pr of [['share', !mp && !ko && !CHAMP.on], ['again', !mp && !CHAMP.on], ['champnext', champMid], ['tomenu', !mp], ['tolobby', mp && NET.host && !NET.pub], ['rematch', mp && NET.host && !NET.pub], ['mpleave', mp], ['fresults', true], ['femo', mp]]) document.getElementById(pr[0]).style.display = pr[1] ? '' : 'none';
-  document.getElementById('tomenu').textContent = champMid ? 'Выйти из чемпионата' : (champEnd ? 'В меню' : 'Выбрать трассу');
+  document.getElementById('tomenu').textContent = champMid ? 'Выйти из чемпионата' : (champEnd ? 'В меню' : (CAREER.ev ? 'К карьере' : 'Выбрать трассу'));
   netResults();
   setTimeout(function () { if (state === 'finished' && !spec) { document.getElementById('finish').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; if (!mp) buildMenu(); } }, ko && place > 1 ? 1100 : 1600);
 }
@@ -3339,7 +3559,8 @@ function burst(x, z, col, n, big) {
 function hitCar(c, dmg, slow, by, col) {
   if (c.rival || c.done || c.wreck > 0) return false;
   if (c.net) { netSend({ t: 'hit', to: c.nid, dmg: dmg, slow: slow, col: col || null, by: by ? by.nid : -1 }); burst(c.x, c.z, c.shield > 0 ? [0.25,0.5,1] : (col || [1,0.6,0.2]), 14, c.shield <= 0);
-    if (by === player) { note('Попадание!'); beep(520, 0.12, 'square', 0.05, 900); haptic('light'); } return true; }
+    if (by === player) { RSTAT.hits++; note('Попадание!'); beep(520, 0.12, 'square', 0.05, 900); haptic('light'); } return true; }
+  if (by === player && c !== player) RSTAT.hits++; if (c === player && !(c.shield > 0)) RSTAT.taken++;
   if (c.shield > 0) { c.shield = Math.max(0, c.shield - 2); burst(c.x, c.z, [0.25,0.5,1], 14); if (c === player) { note('Щит выдержал'); beep(900, 0.15, 'triangle', 0.06); } return true; }
   c.hp -= dmg/(c.K ? c.K.arm : 1); burst(c.x, c.z, col || [1,0.6,0.2], 16, true);
   if (c.bot) c.stun = 1.1;
@@ -3360,7 +3581,7 @@ function carBehind(c, maxDist) {                    // nearest car behind c alon
 }
 function useItem(c, slot, back) {
   if (c.wreck > 0 || c.done || !c.items.length) return;
-  const it = c.items[slot || 0]; if (!it) return;
+  const it = c.items[slot || 0]; if (!it) return; if (c === player) RSTAT.items++;
   const id = PU[it.type].id, s = carS(c), mine = c === player, shots0 = shots.length;
   let keep = false;
   if (id === 'nitro') { c.boost = 2.4; if (mine) sfx('whoosh', 0.7); }
@@ -3577,6 +3798,7 @@ function update(dt) {
     const vt = NET.on || garage.view === undefined ? garage.type : garage.view;
     if (!demo) { demo = newCar(PAINTS[garage.color], vt); const i = T.N - 6; demo.x = T.x[i]; demo.z = T.z[i]; demo.h = T.h[i]; demo.idx = i; player = demo; cars = [demo]; bots = []; }     // the chosen car on the grid
     if (demo.type !== vt || demo.color !== PAINTS[garage.color]) { demo.type = vt; demo.K = CAR_TYPES[vt].st; demo.color = PAINTS[garage.color]; demo.css = null; }
+    demo.tn = TUNEUI.open && TUNEUI.pv ? tnClean(TUNEUI.pv) : (owns(vt) ? tuneSel(vt) : null);
     menuT += dt;
   } else if (state === 'countdown') {
     countT -= dt; const n = Math.ceil(countT - 0.2), label = n >= 1 ? String(n) : 'GO!';
@@ -3584,7 +3806,7 @@ function update(dt) {
     launchWatch(countT - 0.2);
     if (countT <= 0.2) { state = 'race'; raceT = 0; raceClock = 0; lapStart = 0; launchGo(); }
   } else if (state === 'race' || state === 'finished') {
-    if (state === 'race') { raceT += dt; if (raceT < 0.26) launchWatch(0); else LAUNCH.open = false; }
+    if (state === 'race') { raceT += dt; if (player.drifting) RSTAT.drift += dt; if (raceT < 0.26) launchWatch(0); else LAUNCH.open = false; }
     raceClock += dt;
     const inp = state === 'race' ? readInput() : { steer: 0, brake: player.vf > 0.5, gas: false };
     const lapBefore = player.lap; player.gotBoost = false;
@@ -3614,6 +3836,7 @@ function update(dt) {
   particles = particles.filter(function (p) { return p.life > 0; });
   if (state === 'race') {
     const mine = progress(player); let pos = 1; for (const b of cars) if (b !== player && (b.done || progress(b) > mine)) pos++;
+    if (RSTAT.pos && pos < RSTAT.pos && raceT > 2) RSTAT.over += RSTAT.pos - pos; RSTAT.pos = pos;
     hset('pos', String(pos)); hset('lap', String(Math.max(1, Math.min(LAPS, player.lap)))); if (KO.on && !(hudTick % 6)) koHud();
     if ((hudTick % 12) === 0) {                                          // the gaps, five times a second: distance along the lap over the speed of whoever is chasing
       let da = 1e9, db = 1e9, ob = null; for (const b of cars) { if (b === player || b.rival || b.done) continue; const d = progress(b) - mine; if (d > 0 && d < da) da = d; if (d < 0 && -d < db) { db = -d; ob = b; } }
@@ -3641,7 +3864,7 @@ function update(dt) {
 // the device that fired and applied by the device that owns the car that was hit.
 // ---------------------------------------------------------------------------
 const NET = { on: false, host: false, racing: false, code: '', me: 0, tr: null, roster: [], conn: {}, nextId: 1, track: 0, sendT: 0, results: {}, firstFin: 0 };
-const ROOM_PREFIX = 'turbodrift14-';         // bumped whenever players of the old and the new version could not race together (here: a fourth track)
+const ROOM_PREFIX = 'turbodrift15-';         // bumped whenever players of the old and the new version could not race together (here: a fourth track)
 function peerTransport() {
   let peer = null, hc = null, seq = 1, opened = false; const conns = {}; let self = null;
   const load = function (done0) { if (window.Peer) return done0(null); let lf = false; const done = function (e) { if (!lf) { lf = true; done0(e); } }; setTimeout(function () { done('load'); }, 12000);
@@ -3694,9 +3917,9 @@ function roomTransport(room) {
   const hostOf = function () { for (const p of nr.peers()) if (!p.sameTab && p.presence && p.presence.host) return p.peer; return ''; };
   const fail = function (done) { return function (e) { done(e && e.code === 'not_permitted' ? 'denied' : 'room'); }; };
   return self = { mesh: true, msg: netMsg, gone: netClosed,
-    host: function (code, done) { room.join('td14-' + code.toLowerCase()).then(function (r) { nr = r;
+    host: function (code, done) { room.join('td15-' + code.toLowerCase()).then(function (r) { nr = r;
       setTimeout(function () { if (hostOf()) { try { nr.leave(); } catch (e) {} return done('unavailable-id'); } try { nr.presence({ host: true }); } catch (e) {} me = myLabel(); listen(true); done(null); }, 900); }, fail(done)); },
-    join: function (code, done) { room.join('td14-' + code.toLowerCase()).then(function (r) { nr = r; let tries = 0;
+    join: function (code, done) { room.join('td15-' + code.toLowerCase()).then(function (r) { nr = r; let tries = 0;
       const look = function () { hostPeer = hostOf(); if (hostPeer) { me = myLabel(); listen(false); return done(null); } if (++tries > 16) { try { nr.leave(); } catch (e) {} return done('peer-unavailable'); } setTimeout(look, 300); }; look(); }, fail(done)); },
     send: function (id, o) { if (!nr) return; if (id === 0) emit(OPEN[o.t] ? '*' : hostPeer, o); else if (labels[id]) emit(labels[id], o); },
     all: function (o, except) { if (nr) emit('*', o, except > 0 ? labels[except] : ''); },
@@ -3715,7 +3938,7 @@ function mpMsg(t) { document.getElementById('mpmsg').textContent = t || ''; }
 function netError(e) { return ({ 'peer-unavailable': 'Комната с таким кодом не найдена', 'unavailable-id': 'Такой код уже занят, попробуй ещё раз', load: 'Не удалось загрузить модуль связи. Игра должна быть открыта с хостинга или из Telegram, нужен интернет', network: 'Нет связи с сервером, который сводит игроков', blocked: 'Нет связи с сервером, который сводит игроков. Если игра открыта в Claude — открой сам артефакт Turbo Drift, а не предпросмотр файла', denied: 'Нет прав на игру вместе в этом артефакте: владелец должен дать тебе доступ на участие', room: 'Не удалось открыть комнату, попробуй ещё раз', timeout: 'Не удалось соединиться: сеть одного из игроков не пропускает прямое соединение', browser: 'Этот браузер не поддерживает прямое соединение', connect: 'Не удалось соединиться с комнатой' })[e] || ('Ошибка соединения: ' + e); }
 function mpSeek(on) { document.getElementById('mp').classList.toggle('seeking', !!on); document.getElementById('mph1').textContent = on ? 'Онлайн-гонка' : 'Играть вместе'; document.getElementById('mpback').textContent = on ? 'Отмена' : 'Назад'; }
 function netOpen() {
-  for (const id of ['menu','finish','paused','setup','prefs','top']) document.getElementById(id).classList.add('hidden');
+  for (const id of ['menu','finish','paused','setup','prefs','top','daily','career','week']) document.getElementById(id).classList.add('hidden');
   document.getElementById('mp').classList.remove('hidden'); document.getElementById('mp').classList.toggle('inroom', NET.on); mpSeek(false); stageTick = 0; document.getElementById('mpstart').style.display = NET.on ? 'none' : ''; document.getElementById('mplobby').style.display = NET.on ? '' : 'none'; mpMsg('');
 }
 function netHost() {
@@ -3723,14 +3946,14 @@ function netHost() {
   if (NET.busy) return; NET.busy = true; mpMsg('Создаю комнату…'); netTransport(function (tr) {
   tr.host(code, function (err) { NET.busy = false; if (err) { mpMsg(netError(err)); tr.close(); return; }
     NET.on = true; NET.host = true; NET.pub = false; NET.racing = false; NET.code = code; NET.me = 0; NET.tr = tr; NET.nextId = 1; NET.conn = {}; NET.track = T.id;
-    NET.roster = [{ nid: 0, name: playerName, type: garage.type, color: garage.color, pid: tr.pid ? tr.pid() : null }]; voiceBind(tr); netLobby(); }); });
+    NET.roster = [{ nid: 0, name: playerName, type: garage.type, color: garage.color, tn: tuneSel(garage.type), pid: tr.pid ? tr.pid() : null }]; voiceBind(tr); netLobby(); }); });
 }
 function netJoin(code) {
   code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (code.length < 4) { mpMsg('Введи код комнаты'); return; }
   if (NET.busy) return; NET.busy = true; mpMsg('Подключаюсь…'); netTransport(function (tr) {
   tr.join(code, function (err) { NET.busy = false; if (err) { mpMsg(netError(err)); tr.close(); return; }
     NET.on = true; NET.host = false; NET.pub = false; NET.racing = false; NET.code = code; NET.tr = tr; NET.me = -1; NET.roster = []; voiceBind(tr);
-    tr.send(0, { t: 'hello', name: playerName, type: garage.type, color: garage.color }); netLobby(); }); });
+    tr.send(0, { t: 'hello', name: playerName, type: garage.type, color: garage.color, tn: tuneSel(garage.type) }); netLobby(); }); });
 }
 function netLeave() {
   if (!NET.on) return; try { netSend({ t: 'bye', nid: NET.me }); } catch (e) {}
@@ -3748,11 +3971,11 @@ function pubKnock(code, cb) {
     tr.msg = function (from, m) { if (from !== 0 || !m) return; if (m.t === 'welcome') end('in', m.nid); else if (m.t === 'busy') end('busy'); };
     tr.gone = function (from) { if (from === 0) end('none'); };
     tr.join(code, function (err) { if (err) return end(err === 'peer-unavailable' ? 'none' : (err === 'timeout' || err === 'connect' ? 'dead' : 'fail'), err);
-      tr.send(0, { t: 'hello', name: playerName, type: garage.type, color: garage.color }); tm = setTimeout(function () { end('dead'); }, 5000); }, 10000); });
+      tr.send(0, { t: 'hello', name: playerName, type: garage.type, color: garage.color, tn: tuneSel(garage.type) }); tm = setTimeout(function () { end('dead'); }, 5000); }, 10000); });
 }
 function pubOwn(tr, k) {
   NET.on = true; NET.host = true; NET.pub = true; NET.slot = k; NET.racing = false; NET.code = pubCode(k); NET.me = 0; NET.tr = tr; NET.nextId = 1; NET.conn = {}; NET.last = {}; NET.wait = null;
-  NET.roster = [{ nid: 0, name: playerName, type: garage.type, color: garage.color, pid: tr.pid ? tr.pid() : null }]; voiceBind(tr); NET.auto = 0; NET.back = 0; NET.regroup = 0; NET.probeT = performance.now() + 15000; pubPick(); netLobby();
+  NET.roster = [{ nid: 0, name: playerName, type: garage.type, color: garage.color, tn: tuneSel(garage.type), pid: tr.pid ? tr.pid() : null }]; voiceBind(tr); NET.auto = 0; NET.back = 0; NET.regroup = 0; NET.probeT = performance.now() + 15000; pubPick(); netLobby();
 }
 function pubEnter(tr, k, nid) {
   NET.on = true; NET.host = false; NET.pub = true; NET.slot = k; NET.racing = false; NET.code = pubCode(k); NET.tr = tr; NET.me = nid; NET.roster = []; NET.seen = performance.now(); NET.wait = null; tr.msg = netMsg; tr.gone = netClosed; voiceBind(tr); netLobby();
@@ -3837,7 +4060,7 @@ function netLobby() {
     document.getElementById('mpcarname').textContent = CAR_TYPES[garage.type].name; document.getElementById('mpcareng').textContent = CAR_TYPES[garage.type].eng.label; statBars(document.getElementById('mpcarstats'), garage.type);
     { const o = NET.opt || {}, names = []; if (o.rev) names.push('обратно'); if (o.rain) names.push('дождь'); if (o.ko) names.push('выбывание'); document.getElementById('mpoptline').textContent = names.length ? ' Заезд: ' + names.join(', ') + '.' : ''; }
     const sw = document.getElementById('mpswatches'), used = NET.roster.filter(function (p) { return p.nid !== NET.me; }).map(function (p) { return p.color; }); sw.innerHTML = '';
-    PAINTS.forEach(function (p, i) { const b = document.createElement('button'); b.className = 'sw' + (i === garage.color ? ' on' : '') + (used.indexOf(i) >= 0 ? ' taken' : '');
+    PAINTS.forEach(function (p, i) { if (!paintOwned(i)) return; const b = document.createElement('button'); b.className = 'sw' + (i === garage.color ? ' on' : '') + (used.indexOf(i) >= 0 ? ' taken' : '');
       b.style.background = 'rgb(' + p.map(function (v) { return Math.round(Math.pow(v, 0.8)*255); }).join(',') + ')'; b.setAttribute('aria-label', 'Цвет ' + (i + 1));
       b.addEventListener('click', function () { netSetCar(garage.type, i); }); sw.appendChild(b); }); }
   if (NET.host && !NET.pub) { const ol = document.getElementById('mpopts'); ol.innerHTML = ''; NET.opt = NET.opt || { rev: false, rain: false, ko: false };
@@ -3849,8 +4072,8 @@ function netLobby() {
 function netFreeColor(want, nid) { const used = NET.roster.filter(function (p) { return p.nid !== nid; }).map(function (p) { return p.color; }); if (used.indexOf(want) < 0) return want; for (let c = 0; c < 8; c++) if (used.indexOf(c) < 0) return c; return want; }
 function netSetCar(type, color) {                   // the player changes car or colour in the lobby
   garage.type = type; garage.color = color; saveGarage();
-  if (NET.host) { const me = NET.roster[0]; me.type = type; me.color = netFreeColor(color, 0); garage.color = me.color; netRoster(); }
-  else { NET.tr.send(0, { t: 'car', type: type, color: color }); netLobby(); }
+  if (NET.host) { const me = NET.roster[0]; me.type = type; me.color = netFreeColor(color, 0); me.tn = tuneSel(type); garage.color = me.color; netRoster(); }
+  else { NET.tr.send(0, { t: 'car', type: type, color: color, tn: tuneSel(type) }); netLobby(); }
 }
 // «Готов»: each player says when he is set. An open room starts three seconds after the last one has said so (and by the clock at the latest); among friends the host sees who is set and starts when he likes.
 function netReady(v) { if (!NET.on || NET.racing) return; const me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0]; if (!me) return; v = v === undefined ? !me.rdy : !!v; me.rdy = v ? 1 : 0; beep(v ? 880 : 520, 0.06, 'sine', 0.04);
@@ -3976,12 +4199,13 @@ function netStart() {
   NET.tr.all(m, -1); netBegin(m);
 }
 function netBegin(m) {
+  rstatReset();
   audio(); NET.racing = true; NET.seen = performance.now(); NET.last = {}; for (const id in NET.conn) NET.last[id] = NET.seen; NET.sendT = 0; NET.roster = m.list; NET.awarded = false; CHAMP.on = false; RAIN = !!m.rain; buildTrack(m.track, !!m.rev); rivalBot = null; document.getElementById('rival').style.display = 'none';
   { const me = m.list.filter(function (p) { return p.nid === NET.me; })[0]; if (me) { garage.type = me.type; garage.color = me.color; } }
-  player = newCar(PAINTS[garage.color], garage.type); player.name = playerName; player.nid = NET.me; bots = []; cars = [];
+  player = newCar(PAINTS[garage.color], garage.type); player.name = playerName; player.nid = NET.me; dressPlayer(player); bots = []; cars = [];
   for (const b of m.bots) { if (NET.host) { const c = newBot(PAINTS[b.color] || PAINTS[0], b.skill, 0, 'Бот', b.type); c.nid = b.nid; bots.push(c); cars.push(c); }
     else { const c = newCar(PAINTS[b.color] || PAINTS[0], b.type); c.net = true; c.nid = b.nid; c.name = CAR_TYPES[b.type || 0].name; cars.push(c); } }
-  for (const p of m.list) { if (p.nid === NET.me) continue; const c = newCar(PAINTS[p.color] || PAINTS[0], p.type); c.net = true; c.nid = p.nid; c.name = p.name; cars.push(c); }
+  for (const p of m.list) { if (p.nid === NET.me) continue; const c = newCar(PAINTS[p.color] || PAINTS[0], p.type); c.net = true; c.nid = p.nid; c.name = p.name; c.tn = tnClean(p.tn); cars.push(c); }
   cars.push(player);
   m.order.forEach(function (nid, slot) { const c = carByNid(nid); if (!c) return; gridPlace(c, slot); if (c.bot) { c.lap = 0; botReady(c); } c.sn = null; });
   resetRaceState(); koSetup(!!m.ko); beginCountdown();
@@ -4024,7 +4248,7 @@ function netMsg(from, m) {
   if (m.t === 'ko') { if (!NET.host && NET.racing) koOut(m.nid | 0); return; }
   if (NET.host) {
     if (m.t === 'hello') { const late = NET.racing && NET.pub; if (NET.conn[from] !== undefined) return; if ((NET.racing && !late) || NET.roster.length >= 6) { NET.tr.send(from, { t: 'busy', why: NET.racing && !late ? 'race' : 'full' }); return; }
-      const nid = NET.nextId++, np = { nid: nid, name: String(m.name || 'Игрок').slice(0, 16), type: Math.abs(m.type | 0) % CAR_TYPES.length, color: netFreeColor(Math.abs(m.color | 0) % 8, nid), pid: NET.tr.pidOf ? NET.tr.pidOf(from) : null }; if (late) np.late = 1;
+      const nid = NET.nextId++, np = { nid: nid, name: String(m.name || 'Игрок').slice(0, 16), type: Math.abs(m.type | 0) % CAR_TYPES.length, color: netFreeColor(Math.abs(m.color | 0) % PAINTS.length, nid), tn: tnClean(m.tn), pid: NET.tr.pidOf ? NET.tr.pidOf(from) : null }; if (late) np.late = 1;
       NET.conn[from] = nid; NET.last = NET.last || {}; NET.last[from] = performance.now(); NET.roster.push(np); NET.tr.send(from, { t: 'welcome', nid: nid }); netRoster();
       if (NET.pub) { const now = performance.now();
         if (late && !NET.regroup && cars.filter(function (c) { return c.nid < 100; }).length < 2) { NET.regroup = now + 3500; note('Нашёлся соперник: ' + np.name, 2600); }          // racing the bots alone: stop and start together
@@ -4035,7 +4259,7 @@ function netMsg(from, m) {
     if (!NET.tr.mesh && (m.t === 'st' || m.t === 'use' || m.t === 'hit' || m.t === 'fin')) NET.tr.all(m, from);          // pass it on to the other guests
     if (m.t === 'bye') { netClosed(from); return; }
     if (m.t === 'rdy' && !NET.racing) { const p = NET.roster.filter(function (q) { return q.nid === who; })[0]; if (p) { p.rdy = m.v ? 1 : 0; netRoster(); if (NET.pub) pubBeat(); } return; }
-    if (m.t === 'car' && !NET.racing) { const p = NET.roster.filter(function (q) { return q.nid === who; })[0]; if (p) { p.type = Math.abs(m.type | 0) % CAR_TYPES.length; p.color = netFreeColor(Math.abs(m.color | 0) % 8, who); netRoster(); } return; }
+    if (m.t === 'car' && !NET.racing) { const p = NET.roster.filter(function (q) { return q.nid === who; })[0]; if (p) { p.type = Math.abs(m.type | 0) % CAR_TYPES.length; p.color = netFreeColor(Math.abs(m.color | 0) % PAINTS.length, who); p.tn = tnClean(m.tn); netRoster(); } return; }
   } else {
     if (from === 0) NET.seen = performance.now();
     if (m.t === 'welcome') { NET.me = m.nid; return; }
@@ -4246,14 +4470,15 @@ let UPD = null;
     setTimeout(function () { if (UPD) UPD(); }, 600); }, function () {});
 } catch (e) {} })();
 function toMenu() {
+  TUNEUI.open = false; TUNEUI.pv = null; document.getElementById('menu').classList.remove('tuning'); const cback = CAREER.back && !!CAREER.ev; careerEnd(); CAREER.back = false; if (cback) setTimeout(function () { if (state === 'menu') { buildCareer(); document.getElementById('career').classList.remove('hidden'); } }, 0);
   specStop(false); CHAMP.on = false; koSetup(false); document.body.classList.remove('rain'); if (NET.qon) { NET.qon = false; NET.busy = false; NET.qtok = (NET.qtok || 0) + 1; } if (NET.on) netLeave();
   state = 'menu'; demo = null; particles = []; skids = []; engine(0, false); if (UPD) setTimeout(function () { if (UPD) UPD(); }, 400);
-  for (const id of ['finish','paused','mp','setup','prefs','top']) document.getElementById(id).classList.add('hidden');
+  for (const id of ['finish','paused','mp','setup','prefs','top','daily','career','week']) document.getElementById(id).classList.add('hidden');
   document.getElementById('menu').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; buildMenu();
 }
 function saveGarage() { try { localStorage.setItem('td_car', JSON.stringify({ type: garage.type, color: garage.color })); } catch (e) {} }
 function statBars(el, t) {
-  const st = CAR_TYPES[t].st, rows = [['Скорость', (st.top - 0.92)/0.15], ['Разгон', (st.acc - 0.90)/0.22], ['Управление', (st.grip - 0.90)/0.21], ['Броня', (st.arm - 0.75)/0.75]]; el.innerHTML = '';
+  const st = owns(t) ? carK(t, stageOf(t)) : CAR_TYPES[t].st, rows = [['Скорость', (st.top - 0.92)/0.15], ['Разгон', (st.acc - 0.90)/0.22], ['Управление', (st.grip - 0.90)/0.21], ['Броня', (st.arm - 0.75)/0.75]]; el.innerHTML = '';
   rows.forEach(function (r) { const sp = document.createElement('span'), i = document.createElement('i'), u = document.createElement('u'); u.style.width = Math.round(Math.max(0.08, Math.min(1, r[1]))*100) + '%'; u.style.background = statColor(r[1]); i.appendChild(u); sp.appendChild(document.createTextNode(r[0])); sp.appendChild(i); el.appendChild(sp); });
 }
 // a weak side of the car reads red, an average one yellow, a strong one green; the worst and the best car in the garage mark the ends
@@ -4261,14 +4486,37 @@ function statColor(v) { const t = Math.max(0, Math.min(1, (v - 0.13)/0.78)), A =
   return 'rgb(' + A.map(function (a, i) { return Math.round(a + (B[i] - a)*k); }).join(',') + ')'; }
 function buildGarage() {
   if (garage.view === undefined || !(garage.view >= 0 && garage.view < CAR_TYPES.length)) garage.view = garage.type;
+  if (TUNEUI.open) { if (owns(garage.view)) { TUNEUI.pv = null; TUNEUI.part = null; setTimeout(buildTune, 0); } else tuneClose(); }
+  document.getElementById('tuneopen').style.display = owns(garage.view) ? '' : 'none';
   const vt = garage.view, mine = owns(vt), C = CAR_TYPES[vt];
   document.getElementById('carname').textContent = C.name; document.getElementById('careng').textContent = C.eng.label; statBars(document.getElementById('carstats'), vt);
   document.getElementById('coins').textContent = String(WALLET.coins);
   const sw = document.getElementById('swatches'), buy = document.getElementById('buycar'); sw.innerHTML = ''; sw.style.display = mine ? '' : 'none'; buy.style.display = mine ? 'none' : '';
   if (!mine) { const need = C.price - WALLET.coins; buy.classList.toggle('poor', need > 0); buy.textContent = need > 0 ? C.price + ' · не хватает ' + need : 'Купить за ' + C.price; return; }
-  PAINTS.forEach(function (p, i) { const b = document.createElement('button'); b.className = 'sw' + (i === garage.color ? ' on' : '');
+  PAINTS.forEach(function (p, i) { if (!paintOwned(i)) return; const b = document.createElement('button'); b.className = 'sw' + (i === garage.color ? ' on' : '');
     b.style.background = 'rgb(' + p.map(function (v) { return Math.round(Math.pow(v, 0.8)*255); }).join(',') + ')';
     b.setAttribute('aria-label', 'Цвет ' + (i + 1)); b.addEventListener('click', function () { garage.color = i; saveGarage(); buildGarage(); }); sw.appendChild(b); });
+}
+// ---- the tuning panel
+const TUNEUI = { open: false, pv: null, part: null };
+function tuneOpen() { const t = garage.view === undefined ? garage.type : garage.view; if (!owns(t)) { note('Сначала купи эту машину', 1800); return; } TUNEUI.open = true; TUNEUI.pv = null; TUNEUI.part = null; document.getElementById('menu').classList.add('tuning'); buildTune(); stageTick = 0; }
+function tuneClose() { if (!TUNEUI.open) return; TUNEUI.open = false; TUNEUI.pv = null; document.getElementById('menu').classList.remove('tuning'); stageTick = 0; buildGarage(); }
+function buildTune() {
+  const t = garage.view === undefined ? garage.type : garage.view; if (!TUNEUI.open) return; if (!owns(t)) { tuneClose(); return; }
+  const sel = tuneSel(t) || [0, 0, 0, 0], stg = stageOf(t), st = document.getElementById('tunestage'), rows = document.getElementById('tunerows'), buy = document.getElementById('tunebuy'); st.innerHTML = ''; rows.innerHTML = '';
+  document.getElementById('coins').textContent = String(WALLET.coins); statBars(document.getElementById('carstats'), t);
+  const pips = document.createElement('div'); pips.className = 'pips'; for (let k = 1; k <= 3; k++) { const i = document.createElement('i'); if (k <= stg) i.className = 'on'; pips.appendChild(i); } st.appendChild(pips);
+  const tx = document.createElement('div'); tx.className = 'txt'; tx.textContent = STAGE_INFO[stg][0]; const sm = document.createElement('small'); sm.textContent = stg >= 3 ? 'максимум: скорость, разгон и управление' : 'дальше: ' + STAGE_INFO[stg + 1][1] + ' · быстрее и цепче'; tx.appendChild(sm); st.appendChild(tx);
+  if (stg < 3) { const p = stagePrice(t, stg + 1), b = document.createElement('button'); b.className = 'main' + (WALLET.coins < p ? ' poor' : ''); b.textContent = STAGE_INFO[stg + 1][0] + ' · ' + p;
+    b.addEventListener('click', function () { if (WALLET.coins < p) { note('Не хватает ' + (p - WALLET.coins) + ' монет', 2000); return; } WALLET.coins -= p; saveWallet(); progSet('s' + t, stg + 1); beep(660, 0.25, 'triangle', 0.07, 1320); haptic('win'); note(STAGE_INFO[stg + 1][0] + ' стоит на ' + CAR_TYPES[t].name, 2000); buildTune(); }); st.appendChild(b); }
+  TUNE_KEYS.forEach(function (key, ki) { const P = TUNE_PARTS[key], row = document.createElement('div'), lab = document.createElement('span'), box = document.createElement('div'); row.className = 'tunerow'; lab.textContent = P.name; row.appendChild(lab);
+    P.opts.forEach(function (o, i) { const own = tuneOwns(t, key, i), b = document.createElement('button'), pv = TUNEUI.pv && TUNEUI.part === key && TUNEUI.pv[ki] === i && !own; b.className = 'tchip' + (sel[ki] === i && !(TUNEUI.pv && TUNEUI.part === key) ? ' on' : '') + (pv ? ' pv' : '');
+      if (P.css) { const d = document.createElement('i'); d.style.background = P.css[i]; b.appendChild(d); b.className += ' dot'; b.title = o[0]; } { const nm = document.createElement('span'); nm.textContent = o[0]; b.appendChild(nm); } if (!own) { const pr = document.createElement('small'); pr.textContent = String(o[1]); b.appendChild(pr); }
+      b.addEventListener('click', function () { if (own) { const q = tuneSel(t) || [0, 0, 0, 0]; q[ki] = i; TUNE_SEL[t] = q; tuneSave(); TUNEUI.pv = null; TUNEUI.part = null; } else { const q = (tuneSel(t) || [0, 0, 0, 0]).slice(); q[ki] = i; TUNEUI.pv = q; TUNEUI.part = key; } buildTune(); }); box.appendChild(b); });
+    row.appendChild(box); rows.appendChild(row); });
+  if (TUNEUI.pv && TUNEUI.part) { const key = TUNEUI.part, ki = TUNE_KEYS.indexOf(key), i = TUNEUI.pv[ki], o = TUNE_PARTS[key].opts[i]; buy.style.display = ''; buy.classList.toggle('poor', WALLET.coins < o[1]); buy.textContent = WALLET.coins < o[1] ? TUNE_PARTS[key].name + ' «' + o[0] + '» · ' + o[1] + ' · не хватает ' + (o[1] - WALLET.coins) : 'Купить: ' + TUNE_PARTS[key].name.toLowerCase() + ' «' + o[0] + '» за ' + o[1];
+    buy.onclick = function () { if (WALLET.coins < o[1]) { note('Не хватает ' + (o[1] - WALLET.coins) + ' монет — они даются за заезды', 2200); return; } WALLET.coins -= o[1]; saveWallet(); progSet('o' + t, 1 << (TUNE_PARTS[key].bit + i)); const q = tuneSel(t) || [0, 0, 0, 0]; q[ki] = i; TUNE_SEL[t] = q; tuneSave(); TUNEUI.pv = null; TUNEUI.part = null; beep(660, 0.25, 'triangle', 0.07, 1320); haptic('win'); buildTune(); }; }
+  else { buy.style.display = 'none'; buy.onclick = null; }
 }
 function buyCar() { const t = garage.view, C = CAR_TYPES[t]; if (owns(t)) return; if (WALLET.coins < C.price) { note('Не хватает ' + (C.price - WALLET.coins) + ' монет — они даются за заезды', 2200); return; }
   WALLET.coins -= C.price; WALLET.owned.push(t); saveWallet(); garage.type = t; saveGarage(); buildGarage(); beep(660, 0.25, 'triangle', 0.07, 1320); haptic('win'); }
@@ -4316,7 +4564,7 @@ function buildFpsSwitch() {
     b.addEventListener('click', function () { fpsEco = o[0]; try { localStorage.setItem('td_eco', fpsEco ? '1' : '0'); } catch (e) {} buildFpsSwitch(); toast(o[2]); }); ee.appendChild(b); });
 }
 function buildMenu() {
-  buildGarage(); buildLevels(); buildUISwitch(); buildCtlSwitch(); buildFpsSwitch(); buildOpts();
+  dailyBadge(); careerBadge(); if (garage.color >= 8 && !paintOwned(garage.color)) garage.color = 0; buildGarage(); buildLevels(); buildUISwitch(); buildCtlSwitch(); buildFpsSwitch(); buildOpts();
   { const names = []; if (opt.rev) names.push('обратно'); if (opt.rain) names.push('дождь'); if (opt.ko) names.push('выбывание'); document.getElementById('playsub').textContent = (champPick ? 'Чемпионат' : TRACKS[lastTrack].name) + ' · ' + LEVELS[level].name + (names.length ? ' · ' + names.join(', ') : ''); }
   const el = document.getElementById('tracks'); el.innerHTML = ''; el.classList.toggle('many', TRACKS.length > 5); document.getElementById('tdesc').textContent = champPick ? 'Пять случайных трасс подряд, очки за места' : TRACKS[lastTrack].desc;
   TRACKS.forEach(function (tr, i) {
@@ -4342,6 +4590,28 @@ function lbCall(path, body, cb) { let done = false; const end = function (r) { i
   try { fetch(API_URL + path, { method: 'POST', body: JSON.stringify(body) }).then(function (r) { return r.json(); }).then(function (j) { end(j && j.ok ? j : null); }, function () { end(null); }); } catch (e) { end(null); } }
 function lbSend(track, ms, car, cb) { if (!lbOn() || !lbInit()) { if (cb) cb(null); return; }
   lbCall('/score', { track: lbId(track), ms: ms, car: car, init: lbInit() }, function (r) { if (r) { LB.data[track] = r; try { localStorage.setItem('td_lc' + lbId(track), String(ms)); } catch (e) {} } if (cb) cb(r); }); }
+// ---- The tournament of the week: one track from Monday to Sunday (UTC), everybody's best time on it in the usual conditions.
+// Any such race on that track counts, wherever it was started from. The prize for last week arrives when the table is next opened.
+const WEEK = { data: null, fail: false, busy: false, seen: 0 }, WEEK_PRIZES = 'Призы в конце недели: 1 место — 3000 монет, 2 — 2000, 3 — 1500, до 10-го — 700, до 50-го — 300, всем участникам — 100';
+function weekNum() { return Math.floor((Date.now()/1000 + 3*86400)/(7*86400)); }
+function weekTrack() { return (weekNum()*7 + 3) % 15; }
+function weekLeft() { const s = Math.max(0, (weekNum() + 1)*7*86400 - 3*86400 - Date.now()/1000), d = Math.floor(s/86400), h = Math.floor(s % 86400/3600); return d > 0 ? d + ' д ' + h + ' ч' : h > 0 ? h + ' ч ' + Math.floor(s % 3600/60) + ' мин' : Math.max(1, Math.floor(s/60)) + ' мин'; }
+function weekGot(r) { if (!r || !r.ok) return; WEEK.data = r; WEEK.fail = false; if (r.won && r.won.coins > 0) { note('Турнир прошлой недели: ' + r.won.rank + ' место · +' + r.won.coins + ' монет', 5000); beep(660, 0.3, 'triangle', 0.07, 1320); walletSync(); } }
+function weekLoad(cb) { if (!lbOn()) { if (cb) cb(null); return; } lbCall('/week', { init: lbInit() }, function (r) { if (r && r.ok) weekGot(r); else WEEK.fail = true; if (cb) cb(r); }); }
+function weekSend(ms, car, cb) { if (!lbOn() || !lbInit()) { if (cb) cb(null); return; } lbCall('/week', { init: lbInit(), ms: ms, car: car, track: weekTrack() }, function (r) { if (r && r.ok) weekGot(r); if (cb) cb(r); }); }
+function weekOpen() { document.getElementById('week').classList.remove('hidden'); weekDraw(); weekLoad(function () { if (!document.getElementById('week').classList.contains('hidden')) weekDraw(); }); }
+function weekDraw() {
+  const el = document.getElementById('wlist'), me = document.getElementById('wme'), r = WEEK.data && WEEK.data.wk === weekNum() ? WEEK.data : null, ti = weekTrack(); el.innerHTML = '';
+  document.getElementById('wtrack').textContent = 'Трасса недели: ' + TRACKS[ti].name + ' · осталось ' + weekLeft(); document.getElementById('wprize').textContent = WEEK_PRIZES;
+  const line = function (t) { const d = document.createElement('div'); d.className = 'note2'; d.textContent = t; el.appendChild(d); };
+  if (!lbOn()) { line('Турнир работает в игре, открытой через Telegram'); me.textContent = ''; return; }
+  if (!r) { el.classList.remove('many'); line(WEEK.fail ? 'Не удалось загрузить таблицу — проверь интернет' : 'Загружаю…'); me.textContent = ''; return; }
+  el.classList.toggle('many', r.top.length > 8); if (!r.top.length) line('Пока никого. Проедь трассу — и будешь первым');
+  r.top.forEach(function (p, i) { const d = document.createElement('div'), sp = document.createElement('span'), rk = document.createElement('i'), u = document.createElement('u'), b = document.createElement('b'); if (p.me) d.className = 'me';
+    rk.className = 'rk'; rk.textContent = String(i + 1); sp.appendChild(rk); sp.appendChild(document.createTextNode(p.name)); u.textContent = CAR_TYPES[p.car] ? CAR_TYPES[p.car].name : ''; b.textContent = fmt(p.ms); d.appendChild(sp); d.appendChild(u); d.appendChild(b); el.appendChild(d); });
+  me.textContent = r.me ? 'Твоё место: ' + r.me.rank + ' из ' + r.total + ' · ' + fmt(r.me.ms) : (lbInit() ? 'Тебя здесь пока нет: проедь трассу недели без «обратно», дождя и выбывания' : 'Чтобы участвовать, открой игру в Telegram');
+}
+function weekGo() { if (!CAREER.keep) CAREER.keep = { level: level, opt: opt, last: lastTrack, champ: champPick }; opt = { rev: false, rain: false, ko: false }; champPick = false; CHAMP.on = false; CAREER.ev = null; document.getElementById('week').classList.add('hidden'); startRace(weekTrack(), false); }
 function lbSync() {                                     // records set before the table existed, or while offline, go up once
   if (!lbOn() || !lbInit()) return; for (let i = 0; i < TRACKS.length; i++) { const b = bestTimes[trackKey(i, false, false)]; let sent = 0; try { sent = parseInt(localStorage.getItem('td_lc' + lbId(i)) || '0', 10); } catch (e) {} if (b && (!sent || b < sent)) lbSend(i, b, garage.type); } }
 let REGION = null; try { REGION = new Intl.DisplayNames(['ru'], { type: 'region' }); } catch (e) {}
@@ -4421,6 +4691,10 @@ document.getElementById('mpjoin').addEventListener('click', function () { netJoi
 document.getElementById('mpgo').addEventListener('click', netStart); document.getElementById('mprdy').addEventListener('click', function () { netReady(); }); document.getElementById('pubrdy').addEventListener('click', function () { netReady(); });
 document.getElementById('mpshare').addEventListener('click', netShare);
 document.getElementById('mpback').addEventListener('click', toMenu);
+document.getElementById('tuneopen').addEventListener('click', function () { audio(); if (TUNEUI.open) tuneClose(); else tuneOpen(); }); document.getElementById('tuneclose').addEventListener('click', tuneClose);
+document.getElementById('careeropen').addEventListener('click', function () { audio(); buildCareer(); document.getElementById('career').classList.remove('hidden'); }); document.getElementById('careerclose').addEventListener('click', function () { document.getElementById('career').classList.add('hidden'); }); document.getElementById('careergo').addEventListener('click', function () { careerGo(CAREER.sel); });
+document.getElementById('weekopen').addEventListener('click', function () { audio(); weekOpen(); }); document.getElementById('weekclose').addEventListener('click', function () { document.getElementById('week').classList.add('hidden'); }); document.getElementById('weekgo').addEventListener('click', weekGo);
+document.getElementById('dailyopen').addEventListener('click', function () { audio(); buildDaily(); document.getElementById('daily').classList.remove('hidden'); }); document.getElementById('dailyclose').addEventListener('click', function () { document.getElementById('daily').classList.add('hidden'); });
 document.getElementById('mpleave').addEventListener('click', toMenu);
 document.getElementById('tolobby').addEventListener('click', function () { if (!NET.host) return; netAward(); for (const p of NET.roster) delete p.rdy; NET.tr.all({ t: 'roster', list: NET.roster, track: NET.track, opt: NET.opt }, -1); NET.tr.all({ t: 'lobby' }, -1); document.getElementById('finish').classList.add('hidden'); netLobby(); });
 document.getElementById('rematch').addEventListener('click', function () { if (!NET.host) return; netAward(); specStop(false); NET.racing = false; netStart(); });
