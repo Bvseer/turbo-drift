@@ -618,7 +618,7 @@
     <div><b>Тренировка</b> — трасса без соперников, с подсказками по шагам: руль, занос, бонусы. Монеты и рекорды в ней не идут</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 99</div>
+    <div style="opacity:.5;margin-top:8px">версия 100</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -702,7 +702,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 99</div>
+  <div class="fver">Turbo Drift · версия 100</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -4007,6 +4007,8 @@ function hudReset() { for (const k in HUDC) { HUDC[k].v = null; HUDC[k].s = {}; 
 let hudTick = 0;
 // In a room everybody's car stands on the grid behind the player's own, two abreast, in its colour and with its parts: who has come is seen, not only read in the list.
 const LOBBY = { sig: '' };
+// the showroom stands on the track that is chosen: picking another one in a room or before a race changes the scenery behind the car
+function menuTrack(id) { id = id | 0; if (state !== 'menu' || !TRACKS[id] || (T && T.id === id && !T.rev)) return; try { RAIN = false; buildTrack(id, false); pickups = []; shots = []; particles = []; skids = []; demo = null; cars = []; LOBBY.sig = ''; stageTick = 0; update(0); } catch (e) {} }
 function lobbyCars() {
   const others = NET.roster.filter(function (p) { return p.nid !== NET.me; }).slice(0, 7), sig = others.map(function (p) { return p.nid + ':' + p.type + ':' + p.color + ':' + (p.tn || []).join(''); }).join('|');
   if (sig === LOBBY.sig && cars[0] === demo && cars.length === others.length + 1) return; LOBBY.sig = sig;
@@ -4323,6 +4325,7 @@ function netLobby() {
     const tl = document.getElementById('mptracks'); tl.innerHTML = ''; tl.classList.toggle('many', TRACKS.length > 5);
     TRACKS.forEach(function (tr, i) { const b = document.createElement('button'); b.className = 'track' + (i === NET.track ? ' on' : '') + (tr.name.length > 9 ? ' long' : ''); const left = document.createElement('span'); left.textContent = tr.name; const sm = document.createElement('small'); sm.textContent = tr.desc; left.appendChild(sm); b.appendChild(left);
       b.addEventListener('click', function () { NET.track = i; NET.picked = true; netRoster(); }); tl.appendChild(b); }); }
+  menuTrack(NET.track);
 }
 function netFreeColor(want, nid) { const used = NET.roster.filter(function (p) { return p.nid !== nid; }).map(function (p) { return p.color; }); if (used.indexOf(want) < 0) return want; for (let c = 0; c < 8; c++) if (used.indexOf(c) < 0) return c; return want; }
 function netSetCar(type, color) {                   // the player changes car or colour in the lobby
@@ -4914,7 +4917,7 @@ function buildMenu() {
     const sm = document.createElement('small'); sm.textContent = tr.desc; left.appendChild(sm);
     const right = document.createElement('b'); right.textContent = bestTimes[tk] ? fmt(bestTimes[tk]) : 'нет рекорда';
     if (i === lastTrack && !champPick) b.classList.add('on');
-    b.appendChild(left); b.appendChild(right); b.addEventListener('click', function () { champPick = false; lastTrack = i; try { localStorage.setItem('td_last', String(i)); } catch (e) {} buildMenu(); }); el.appendChild(b);
+    b.appendChild(left); b.appendChild(right); b.addEventListener('click', function () { champPick = false; lastTrack = i; try { localStorage.setItem('td_last', String(i)); } catch (e) {} buildMenu(); menuTrack(i); }); el.appendChild(b);
   });
   document.getElementById('champ').classList.toggle('on', champPick);
 }
