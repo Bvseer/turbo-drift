@@ -639,7 +639,7 @@
     <div><b>Тренировка</b> — трасса без соперников, с подсказками по шагам: руль, занос, бонусы. Монеты и рекорды в ней не идут</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 103</div>
+    <div style="opacity:.5;margin-top:8px">версия 104</div>
   </div>
 </div>
 
@@ -722,7 +722,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 103</div>
+  <div class="fver">Turbo Drift · версия 104</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -3140,7 +3140,7 @@ function stepCar(c, steer, brake, dt, gas) {
   let u = c.vx*s + c.vz*co, v = c.vx*co - c.vz*s, r = c.r;                                // forward, sideways, yaw rate
   const K = c.K, tow = c.draft > 0.4 ? Math.min(1, (c.draft - 0.4)/0.6) : 0, GR = GRIP*K.grip;                 // tow: riding in the hole another car punches in the air
   const onRoad = c.off < ROAD_W/2 + 0.9, boost = c.boost > 0, mu = onRoad ? (boost ? 1.14 : 1)*(RAIN ? 0.86 : 1) : 0.55;       // turbo presses the car into the road
-  const top = !onRoad ? 17 : (boost ? V_BOOST : V_MAX)*K.top + tow*3.4, uu = Math.max(3, Math.abs(u));
+  const top = !onRoad ? 20 : (boost ? V_BOOST : V_MAX)*K.top + tow*3.4, uu = Math.max(3, Math.abs(u));
   const beta = Math.atan2(v, uu);                                                          // how far the car points away from where it goes
   // lock shrinks with speed; counter-steer assist; never ask the front for more slip than it can use
   const lock = 0.52/(1 + Math.pow(Math.max(0, u)/15, 1.6)) + 0.035;
@@ -3161,7 +3161,7 @@ function stepCar(c, steer, brake, dt, gas) {
   else if (u > top) ax = -(u - top)*3.2;
   else if (gas || boost) ax = (accelAt(u/K.top)*K.acc*(c.spinT > 0 ? 0.38 : 1) + (boost ? 9 : 0) + tow*2.4)*mu;
   else ax = -(u > 0 ? 1 : -1)*Math.min(Math.abs(u)*4, 2.2 + Math.abs(u)*0.16);              // off the throttle: engine braking and drag
-  if (!onRoad) ax -= u*0.6;
+  if (!onRoad) ax -= u*0.45;
   if (c.spinT > 0) c.spinT -= dt;                                                            // wheels spinning off the line
   ax -= Math.abs(beta)*1.4;                                                                   // scrubbing speed while sideways
   const du = ax - Ff*Math.sin(delta)*0.3 + v*r, dv = Fr + Ff*Math.cos(delta) - u*r;
@@ -3523,10 +3523,11 @@ function startRace(trackId, useChallenge) {
 }
 function welcomeShow() { if (!FRESH || challenge || NET.on) return; if (!document.getElementById('mp').classList.contains('hidden')) return; document.getElementById('welcome').classList.remove('hidden'); }
 function welcomeClose() { FRESH = false; document.getElementById('welcome').classList.add('hidden'); try { localStorage.setItem('td_seen', '1'); } catch (e) {} }
-function beginCountdown() {
+let COUNT_LEN = 3.2;          // how long this countdown runs: three seconds alone, ten in a room, so that everybody has the phone in his hands by the start
+function beginCountdown(len) {
   TILT.zero = Math.abs(TILT.roll) < 30 ? TILT.roll : 0; document.body.classList.toggle('tilt', TILT.mode === 'tilt' && document.body.classList.contains('mob'));
   { const kb = document.getElementById('keysbar'); kb.classList.remove('gone'); clearTimeout(beginCountdown.t); beginCountdown.t = setTimeout(function () { kb.classList.add('gone'); }, 14000); }
-  state = 'countdown'; countT = 3.2; lastShown = ''; LAUNCH.at = null; LAUNCH.prev = null; LAUNCH.open = false;
+  state = 'countdown'; countT = len > 3.2 ? len : 3.2; COUNT_LEN = countT; lastShown = ''; LAUNCH.at = null; LAUNCH.prev = null; LAUNCH.open = false;
   try { const hn = parseInt(localStorage.getItem('td_hint') || '0', 10), mob = document.body.classList.contains('mob'); if (hn < 6 && !TRAIN.hints) { localStorage.setItem('td_hint', String(hn + 1));
     const text = hn < 2 ? (mob ? (document.body.classList.contains('tilt') ? 'Наклоняй телефон — это руль' : 'Веди пальцем по полосе слева — это руль') : '↑ газ · ← → руль · Пробел — бонус') : (mob ? 'Держи ТОРМОЗ, отпусти на GO — рывок' : 'Газ ровно на GO — рывок');
     setTimeout(function () { if (state === 'countdown') note(text, 2600); }, 400); } } catch (e) {}
@@ -4071,7 +4072,7 @@ function update(dt) {
     menuT += dt;
   } else if (state === 'countdown') {
     countT -= dt; const n = Math.ceil(countT - 0.2), label = n >= 1 ? String(n) : 'GO!';
-    if (label !== lastShown && countT < 3.1) { lastShown = label; showBig(label, 650); beep(n >= 1 ? 440 : 880, n >= 1 ? 0.15 : 0.4, 'square', 0.06); haptic('light'); }
+    if (label !== lastShown && countT < COUNT_LEN - 0.1) { lastShown = label; showBig(label, 650); if (n > 3) beep(330, 0.07, 'square', 0.03); else { beep(n >= 1 ? 440 : 880, n >= 1 ? 0.15 : 0.4, 'square', 0.06); haptic('light'); } }          // the long count ticks quietly until the last three
     launchWatch(countT - 0.2);
     if (countT <= 0.2) { state = 'race'; raceT = 0; raceClock = 0; lapStart = 0; launchGo(); }
   } else if (state === 'race' || state === 'finished') {
@@ -4519,7 +4520,7 @@ function netBegin(m) {
   for (const p of m.list) { if (p.nid === NET.me) continue; const c = newCar(PAINTS[p.color] || PAINTS[0], p.type); c.net = true; c.nid = p.nid; c.name = p.name; c.tn = tnClean(p.tn); cars.push(c); }
   cars.push(player);
   m.order.forEach(function (nid, slot) { const c = carByNid(nid); if (!c) return; gridPlace(c, slot); if (c.bot) { c.lap = 0; botReady(c); } c.sn = null; });
-  resetRaceState(); koSetup(!!m.ko); beginCountdown();
+  resetRaceState(); koSetup(!!m.ko); beginCountdown(10.2);
 }
 // state of every car this device drives: [id, x, z, heading, forward speed, side speed, lap, sample, offset, wheel, flags, shield, health]
 function netPack(c) { const f = (c.braking ? 1 : 0) | (c.sliding ? 2 : 0) | ((c.boost > 0 || c.nitro > 0) ? 4 : 0) | (c.wreck > 0 ? 8 : 0) | (c.done ? 16 : 0), r2 = function (v) { return Math.round(v*100)/100; };
