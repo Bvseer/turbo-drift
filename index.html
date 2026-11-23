@@ -575,7 +575,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 93</div>
+    <div style="opacity:.5;margin-top:8px">версия 94</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -652,7 +652,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 93</div>
+  <div class="fver">Turbo Drift · версия 94</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -3301,8 +3301,14 @@ try { const l = parseInt(localStorage.getItem('td_level') || (FRESH ? '0' : '1')
 let menuT = 0, garage = { type: 0, color: 0 };
 try { const g = JSON.parse(localStorage.getItem('td_car') || 'null'); if (g && g.type >= 0 && g.type < CAR_TYPES.length && g.color >= 0 && g.color < PAINTS.length && paintOwned(g.color | 0)) garage = { type: g.type | 0, color: g.color | 0 }; } catch (e) {}
 // What the next solo race is: direction, weather, and whether the last car is knocked out every few seconds.
+// How many laps: 0 leaves the track its own number. A race of another length is a race like any other, but its time is not a record:
+// the tables, the ghost, the tournament of the week and the challenge to a friend all go by the track's own number of laps.
+const LAP_CHOICES = [0, 1, 2, 3, 5, 8];
+function stdLaps() { return (T && TRACKS[T.id] && TRACKS[T.id].laps) || 3; }
+function lapsNext(o) { o.laps = LAP_CHOICES[(LAP_CHOICES.indexOf(o.laps | 0) + 1) % LAP_CHOICES.length]; }
+function lapsWord(n) { return n + plural(n, ' круг', ' круга', ' кругов'); }
 let opt = { rev: false, rain: false, ko: false };
-try { const o = JSON.parse(localStorage.getItem('td_opt') || 'null'); if (o) opt = { rev: !!o.rev, rain: !!o.rain, ko: !!o.ko }; } catch (e) {}
+try { const o = JSON.parse(localStorage.getItem('td_opt') || 'null'); if (o) opt = { rev: !!o.rev, rain: !!o.rain, ko: !!o.ko, laps: LAP_CHOICES.indexOf(o.laps | 0) > 0 ? o.laps | 0 : 0 }; } catch (e) {}
 function saveOpt() { try { localStorage.setItem('td_opt', JSON.stringify(opt)); } catch (e) {} }
 // Coins are won in races and spent on cars. Two cars are free; a car chosen before coins existed stays with its driver.
 let WALLET = { coins: 0, owned: [0, 3] };
@@ -3368,7 +3374,7 @@ const GHOST = { rec: [], play: null, car: null, acc: 0 };
 function ghostLoad(key) { try { const b = localStorage.getItem('td_g_' + key); if (!b) return null; const bin = atob(b), a = new Int16Array(bin.length >> 1); for (let i = 0; i < a.length; i++) a[i] = ((bin.charCodeAt(2*i) | (bin.charCodeAt(2*i + 1) << 8)) << 16) >> 16; return a.length > 20 ? a : null; } catch (e) { return null; } }
 function ghostSave(key) { try { const a = new Int16Array(2 + GHOST.rec.length); a[0] = player.type; a[1] = 0; a.set(GHOST.rec, 2); const u = new Uint8Array(a.buffer); let str = ''; for (let i = 0; i < u.length; i += 4096) str += String.fromCharCode.apply(null, u.subarray(i, i + 4096)); localStorage.setItem('td_g_' + key, btoa(str)); } catch (e) {} }
 function ghostSetup() {
-  GHOST.rec = []; GHOST.acc = 0; GHOST.play = null; GHOST.car = null; if (NET.racing || KO.on || rivalBot) return;
+  GHOST.rec = []; GHOST.acc = 0; GHOST.play = null; GHOST.car = null; if (NET.racing || KO.on || rivalBot || LAPS !== stdLaps()) return;
   const a = ghostLoad(T.key); if (!a) return; GHOST.play = a; GHOST.car = newCar([0.70,0.90,1.0], Math.abs(a[0]) % CAR_TYPES.length); ghostPlace(0);
 }
 function ghostPlace(t) {
@@ -3405,6 +3411,7 @@ function setupRace(trackId, useChallenge) {
   cars = bots.concat([player]);
   bots.forEach(function (b, k) { gridPlace(b, k); if (b.rival) placeBot(b); b.lap = 0; botReady(b); });
   gridPlace(player, bots.length);
+  if (opt.laps > 0 && !ch && !CHAMP.on) LAPS = opt.laps;
   resetRaceState(); koSetup(opt.ko && !ch && !CHAMP.on); ghostSetup();
   const r = document.getElementById('rival');
   if (rivalBot) { r.style.display = 'block'; r.textContent = 'Соперник: ' + challenge.name + ' — ' + fmt(challenge.ms); } else r.style.display = 'none';
@@ -3585,15 +3592,15 @@ function finishRace(koPlace) {
   state = 'finished'; finishMs = Math.round(raceT*1000); player.done = true; haptic('win'); if (!ko || koPlace === 1) beep(660, 0.5, 'triangle', 0.08, 1320);
   const ahead = cars.filter(function (b) { return b !== player && b.done; }).length; place = ko ? koPlace : ahead + 1;
   if (!ko) netFinished(player.nid, finishMs);
-  const key = T.key, isBest = !ko && (!bestTimes[key] || finishMs < bestTimes[key]);
+  const key = T.key, std = ko || LAPS === stdLaps(), isBest = !ko && std && (!bestTimes[key] || finishMs < bestTimes[key]);
   if (isBest) { bestTimes[key] = finishMs; saveBest(); if (!mp && !rivalBot) ghostSave(key); }
   document.getElementById('fworldrow').style.display = 'none';
-  if (!ko && key === trackKey(T.id, false, false) && lbOn() && lbInit()) { const tid = T.id, stamp = finishMs;
+  if (!ko && std && key === trackKey(T.id, false, false) && lbOn() && lbInit()) { const tid = T.id, stamp = finishMs;
     lbSend(tid, bestTimes[key], player.type | 0, function (r) { if (r && r.me && state === 'finished' && T.id === tid && finishMs === stamp) { document.getElementById('fworld').textContent = r.me.rank + ' место из ' + r.total; document.getElementById('fworldrow').style.display = ''; } }); }
   if (place === 1 && !mp && !ko) { wins[key] = wins[key] || [0,0,0,0]; wins[key][level] = 1; try { localStorage.setItem('td_wins', JSON.stringify(wins)); } catch (e) {} }
   // coins: for taking part, for the place, more against stronger rivals
   const total = cars.length + KO.outs.length, share = [50,30,18,10,6,4][Math.min(5, place - 1)];
-  let coins = mp ? 25 + share*0.8 : (15 + share)*[1, 1.25, 1.6, 2][level]*(ko ? 1.2 : 1); if (isBest && !mp) coins += 20; if (total < 2) coins = 10;
+  let coins = mp ? 25 + share*0.8 : (15 + share)*[1, 1.25, 1.6, 2][level]*(ko ? 1.2 : 1); if (isBest && !mp) coins += 20; if (total < 2) coins = 10; if (!std) coins *= Math.max(0.34, Math.min(2.7, LAPS/stdLaps()));          // a shorter race pays less, a longer one more
   let v = '';
   if (CHAMP.on && !mp) {                                       // points for this round; after the third, the table decides
     ranking().forEach(function (c, i) { CHAMP.pts[c.nid] = (CHAMP.pts[c.nid] || 0) + (PLACE_PTS[i] || 0); });
@@ -3601,7 +3608,7 @@ function finishRace(koPlace) {
     else v = 'Чемпионат · этап ' + (CHAMP.i + 1) + ' из ' + CHAMP.list.length;
   }
   const dq = dailyRace({ place: place, total: total, mp: !!mp, track: T.id }); coins += dq.coins;
-  if (!ko && key === trackKey(T.id, false, false) && T.id === weekTrack() && lbOn() && lbInit()) { const stamp = finishMs; weekSend(finishMs, player.type | 0, function (r) { if (r && r.me && state === 'finished' && finishMs === stamp) { const fd = document.getElementById('fdaily'), d = document.createElement('div'); d.textContent = 'Турнир недели: ' + r.me.rank + ' место из ' + r.total; fd.appendChild(d); fd.style.display = ''; } }); }
+  if (!ko && std && key === trackKey(T.id, false, false) && T.id === weekTrack() && lbOn() && lbInit()) { const stamp = finishMs; weekSend(finishMs, player.type | 0, function (r) { if (r && r.me && state === 'finished' && finishMs === stamp) { const fd = document.getElementById('fdaily'), d = document.createElement('div'); d.textContent = 'Турнир недели: ' + r.me.rank + ' место из ' + r.total; fd.appendChild(d); fd.style.display = ''; } }); }
   if (CAREER.ev && !mp) { const cq = careerFinish(place); coins += cq.coins; dq.lines = cq.lines.concat(dq.lines); }
   coins = earn(coins);
   { const fd = document.getElementById('fdaily'); fd.innerHTML = ''; for (const l of dq.lines) { const d = document.createElement('div'); d.textContent = l; fd.appendChild(d); } fd.style.display = dq.lines.length ? '' : 'none'; }
@@ -4215,13 +4222,14 @@ function netLobby() {
     const go = document.getElementById('mpgo'), all = k === guests.length; go.textContent = !guests.length ? 'Старт' : all ? 'Старт · все готовы' : 'Ждём готовности · ' + k + '/' + guests.length; go.classList.toggle('waitrdy', !all); }          // with friends the host gives the start, and only once every guest has said he is ready
   { const me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0]; if (me) { garage.type = me.type; garage.color = me.color; }
     document.getElementById('mpcarname').textContent = CAR_TYPES[garage.type].name; document.getElementById('mpcareng').textContent = CAR_TYPES[garage.type].eng.label; statBars(document.getElementById('mpcarstats'), garage.type, true);
-    { const o = NET.opt || {}, names = []; if (o.rev) names.push('обратно'); if (o.rain) names.push('дождь'); if (o.ko) names.push('выбывание'); document.getElementById('mpoptline').textContent = names.length ? ' Заезд: ' + names.join(', ') + '.' : ''; }
+    { const o = NET.opt || {}, names = []; if (o.rev) names.push('обратно'); if (o.rain) names.push('дождь'); if (o.ko) names.push('выбывание'); else if (o.laps > 0) names.push(lapsWord(o.laps | 0)); document.getElementById('mpoptline').textContent = names.length ? ' Заезд: ' + names.join(', ') + '.' : ''; }
     const sw = document.getElementById('mpswatches'), used = NET.roster.filter(function (p) { return p.nid !== NET.me; }).map(function (p) { return p.color; }); sw.innerHTML = '';
     PAINTS.forEach(function (p, i) { if (!paintOwned(i)) return; const b = document.createElement('button'); b.className = 'sw' + (i === garage.color ? ' on' : '') + (used.indexOf(i) >= 0 ? ' taken' : '');
       b.style.background = 'rgb(' + p.map(function (v) { return Math.round(Math.pow(v, 0.8)*255); }).join(',') + ')'; b.setAttribute('aria-label', 'Цвет ' + (i + 1));
       b.addEventListener('click', function () { netSetCar(garage.type, i); }); sw.appendChild(b); }); }
   if (NET.host && !NET.pub) { const ol = document.getElementById('mpopts'); ol.innerHTML = ''; NET.opt = NET.opt || { rev: false, rain: false, ko: false };
     [['rev', 'Обратно'], ['rain', 'Дождь'], ['ko', 'Выбывание']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (NET.opt[o[0]] ? ' on' : ''); b.textContent = o[1]; b.addEventListener('click', function () { NET.opt[o[0]] = !NET.opt[o[0]]; netRoster(); }); ol.appendChild(b); });
+    { const b = document.createElement('button'); b.className = 'lv' + (NET.opt.laps > 0 ? ' on' : ''); b.textContent = 'Круги: ' + (NET.opt.laps > 0 ? NET.opt.laps : 'авто'); b.addEventListener('click', function () { lapsNext(NET.opt); netRoster(); }); ol.appendChild(b); }
     const tl = document.getElementById('mptracks'); tl.innerHTML = ''; tl.classList.toggle('many', TRACKS.length > 5);
     TRACKS.forEach(function (tr, i) { const b = document.createElement('button'); b.className = 'track' + (i === NET.track ? ' on' : '') + (tr.name.length > 9 ? ' long' : ''); const left = document.createElement('span'); left.textContent = tr.name; const sm = document.createElement('small'); sm.textContent = tr.desc; left.appendChild(sm); b.appendChild(left);
       b.addEventListener('click', function () { NET.track = i; netLobby(); }); tl.appendChild(b); }); }
@@ -4357,12 +4365,12 @@ function netStart() {
   const usedC = NET.roster.map(function (p) { return p.color; }), cols = [0,1,2,3,4,5,6,7].filter(function (c) { return usedC.indexOf(c) < 0; }), bl = [];
   for (let k = 0; k < nb; k++) bl.push({ nid: 100 + k, type: (k + 1 + NET.track*2) % CAR_TYPES.length, color: cols.length ? cols[k % cols.length] : k, skill: NET.pub && np > 1 ? PUB.skills[k % 3] : L.skills[4 - k] });
   const pl = NET.roster.map(function (p) { return p.nid; }); for (let i = pl.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i + 1)), t = pl[i]; pl[i] = pl[j]; pl[j] = t; }
-  const o = NET.opt || {}, m = { t: 'start', pub: NET.pub ? 1 : 0, track: NET.track, rev: !!o.rev, rain: !!o.rain, ko: !!o.ko, bots: bl, order: bl.map(function (b) { return b.nid; }).concat(pl), list: NET.roster };
+  const o = NET.opt || {}, m = { t: 'start', pub: NET.pub ? 1 : 0, track: NET.track, rev: !!o.rev, rain: !!o.rain, ko: !!o.ko, laps: NET.pub ? 0 : (o.laps | 0), bots: bl, order: bl.map(function (b) { return b.nid; }).concat(pl), list: NET.roster };
   NET.tr.all(m, -1); netBegin(m);
 }
 function netBegin(m) {
   rstatReset();
-  audio(); NET.racing = true; NET.seen = performance.now(); NET.last = {}; for (const id in NET.conn) NET.last[id] = NET.seen; NET.sendT = 0; NET.roster = m.list; NET.awarded = false; CHAMP.on = false; RAIN = !!m.rain; buildTrack(m.track, !!m.rev); rivalBot = null; document.getElementById('rival').style.display = 'none';
+  audio(); NET.racing = true; NET.seen = performance.now(); NET.last = {}; for (const id in NET.conn) NET.last[id] = NET.seen; NET.sendT = 0; NET.roster = m.list; NET.awarded = false; CHAMP.on = false; RAIN = !!m.rain; buildTrack(m.track, !!m.rev); if (m.laps > 0 && m.laps <= 12 && !m.pub) LAPS = m.laps | 0; rivalBot = null; document.getElementById('rival').style.display = 'none';
   { const me = m.list.filter(function (p) { return p.nid === NET.me; })[0]; if (me) { garage.type = me.type; garage.color = me.color; } }
   player = newCar(PAINTS[garage.color], garage.type); player.name = playerName; player.nid = NET.me; dressPlayer(player); player.K = netK(player.K); bots = []; cars = [];
   for (const b of m.bots) { if (NET.host) { const c = newBot(PAINTS[b.color] || PAINTS[0], b.skill, 0, 'Бот', b.type); c.nid = b.nid; bots.push(c); cars.push(c); }
@@ -4757,6 +4765,8 @@ function buildOpts() {
   const el = document.getElementById('opts'); el.innerHTML = '';
   [['rev', 'Обратно'], ['rain', 'Дождь'], ['ko', 'Выбывание']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (opt[o[0]] ? ' on' : ''); b.textContent = o[1];
     b.addEventListener('click', function () { opt[o[0]] = !opt[o[0]]; saveOpt(); buildMenu(); }); el.appendChild(b); });
+  { const b = document.createElement('button'); b.className = 'lv' + (opt.laps > 0 ? ' on' : ''); b.textContent = 'Круги: ' + (opt.laps > 0 ? opt.laps : 'авто'); b.title = 'Сколько кругов ехать. Рекорды идут только при обычном числе кругов';
+    b.addEventListener('click', function () { lapsNext(opt); saveOpt(); buildMenu(); if (opt.laps > 0) toast(lapsWord(opt.laps) + '. Рекорды и турнир считаются только при обычном числе кругов'); }); el.appendChild(b); }
 }
 function buildLevels() {
   const el = document.getElementById('levels'); el.innerHTML = '';
@@ -4800,7 +4810,7 @@ function buildFpsSwitch() {
 function buildMenu() {
   { const fv = document.querySelector('.fver'), mv = document.getElementById('mver'), n = fv ? (fv.textContent.match(/\d+/) || [''])[0] : ''; if (mv && n) mv.textContent = 'версия ' + n; }          // the version is read off the one place it is written, so the two cannot disagree
   dailyBadge(); careerBadge(); if (!NET.on) { const hc = homeColor(); if (garage.color !== hc) { garage.color = hc; saveGarage(); } } buildGarage(); buildLevels(); buildUISwitch(); buildCtlSwitch(); buildFpsSwitch(); buildOpts();
-  { const names = []; if (opt.rev) names.push('обратно'); if (opt.rain) names.push('дождь'); if (opt.ko) names.push('выбывание'); document.getElementById('playsub').textContent = (champPick ? 'Чемпионат' : TRACKS[lastTrack].name) + ' · ' + LEVELS[level].name + (names.length ? ' · ' + names.join(', ') : ''); }
+  { const names = []; if (opt.rev) names.push('обратно'); if (opt.rain) names.push('дождь'); if (opt.ko) names.push('выбывание'); else if (opt.laps > 0 && !champPick) names.push(lapsWord(opt.laps)); document.getElementById('playsub').textContent = (champPick ? 'Чемпионат' : TRACKS[lastTrack].name) + ' · ' + LEVELS[level].name + (names.length ? ' · ' + names.join(', ') : ''); }
   const el = document.getElementById('tracks'); el.innerHTML = ''; el.classList.toggle('many', TRACKS.length > 5); document.getElementById('tdesc').textContent = champPick ? 'Пять случайных трасс подряд, очки за места' : TRACKS[lastTrack].desc;
   TRACKS.forEach(function (tr, i) {
     const b = document.createElement('button'); b.className = 'track' + (tr.name.length > 9 ? ' long' : '');
@@ -4881,6 +4891,7 @@ function showChallenge() {
   btn.addEventListener('click', function () { CHAMP.on = false; startRace(challenge.track, true); }); el.appendChild(txt); el.appendChild(btn);
 }
 function share() {
+  if (LAPS !== stdLaps() && !KO.on) { note('Вызов можно бросить только с заезда на обычное число кругов', 2600); return; }
   const text = 'Я проехал трассу «' + TRACKS[T.id].name + (T.rev ? ', обратно' : '') + (RAIN ? ', дождь' : '') + '» за ' + fmt(finishMs) + ' в Turbo Drift. Попробуй обогнать!';
   const link = APP_LINK ? APP_LINK + '?startapp=' + makeCode(T.id, finishMs, '_') : location.href.split('#')[0] + '#' + makeCode(T.id, finishMs, '-');
   if (tg && tg.openTelegramLink && APP_LINK) { try { tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text)); return; } catch (e) {} }
