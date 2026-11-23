@@ -156,6 +156,9 @@
   .gorow { display: flex; gap: 8px; width: 100%; } .gorow #mpstakebtn { flex: 0 0 37%; min-width: 0; padding: 0 4px; font-size: 13.5px; white-space: nowrap; } .gorow #mpstakebtn.on { color: #ffd23f; box-shadow: inset 0 0 0 1.5px rgba(255,210,63,.7); } .gorow #mpgo { flex: 1 1 0; min-width: 0; padding-left: 6px; padding-right: 6px; font-size: 16px; }
   #mpstakeline { color: #ffd23f; font-size: 13px; font-weight: 800; margin: 8px 0 0; } #mpstakes button { font-size: 16px; } body.land #mphostbox .sub.frionly { display: none; } body.land .gorow #mpgo { font-size: 14.5px; }
   #ltags { position: absolute; inset: 0; pointer-events: none; overflow: hidden; } #ltags .tag { font-size: 12.5px; padding: 2px 8px; background: rgba(10,13,24,.62); } #ltags .tag.mine { color: #ffd23f; }
+  /* the way back is the same on every screen: top left */
+  .backbtn { position: fixed; left: 10px; top: 10px; z-index: 4; display: flex; align-items: center; gap: 3px; height: 40px; padding: 0 15px 0 10px; border-radius: 20px; font-size: 14px; white-space: nowrap; background: rgba(10,13,24,.72); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.22); }
+  .backbtn i { font-style: normal; font-size: 25px; line-height: 1; margin-top: -4px; } body:not(.wide) .backbtn { width: 40px; padding: 0; justify-content: center; } body:not(.wide) .backbtn span { display: none; } body.land .backbtn { height: 34px; left: 8px; top: 8px; font-size: 13px; padding: 0 12px 0 8px; } body.land #mp.inroom .backbtn { width: 34px; padding: 0; justify-content: center; } body.land #mp.inroom .backbtn span { display: none; }
   .pubonly { display: none; } #mphostbox.pubhost .pubonly { display: block; font-size: 12.5px; margin: 8px 0 6px; opacity: .8; } #mphostbox.pubhost .frionly, #mphostbox.pubhost #mpstakebtn { display: none; }
   body.land #mphostbox.pubhost .pubonly { display: none; } body.land #mphostbox.pubhost { margin-top: 6px; } body.land #mphostbox.pubhost #mptracks .track { min-height: 29px; padding: 3px 4px; font-size: 12px; border-radius: 10px; } body.land #mphostbox.pubhost #mptracks { gap: 5px; } body.land #mphostbox.pubhost #mpopts { margin-bottom: 5px; } body.land #mphostbox.pubhost #mpopts .lv { padding: 6px 1px; font-size: 11px; }
   body.land #mppub .pubstat { font-size: 18px; margin: 0 0 2px; } body.land #mppub #pubsub { font-size: 11.5px; margin-bottom: 0; } body.land #mppub .btns { margin-top: 5px; } body.land #mppub .btns button { padding: 8px; font-size: 15px; }
@@ -478,6 +481,7 @@
 </div>
 
 <div class="screen hidden" id="playscr">
+  <button class="ghost backbtn" id="playclose" aria-label="Назад"><i>‹</i><span>Назад</span></button>
   <h1>Играть</h1>
   <div class="modes">
     <button class="mode gold" id="botsopen"><b>Гонка с ботами</b><small id="botssub"></small></button>
@@ -488,10 +492,10 @@
     <button class="mode" id="dailyopen"><b>Задания</b><small id="dailysub"></small></button>
     <button class="mode" id="trainopen"><b>Тренировка</b><small>трасса без соперников</small></button>
   </div>
-  <div class="btns"><button class="ghost" id="playclose">Назад</button></div>
 </div>
 
 <div class="screen hidden" id="setup">
+  <button class="ghost backbtn" id="setupclose" aria-label="Назад"><i>‹</i><span>Назад</span></button>
   <h1 id="setuph1">Гонка с ботами</h1>
   <div class="setupgrid">
     <div class="scol">
@@ -505,7 +509,7 @@
       <div class="sub trainonly" id="trainnote">Ты один на трассе: спокойно учи повороты и управление. Монеты и рекорды в тренировке не идут</div>
       <div class="seclabel">Условия</div>
       <div class="levels opts" id="opts"></div>
-      <div class="btns"><button class="main" id="setupgo">Старт</button><button class="ghost" id="setupclose">Назад</button></div>
+      <div class="btns"><button class="main" id="setupgo">Старт</button></div>
     </div>
   </div>
 </div>
@@ -526,39 +530,42 @@
 </div>
 
 <div class="screen hidden" id="week">
+  <button class="ghost backbtn" id="weekclose" aria-label="Назад"><i>‹</i><span>Назад</span></button>
   <h1 style="font-size:28px;margin-bottom:2px">Турнир недели</h1>
   <div class="sub" id="wtrack" style="color:#ffd23f;margin-bottom:4px"></div>
   <div class="sub" id="wme" style="font-size:13px;margin-bottom:6px;min-height:16px"></div>
   <div class="plist toplist" id="wlist"></div>
   <div class="sub" id="wprize" style="font-size:11.5px;margin:6px 0 4px;max-width:560px;opacity:.8"></div>
-  <div class="btns crow"><button class="ghost" id="weekclose">Назад</button><button class="main" id="weekgo">Ехать</button></div>
+  <div class="btns crow"><button class="main" id="weekgo">Ехать</button></div>
 </div>
 
 <div class="screen hidden" id="career">
+  <button class="ghost backbtn" id="careerclose" aria-label="Назад"><i>‹</i><span>Назад</span></button>
   <h1 style="font-size:28px;margin-bottom:2px">Мировой тур</h1>
   <div class="sub" id="cstars" style="color:#ffd23f;margin-bottom:8px"></div>
   <div class="cstages" id="cstages"></div>
   <div class="cinfo" id="cinfo"></div>
-  <div class="btns crow"><button class="ghost" id="careerclose">Назад</button><button class="main" id="careergo">Старт</button></div>
+  <div class="btns crow"><button class="main" id="careergo">Старт</button></div>
 </div>
 
 <div class="screen hidden" id="daily">
+  <button class="ghost backbtn" id="dailyclose" aria-label="Назад"><i>‹</i><span>Назад</span></button>
   <h1 style="font-size:30px">Задания на сегодня</h1>
   <div class="dstreak" id="dstreak"></div>
   <div class="dlist" id="dlist"></div>
   <div class="sub" id="dnote" style="font-size:13px"></div>
-  <div class="btns"><button class="main" id="dailyclose">Назад</button></div>
 </div>
 
 <div class="screen hidden" id="top">
+  <button class="ghost backbtn" id="topclose" aria-label="Назад"><i>‹</i><span>Назад</span></button>
   <h1>Рекорды</h1>
   <div class="levels" id="toptabs"></div>
   <div class="sub" id="topme"></div>
   <div class="plist toplist" id="toplist"></div>
-  <div class="btns"><button class="main" id="topclose">Назад</button></div>
 </div>
 
 <div class="screen hidden" id="prefs">
+  <button class="ghost backbtn" id="prefsclose" aria-label="Назад"><i>‹</i><span>Назад</span></button>
   <h1>Настройки</h1>
   <div class="levels uisw" id="uisw"></div>
   <div class="levels uisw ctlsw for-mob" id="ctlsw"></div>
@@ -568,7 +575,7 @@
   <div class="levels uisw ecosw" id="ecosw"></div>
   <div class="levels uisw sndsw" id="sndsw"></div>
   <div class="levels uisw mussw" id="mussw"></div>
-  <div class="btns"><button class="main" id="prefsclose">Готово</button><button class="ghost" id="helpopen">Справка: бонусы и правила</button></div>
+  <div class="btns"><button class="ghost" id="helpopen">Справка: бонусы и правила</button></div>
 </div>
 
 <div class="screen hidden" id="welcome">
@@ -581,6 +588,7 @@
   <div class="btns"><button class="main" id="wgo">Поехали!</button><button class="ghost" id="wmenu">Сначала посмотреть меню</button></div>
 </div>
 <div class="screen hidden" id="help">
+  <button class="ghost backbtn" id="helpclose" aria-label="Назад"><i>‹</i><span>Назад</span></button>
   <h1 style="font-size:28px">Справка</h1>
   <div class="hints">
     <div class="for-mob">
@@ -618,9 +626,8 @@
     <div><b>Тренировка</b> — трасса без соперников, с подсказками по шагам: руль, занос, бонусы. Монеты и рекорды в ней не идут</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 100</div>
+    <div style="opacity:.5;margin-top:8px">версия 101</div>
   </div>
-  <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
 
 <div class="chatfeed" id="chatfeed"></div>
@@ -634,6 +641,7 @@
 
 <div class="screen hidden" id="mp">
   <div id="ltags"></div>
+  <button class="ghost backbtn" id="mpback" aria-label="Назад"><i>‹</i><span>Назад</span></button>
   <h1 style="font-size:34px" id="mph1">Играть вместе</h1>
   <div id="mpseek"><i></i><b>Ищу комнату с игроками…</b><span>Обычно это несколько секунд</span></div>
   <div id="mpstart">
@@ -676,7 +684,6 @@
   </div>
   <div class="sub" id="mpmsg" style="min-height:20px;color:#ffd23f"></div>
   <div class="linkbox" id="mplink"></div>
-  <div class="btns"><button class="ghost" id="mpback">Назад</button></div>
 </div>
 
 <div class="screen hidden" id="finish">
@@ -702,7 +709,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 100</div>
+  <div class="fver">Turbo Drift · версия 101</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -3973,6 +3980,7 @@ function key(e, down) {
     if (ti === 'chatin' || ti === 'padin') { if (down && e.key === 'Enter') chatType(e.target); else if (down && e.key === 'Escape') { chatClose(); padClose(); } }
     else if (down && e.key === 'Enter') netJoin(e.target.value); return; }
   const k = (e.key || '').toLowerCase();
+  if (down && !e.repeat && k === 'escape' && state === 'menu') { if (!document.getElementById('chatbox').classList.contains('hidden')) { chatClose(); return; } for (const pr of [['help','helpclose'],['prefs','prefsclose'],['top','topclose'],['daily','dailyclose'],['career','careerclose'],['week','weekclose'],['setup','setupclose'],['garage','gback'],['mp','mpback'],['playscr','playclose']]) if (!document.getElementById(pr[0]).classList.contains('hidden')) { document.getElementById(pr[1]).click(); e.preventDefault(); return; } }
   if (down && !e.repeat && k === 'enter' && state === 'menu' && !NET.on) { const vis = function (id) { return !document.getElementById(id).classList.contains('hidden'); };
     if (vis('welcome')) { document.getElementById('wgo').click(); return; } if (vis('menu') && !['help','mp','prefs','top','daily','career','week','garage'].some(vis)) { document.getElementById(vis('setup') ? 'setupgo' : vis('playscr') ? 'botsopen' : 'play').click(); return; } }
   if (down && !e.repeat && NET.on && !chatDriving() && (k === 't' || k === 'е') && document.getElementById('chatbox').classList.contains('hidden')) { chatOpen(false); e.preventDefault(); return; }
@@ -4160,7 +4168,7 @@ function netSend(m) { if (!NET.on || !NET.tr) return; if (NET.host) NET.tr.all(m
 function carByNid(n) { for (const c of cars) if (c.nid === n) return c; return null; }
 function mpMsg(t) { document.getElementById('mpmsg').textContent = t || ''; }
 function netError(e) { return ({ 'peer-unavailable': 'Комната с таким кодом не найдена', 'unavailable-id': 'Такой код уже занят, попробуй ещё раз', load: 'Не удалось загрузить модуль связи. Игра должна быть открыта с хостинга или из Telegram, нужен интернет', network: 'Нет связи с сервером, который сводит игроков', blocked: 'Нет связи с сервером, который сводит игроков. Если игра открыта в Claude — открой сам артефакт Turbo Drift, а не предпросмотр файла', denied: 'Нет прав на игру вместе в этом артефакте: владелец должен дать тебе доступ на участие', room: 'Не удалось открыть комнату, попробуй ещё раз', timeout: 'Не удалось соединиться: сеть одного из игроков не пропускает прямое соединение', browser: 'Этот браузер не поддерживает прямое соединение', connect: 'Не удалось соединиться с комнатой' })[e] || ('Ошибка соединения: ' + e); }
-function mpSeek(on) { document.getElementById('mp').classList.toggle('seeking', !!on); document.getElementById('mph1').textContent = on ? 'Онлайн-гонка' : (NET.scr === 'onl' ? 'Онлайн' : 'С друзьями'); document.getElementById('mpback').textContent = on ? 'Отмена' : 'Назад'; }
+function mpSeek(on) { document.getElementById('mp').classList.toggle('seeking', !!on); document.getElementById('mph1').textContent = on ? 'Онлайн-гонка' : (NET.scr === 'onl' ? 'Онлайн' : 'С друзьями'); document.querySelector('#mpback span').textContent = on ? 'Отмена' : 'Назад'; }
 function netOpen() {
   for (const id of ['menu','playscr','finish','paused','setup','prefs','top','daily','career','week','garage']) document.getElementById(id).classList.add('hidden'); TRAIN.on = false; TRAIN.hints = false;
   document.getElementById('mp').classList.remove('hidden'); document.getElementById('mp').classList.toggle('inroom', NET.on); document.getElementById('mp').classList.toggle('onl', NET.scr === 'onl'); mpSeek(false); stageTick = 0; document.getElementById('mpstart').style.display = NET.on ? 'none' : ''; document.getElementById('mplobby').style.display = NET.on ? '' : 'none'; mpMsg('');
