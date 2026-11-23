@@ -77,8 +77,8 @@ async function score(env, q, request) {
 const COINS_MAX = 10000000;
 async function withSave(env, work) {          // the table is made the first time it is needed: no new setup step
   try { return await work(); } catch (e) { const m = String(e && e.message || e);
-    if (/no such table/i.test(m)) { await env.DB.prepare('CREATE TABLE IF NOT EXISTS save (uid INTEGER PRIMARY KEY, coins INTEGER NOT NULL, owned TEXT NOT NULL, best TEXT NOT NULL, at INTEGER NOT NULL, prog TEXT, look TEXT, tx TEXT)').run(); return await work(); }
-    if (/no such column|no column named|has no column/i.test(m)) { for (const c of ['prog', 'look', 'tx']) { try { await env.DB.prepare('ALTER TABLE save ADD COLUMN ' + c + ' TEXT').run(); } catch (e2) {} } return await work(); }       // a table made before stages and the career existed
+    if (/no such table/i.test(m)) { await env.DB.prepare('CREATE TABLE IF NOT EXISTS save (uid INTEGER PRIMARY KEY, coins INTEGER NOT NULL, owned TEXT NOT NULL, best TEXT NOT NULL, at INTEGER NOT NULL, prog TEXT, look TEXT, tx TEXT, bud TEXT)').run(); return await work(); }
+    if (/no such column|no column named|has no column/i.test(m)) { for (const c of ['prog', 'look', 'tx', 'bud']) { try { await env.DB.prepare('ALTER TABLE save ADD COLUMN ' + c + ' TEXT').run(); } catch (e2) {} } return await work(); }       // a table made before stages and the career existed
     throw e; }
 }
 // Progress that only grows (stages of the cars, parts bought, career stars): a flat map of small integers. The larger number wins;
@@ -86,6 +86,24 @@ async function withSave(env, work) {          // the table is made the first tim
 function progJoin(into, from) { if (!from || typeof from !== 'object') return into; let n = 0;
   for (const k in from) { if (++n > 300) break; const v = Math.round(+from[k]); if (!/^[a-z0-9]{1,8}$/.test(k) || !(v >= 0 && v <= 1048575)) continue; const was = into[k] | 0; into[k] = k[0] === 'o' ? (was | v) : Math.max(was, v); }
   const keys = Object.keys(into); if (keys.length > 300) for (const k of keys.slice(300)) delete into[k]; return into; }
+// The server is the cashier. The game says what the player has earned since last time and what he has bought; the server lets the earnings in only
+// as fast as racing can bring them (it cannot see a race, so it counts the time), takes the price of every new thing from its own list, and refuses
+// the lot when the purse does not cover it. What the game holds afterwards is what the server answers.
+const CAR_PRICE = [0, 25000, 5000, 0, 3000, 2000, 16000, 8000, 12000], STAGE_BASE = [0, 1500, 4000, 10000], PAINT_PRICE = 1500;
+const PART_PRICE = { s: [0, 800, 2500, 1500, 4500, 7000], k: [0, 3000, 1500, 6000, 9000], r: [0, 1000, 1500, 1000, 1000], n: [0, 2000, 2000, 2000, 2500, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000], w: [0, 1500, 2500, 4000, 6000, 8000] };
+const stagePrice = (t, n) => STAGE_BASE[n] + Math.round((CAR_PRICE[t] || 0)*0.1/100)*100;
+const RATE = 5, BUD_MAX = 6000, BUD_NEW = 2000;          // coins a second that racing can bring at the very most; how much may pile up while the game is not heard from; what a newcomer starts with
+function shop(prog, from, owned, buy) {                 // what is new in this save and what it costs
+  let cost = 0; const np = {}, nc = [];
+  for (const t of buy) if (owned.indexOf(t) < 0 && CAR_PRICE[t] !== undefined) { cost += CAR_PRICE[t]; nc.push(t); }
+  if (from && typeof from === 'object') { let n = 0;
+    for (const k in from) { if (++n > 300) break; const v = Math.round(+from[k]), was = prog[k] | 0; let m; if (!(v >= 0 && v <= 1048575)) continue;
+      if ((m = /^s(\d{1,2})$/.exec(k))) { if (CAR_PRICE[+m[1]] === undefined || v > 3 || v <= was) continue; for (let g = was + 1; g <= v; g++) cost += stagePrice(+m[1], g); np[k] = v; }
+      else if ((m = /^o(\d{1,2})([skrnw])$/.exec(k))) { const P = PART_PRICE[m[2]], add = v & ~was; let ok = CAR_PRICE[+m[1]] !== undefined && add > 0, c = 0; for (let i = 1; ok && i < 20; i++) if (add & (1 << i)) { if (P[i] === undefined) ok = false; else c += P[i]; } if (ok) { cost += c; np[k] = was | add; } }
+      else if (k === 'oc') { const add = v & ~was & 0xFE; if (!add) continue; for (let i = 1; i < 8; i++) if (add & (1 << i)) cost += PAINT_PRICE; np[k] = was | add; } } }
+  return { cost: cost, prog: np, cars: nc };
+}
+const progFree = (from) => { const o = {}; if (from && typeof from === 'object') for (const k in from) { const v = Math.round(+from[k]); if (/^k\d{1,2}$/.test(k) && v >= 0 && v <= 3) o[k] = v; else if (k === 'op' && v >= 0 && v <= 31) o[k] = v; } return o; };          // what is won, not bought: the stars of the tour and the paints taken from its champions
 // What the player has picked to drive: the car, its paint, the parts fitted to each car. Unlike the progress above this can go back as well as
 // forward, so the newest choice wins: every device stamps its choice with the time it was made.
 function lookClean(v, now) { if (!v || typeof v !== 'object') return null; const t = Math.min(now, Math.round(+v.t) || 0); if (!(t > 0)) return null;
@@ -184,7 +202,7 @@ function statsPage(st, starts, recs) {
       return '<tr><td>' + esc(r.name || 'ID ' + r.uid) + (r.name ? ' <span style="color:var(--muted)">· ' + r.uid + '</span>' : '') + '</td><td>' + r.coins + '</td><td style="text-align:left;white-space:normal">' + (paid.length ? esc(paid.map((t) => CAR_INFO[t][0]).join(', ')) : '<span style="color:var(--muted)">только стартовые</span>') + '</td><td>' + worth + '</td><td>' + (r.races === null || r.races === undefined ? '<span style="color:var(--muted)">—</span>' : r.races) + '</td><td>' + (r.d0 ? (r.old ? 'до ' : '') + date(r.d0) + (r.src && r.src !== 'old' ? ' · ' + esc(SRC[r.src] || r.src) : '') : '<span style="color:var(--muted)">—</span>') + '</td><td>' + stamp(r.at) + '</td></tr>'; }), 'Игроков пока нет') +
     '<p class="note">По убыванию монет, первые 200. «Гараж стоит» — сумма цен купленных машин; тюнинг и стейджи сюда не входят. «Заездов» считается с выкладки этой версии: много монет и дорогих машин при малом числе заездов — повод посмотреть на список ниже.</p>' +
     '<h2>Крупные начисления и отказы</h2>' + table(['Когда', 'Игрок', 'Прибавилось', 'Стало', 'Как'], (st.jumps || []).map((r) => '<tr><td>' + stamp(r.at) + '</td><td>' + esc(r.name || 'ID ' + r.uid) + '</td><td>' + (r.d > 0 ? '+' + r.d : '—') + '</td><td>' + r.coins + '</td><td>' + esc(r.how || '') + '</td></tr>'), 'С выкладки этой версии крупных начислений не было') +
-    '<p class="note">Сюда попадает прибавка от ' + JUMP + ' монет за одно сохранение — столько не дают ни заезд, ни задания, ни приз турнира. Честная причина одна: выигранный банк в гонке на ставку. «Не принято» — устройство, которое сервер видит впервые, прислало кошелёк больше разрешённого: монеты и машины оттуда не зачтены, в силе запись сервера.</p>' +
+    '<p class="note">Сюда попадает прибавка от ' + JUMP + ' монет за одно сохранение — столько не дают ни заезд, ни задания, ни приз турнира. «Срезано» — игра заявила доход быстрее, чем его можно наездить (больше ' + RATE*60 + ' монет в минуту): лишнее не зачтено. «Не прошла» — на покупку по ценам сервера не хватило монет. «Не принято» — устройство, которое сервер видит впервые, прислало кошелёк больше разрешённого.</p>' +
     '<h2>Приглашения</h2>' + table(['Игрок (Telegram ID)', 'Привёл друзей'], st.refs.map((r) => '<tr><td>' + esc(r.ref) + '</td><td>' + r.n + '</td></tr>'), 'По приглашениям пока никто не пришёл') +
     '<h2>Запуски бота по меткам ?start=</h2>' + table(['Метка', 'Запусков'], starts.map((r) => '<tr><td>' + esc(r.k) + '</td><td>' + r.n + '</td></tr>'), 'Запусков пока не было') +
     '<p class="note">Это нажатия «Запустить» в чате с ботом по ссылке <code>t.me/TurboDriftBot?start=метка</code>; игроки считаются выше.</p></main><div id="tip"></div>' +
@@ -195,31 +213,69 @@ async function save(env, q) {
   const me = await whoIs(q.init, env); if (!me) return json({ ok: false, err: 'auth' }, 401);
   const cars = (a) => { const r = []; if (Array.isArray(a)) for (const t of a.slice(0, 64)) if (Number.isInteger(t) && t >= 0 && t < CARS && r.indexOf(t) < 0) r.push(t); return r; };
   const num = (v) => Math.max(-COINS_MAX, Math.min(COINS_MAX, Math.round(+v) || 0)), clamp = (v) => Math.max(0, Math.min(COINS_MAX, v));
-  const row = await withSave(env, () => env.DB.prepare('SELECT coins, owned, best, prog, look, tx FROM save WHERE uid = ?').bind(me.id).first());
+  const row = await withSave(env, () => env.DB.prepare('SELECT coins, owned, best, prog, look, tx, bud, at FROM save WHERE uid = ?').bind(me.id).first());
   let coins = 0, owned = [0, 3], best = {}, prog = {}, look = null, fresh = !row, txs = [];
   // A batch of changes carries a label. The game sends the same batch again when it got no answer; the label tells that it has been counted already.
   if (row && row.tx) { try { txs = JSON.parse(row.tx).filter((x) => typeof x === 'string').slice(-12); } catch (e) { txs = []; } }
   const tx = typeof q.tx === 'string' && /^[a-z0-9]{6,24}$/.test(q.tx) ? q.tx : '', seen = !!tx && txs.indexOf(tx) >= 0, before = row ? row.coins | 0 : 0; if (tx && !seen) txs.push(tx);
   if (row) { coins = row.coins | 0; try { owned = cars(JSON.parse(row.owned)); } catch (e) {} try { best = JSON.parse(row.best) || {}; } catch (e) { best = {}; } try { prog = progJoin({}, JSON.parse(row.prog || '{}')); } catch (e) { prog = {}; } }
-  progJoin(prog, q.prog);
+  const old = !!row && (row.bud === null || row.bud === undefined || row.bud === '');          // a record from before the server kept the till: what that player's game holds is taken over once, as it stands
+  progJoin(prog, old ? q.prog : progFree(q.prog));
   let st = { bonus: 0, refs: 0 }; try { st = await track(env, me.id, fresh, q, me.name); } catch (e) {}          // the count must never stand in the way of the save itself
   { const now = Date.now(); if (row && row.look) { try { look = lookClean(JSON.parse(row.look), now); } catch (e) { look = null; } } const mine = lookClean(q.look, now); if (mine && (!look || mine.t > look.t)) look = mine; }
   // A device that has never talked to the server sends its whole purse. It is believed only a little: a newcomer may bring a small sum and the two
   // free cars; for a player the server already knows, the server's own record stands and the device takes it over. What was not accepted is written down.
-  let refused = '';
+  let refused = '', denied = false; const nowS = Math.floor(Date.now()/1000);
+  let bud = Math.min(BUD_MAX, (row ? (old ? BUD_MAX : Math.max(0, row.bud | 0)) : BUD_NEW) + (row ? Math.max(0, nowS - (row.at | 0))*RATE : 0));
   if (q.first && typeof q.first === 'object') { const fc = clamp(num(q.first.coins)), fo = cars(q.first.owned), extra = fo.filter((t) => owned.indexOf(t) < 0);
-    if (fresh) coins = Math.min(fc, FIRST_MAX);
+    if (fresh) { coins = Math.min(fc, FIRST_MAX); bud = BUD_NEW; }
     if (fc - coins >= JUMP || extra.length) refused = (fresh ? 'не принято у новичка: ' : 'не принято с нового устройства: ') + fc + ' монет' + (extra.length ? ', машины № ' + extra.join(', ') : ''); }
-  else if (!seen) { coins = clamp(coins + num(q.d)); for (const t of cars(q.buy)) if (owned.indexOf(t) < 0) owned.push(t); }
+  else if (!seen) { const sh = shop(prog, q.prog, owned, cars(q.buy)), claim = num(q.d) + sh.cost, inc = Math.max(old ? -coins : 0, Math.min(claim, bud));          // claim: what the game says was earned; the spending is taken off below by the server's own prices
+    bud -= Math.max(0, inc); coins = clamp(coins + inc); if (claim - inc >= 300) refused = 'срезано: заявлен доход ' + claim + ', принято ' + inc;
+    { if (coins >= sh.cost) { coins -= sh.cost; Object.assign(prog, sh.prog); for (const t of sh.cars) owned.push(t); } else { denied = true; refused = (refused ? refused + '; ' : '') + 'покупка на ' + sh.cost + ' не прошла: монет ' + coins; } } }
   if (st.bonus > 0) coins = clamp(coins + st.bonus);          // came by a friend's link: the newcomer's share
   for (const t of [0, 3]) if (owned.indexOf(t) < 0) owned.push(t);
   if (q.best && typeof q.best === 'object') { let n = 0; for (const k in q.best) { if (++n > 300) break; const ms = Math.round(+q.best[k]); if (!/^[a-z0-9]{1,8}$/.test(k) || !(ms >= 20000 && ms <= MAX_MS)) continue; if (!best[k] || ms < best[k]) best[k] = ms; } }
   const keys = Object.keys(best); if (keys.length > 400) best = Object.fromEntries(keys.slice(0, 400).map((k) => [k, best[k]]));
-  await env.DB.prepare('INSERT INTO save (uid, coins, owned, best, at, prog, look, tx) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) ON CONFLICT (uid) DO UPDATE SET coins = excluded.coins, owned = excluded.owned, best = excluded.best, at = excluded.at, prog = excluded.prog, look = excluded.look, tx = excluded.tx')
-    .bind(me.id, coins, JSON.stringify(owned), JSON.stringify(best), Math.floor(Date.now()/1000), JSON.stringify(prog), look ? JSON.stringify(look) : null, JSON.stringify(txs.slice(-12))).run();
+  await env.DB.prepare('INSERT INTO save (uid, coins, owned, best, at, prog, look, tx, bud) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9) ON CONFLICT (uid) DO UPDATE SET coins = MAX(0, MIN(' + COINS_MAX + ', save.coins + ?10)), owned = excluded.owned, best = excluded.best, at = excluded.at, prog = excluded.prog, look = excluded.look, tx = excluded.tx, bud = excluded.bud')          // the purse moves by the difference: a stake paid meanwhile is not written over
+    .bind(me.id, coins, JSON.stringify(owned), JSON.stringify(best), nowS, JSON.stringify(prog), look ? JSON.stringify(look) : null, JSON.stringify(txs.slice(-12)), Math.round(bud), coins - before).run();
   if (refused) { try { await withStat(env, () => env.DB.prepare('INSERT INTO jump (uid, at, d, coins, how) VALUES (?1, ?2, 0, ?3, ?4)').bind(me.id, Math.floor(Date.now()/1000), coins, refused.slice(0, 120)).run()); } catch (e) {} }
   if (coins - before - st.bonus >= JUMP) { try { await withStat(env, () => env.DB.prepare('INSERT INTO jump (uid, at, d, coins, how) VALUES (?1, ?2, ?3, ?4, ?5)').bind(me.id, Math.floor(Date.now()/1000), coins - before - st.bonus, coins, q.first ? (fresh ? 'первый вход' : 'новое устройство') : 'за раз').run()); } catch (e) {} }          // far more than a race pays: kept for the owner to look at
-  return json({ ok: true, coins: coins, owned: owned, best: best, prog: prog, look: look, bonus: st.bonus, refs: st.refs });
+  return json({ ok: true, coins: coins, owned: owned, best: best, prog: prog, look: look, bonus: st.bonus, refs: st.refs, denied: denied });
+}
+
+// A race for a stake. The host opens the bank with his own stake before the start; every other player pays in as the race begins. The coins leave
+// the purses here, on the server. When the first car is home the host names the winner — who must be one of those who paid — and the whole bank
+// goes to him. A bank nobody was named for gives the stakes back after a quarter of an hour.
+const STAKES = [100, 250, 500, 1000, 2000, 2500, 5000], POT_HOLD = 900;
+async function withPot(env, work) {
+  try { return await work(); } catch (e) { if (!/no such table/i.test(String(e && e.message || e))) throw e;
+    await env.DB.prepare('CREATE TABLE IF NOT EXISTS pot (pid TEXT NOT NULL, uid INTEGER NOT NULL, sum INTEGER NOT NULL, at INTEGER NOT NULL, host INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (pid, uid))').run(); return await work(); }
+}
+async function pot(env, q) {
+  const me = await whoIs(q.init, env); if (!me) return json({ ok: false, err: 'auth' }, 401);
+  const pid = String(q.pid || ''), now = Math.floor(Date.now()/1000); if (!/^[a-z0-9]{10,24}$/.test(pid)) return json({ ok: false, err: 'range' }, 400);
+  const purse = async () => { const r = await withSave(env, () => env.DB.prepare('SELECT coins FROM save WHERE uid = ?').bind(me.id).first()); return r ? r.coins | 0 : 0; };
+  if (q.op === 'pay') { const stake = q.stake | 0; if (STAKES.indexOf(stake) < 0) return json({ ok: false, err: 'range' }, 400);
+    const mine = await withPot(env, () => env.DB.prepare('SELECT sum FROM pot WHERE pid = ? AND uid = ?').bind(pid, me.id).first()); if (mine) return json({ ok: true, paid: mine.sum | 0, coins: await purse() });          // asked again after an answer that got lost: paid once
+    const open = ((await env.DB.prepare('SELECT COUNT(*) AS n FROM pot WHERE pid = ?').bind(pid).first()) || {}).n | 0;
+    if (q.host ? open > 0 : open === 0) return json({ ok: false, err: 'pot', coins: await purse() });          // the host is the one who opens it; nobody pays into a bank that is not open
+    const ins = await env.DB.prepare('INSERT OR IGNORE INTO pot (pid, uid, sum, at, host) VALUES (?1, ?2, ?3, ?4, ?5)').bind(pid, me.id, stake, now, q.host ? 1 : 0).run();
+    if (ins && ins.meta && ins.meta.changes) { const up = await withSave(env, () => env.DB.prepare('UPDATE save SET coins = coins - ?1 WHERE uid = ?2 AND coins >= ?1').bind(stake, me.id).run());
+      if (!(up && up.meta && up.meta.changes)) { await env.DB.prepare('DELETE FROM pot WHERE pid = ? AND uid = ?').bind(pid, me.id).run(); return json({ ok: false, err: 'coins', coins: await purse() }); } }
+    return json({ ok: true, paid: stake, coins: await purse() }); }
+  if (q.op === 'win') { const w = Math.round(+q.uid), h = await withPot(env, () => env.DB.prepare('SELECT host FROM pot WHERE pid = ? AND uid = ?').bind(pid, me.id).first());
+    if (!h || !h.host) return json({ ok: false, err: 'host' }); if (!Number.isSafeInteger(w) || !(await env.DB.prepare('SELECT 1 AS x FROM pot WHERE pid = ? AND uid = ?').bind(pid, w).first())) return json({ ok: false, err: 'winner' });
+    const tot = ((await env.DB.prepare('SELECT COALESCE(SUM(sum), 0) AS s FROM pot WHERE pid = ?').bind(pid).first()) || {}).s | 0, del = await env.DB.prepare('DELETE FROM pot WHERE pid = ?').bind(pid).run();
+    if (del && del.meta && del.meta.changes && tot > 0) await env.DB.prepare('UPDATE save SET coins = MIN(?, coins + ?) WHERE uid = ?').bind(COINS_MAX, tot, w).run();
+    return json({ ok: true, sum: tot, coins: await purse() }); }
+  if (q.op === 'back') { const r = await withPot(env, () => env.DB.prepare('SELECT sum, at FROM pot WHERE pid = ? AND uid = ?').bind(pid, me.id).first());
+    if (!r) return json({ ok: true, none: true, coins: await purse() }); const n = ((await env.DB.prepare('SELECT COUNT(*) AS n FROM pot WHERE pid = ?').bind(pid).first()) || {}).n | 0;          // alone in the bank: nobody to race for it, the stake goes back at once
+    if (n > 1 && now - (r.at | 0) < POT_HOLD) return json({ ok: false, err: 'wait', left: POT_HOLD - (now - (r.at | 0)) });
+    const del = await env.DB.prepare('DELETE FROM pot WHERE pid = ? AND uid = ?').bind(pid, me.id).run();
+    if (del && del.meta && del.meta.changes) await env.DB.prepare('UPDATE save SET coins = MIN(?, coins + ?) WHERE uid = ?').bind(COINS_MAX, r.sum | 0, me.id).run();
+    return json({ ok: true, back: r.sum | 0, coins: await purse() }); }
+  return json({ ok: false, err: 'op' }, 400);
 }
 
 // The tournament of the week: one track, Monday to Sunday (UTC), everybody's best time on it in the usual conditions. When the week is over,
@@ -319,12 +375,13 @@ export default {
     try {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
       if (path === '/tg' && request.method === 'POST') return await telegram(env, request);
-      if (path === '/top' || path === '/score' || path === '/save' || path === '/week') {
+      if (path === '/top' || path === '/score' || path === '/save' || path === '/week' || path === '/pot') {
         let q = {}; if (request.method === 'POST') { const t = await request.text(); if (t.length > (path === '/save' ? 20000 : 6000)) return json({ ok: false, err: 'big' }, 413); try { q = JSON.parse(t) || {}; } catch (e) { return json({ ok: false, err: 'json' }, 400); } }
         else q = { track: url.searchParams.get('track') };
         if (path === '/score') return request.method === 'POST' ? await score(env, q, request) : json({ ok: false, err: 'method' }, 405);
         if (path === '/save') return request.method === 'POST' ? await save(env, q) : json({ ok: false, err: 'method' }, 405);
         if (path === '/week') return request.method === 'POST' ? await week(env, q) : json({ ok: false, err: 'method' }, 405);
+        if (path === '/pot') return request.method === 'POST' ? await pot(env, q) : json({ ok: false, err: 'method' }, 405);
         const track = q.track | 0; if (!(track >= 0 && track < TRACKS)) return json({ ok: false, err: 'range' }, 400);
         return json(await board(env, track, await whoIs(q.init, env)));
       }

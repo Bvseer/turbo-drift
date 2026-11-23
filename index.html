@@ -642,7 +642,7 @@
     <div><b>Тренировка</b> — трасса без соперников, с подсказками по шагам: руль, занос, бонусы. Монеты и рекорды в ней не идут</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 106</div>
+    <div style="opacity:.5;margin-top:8px">версия 107</div>
   </div>
 </div>
 
@@ -725,7 +725,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 106</div>
+  <div class="fver">Turbo Drift · версия 107</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -760,7 +760,7 @@ function initTelegram() {
     if (tg.setHeaderColor) tg.setHeaderColor('#16203f');
     const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
     if (u && u.first_name) { playerName = u.first_name; document.getElementById('hello').textContent = 'Привет, ' + u.first_name + '!'; }
-    setTimeout(lbSync, 3500);
+    setTimeout(lbSync, 3500); setTimeout(function () { try { potSweep(); } catch (e) {} }, 6000);
     const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
     if (sp && !challenge) { challenge = parseChallenge(sp); showChallenge(); }
     const gm = /^g_([A-Za-z0-9]{4,6})_(\d{1,16})$/.exec(String(sp || ''));
@@ -1660,6 +1660,19 @@ function progJoin(k, v) { v = Math.max(0, v | 0); const was = PROG[k] | 0, now =
 function progSave(quiet) { try { localStorage.setItem('td_prog', JSON.stringify(PROG)); } catch (e) {} try { if (typeof tg !== 'undefined' && tg && tg.CloudStorage) tg.CloudStorage.setItem('prog', JSON.stringify(PROG)); } catch (e) {} if (!quiet) { try { walletSoon(); } catch (e) {} } }
 function progSet(k, v) { if (progJoin(k, v)) progSave(); }
 function progMerge(o) { let ch = false; if (o && typeof o === 'object') for (const k in o) if (/^[a-z0-9]{1,8}$/.test(k) && progJoin(k, o[k])) ch = true; if (ch) progSave(true); return ch; }
+// What is bought with coins — stages, parts, paints — is settled by the server: it knows the prices and the purse. After its answer the device holds
+// what the server holds, plus whatever was bought here while the request was on its way (that goes with the next one).
+const PAID_KEY = /^(s\d{1,2}|o\d{1,2}[skrnw]|oc)$/;
+function progPaid() { const o = {}; for (const k in PROG) if (PAID_KEY.test(k)) o[k] = PROG[k] | 0; return o; }
+function progTake(sv, snap) {
+  let ch = false, back = 0; sv = sv && typeof sv === 'object' ? sv : {}; snap = snap || {}; const keys = {}; for (const k in PROG) if (PAID_KEY.test(k)) keys[k] = 1; for (const k in sv) if (PAID_KEY.test(k)) keys[k] = 1;
+  for (const k in keys) { const s = Math.max(0, sv[k] | 0), was = PROG[k] | 0, sn = snap[k] | 0; let now;
+    if (k[0] === 's') { if (was > sn && s < sn) { const t = +k.slice(1); for (let g = sn + 1; g <= was; g++) back += stagePrice(t, g); now = s; } else now = was > sn ? Math.max(was, s) : s; }          // a step bought on top of one the server refused comes off too, and its price goes back
+    else now = s | (was & ~sn);
+    if (now !== was) { PROG[k] = now; ch = true; } }
+  for (const k in sv) if (!PAID_KEY.test(k) && /^[a-z0-9]{1,8}$/.test(k) && progJoin(k, sv[k])) ch = true;
+  if (ch) progSave(true); return { ch: ch, back: back };
+}
 // ---- Stages: three steps of engine and chassis work on each car, bought one after another. Each step adds a little top speed and a good deal of pull and grip.
 const STAGE_INFO = [['Сток', ''], ['Стейдж 1', 'прошивка и впуск'], ['Стейдж 2', 'выпуск и подвеска'], ['Стейдж 3', 'турбина и тормоза']], STAGE_BASE = [0, 1500, 4000, 10000], STAGE_GAIN = { top: 0.008, acc: 0.03, grip: 0.02 };
 function stageOf(t) { return Math.min(3, progGet('s' + t)); }
@@ -3422,27 +3435,32 @@ function saveWallet(quiet) { try { localStorage.setItem('td_wallet', JSON.string
 const WSRV = { srv: null, busy: false, again: false };
 const RC = { n: 0 }, REFS = { n: 0 }; try { RC.n = Math.max(0, parseInt(localStorage.getItem('td_rc') || '0', 10) || 0); REFS.n = Math.max(0, parseInt(localStorage.getItem('td_refs') || '0', 10) || 0); } catch (e) {}          // races finished since the server last heard of them; friends who came by this player's link
 try { const q = JSON.parse(localStorage.getItem('td_wsrv') || 'null'); if (q && Array.isArray(q.owned)) WSRV.srv = { coins: q.coins | 0, owned: q.owned }; } catch (e) {}
-try { const q = JSON.parse(localStorage.getItem('td_wpend') || 'null'); if (WSRV.srv && q && typeof q.id === 'string' && Array.isArray(q.owned) && Array.isArray(q.buy)) WSRV.pend = { id: q.id, d: q.d | 0, buy: q.buy, coins: q.coins | 0, owned: q.owned }; } catch (e) {}
+try { const q = JSON.parse(localStorage.getItem('td_wpend') || 'null'); if (WSRV.srv && q && typeof q.id === 'string' && Array.isArray(q.owned) && Array.isArray(q.buy)) WSRV.pend = { id: q.id, d: q.d | 0, buy: q.buy, coins: q.coins | 0, owned: q.owned, prog: q.prog && typeof q.prog === 'object' ? q.prog : null }; } catch (e) {}
 function walletSoon() { clearTimeout(walletSoon.t); walletSoon.t = setTimeout(walletSync, 1500); }
 function walletSync() {
   if (!lbOn() || !lbInit()) return; if (WSRV.busy) { WSRV.again = true; return; }
-  const sent = { coins: WALLET.coins, owned: WALLET.owned.slice() }, body = { init: lbInit(), best: bestTimes, prog: PROG }; if (LOOK.t > 0) body.look = lookGet();
+  const sent = { coins: WALLET.coins, owned: WALLET.owned.slice() }, body = { init: lbInit(), best: bestTimes, prog: {} }; if (LOOK.t > 0) body.look = lookGet(); let snap;
   try { const s0 = localStorage.getItem('td_src'), r0 = localStorage.getItem('td_ref'); if (s0) body.src = s0; if (r0) body.ref = +r0; } catch (e) {} const rcSent = RC.n; if (rcSent > 0) body.rc = rcSent;
-  if (!WSRV.srv) { body.first = sent; WSRV.pend = null; }
+  if (!WSRV.srv) { body.first = sent; WSRV.pend = null; snap = progPaid(); }
   else { if (!WSRV.pend) { let id = ''; for (let k = 0; k < 12; k++) id += 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random()*36)];
-      WSRV.pend = { id: id, d: sent.coins - WSRV.srv.coins, buy: sent.owned.filter(function (t) { return WSRV.srv.owned.indexOf(t) < 0; }), coins: sent.coins, owned: sent.owned }; try { localStorage.setItem('td_wpend', JSON.stringify(WSRV.pend)); } catch (e) {} }
-    body.tx = WSRV.pend.id; body.d = WSRV.pend.d; body.buy = WSRV.pend.buy; sent.coins = WSRV.pend.coins; sent.owned = WSRV.pend.owned; }          // an unanswered batch goes again exactly as it was; what has changed since waits for the next one
+      WSRV.pend = { id: id, d: sent.coins - WSRV.srv.coins, buy: sent.owned.filter(function (t) { return WSRV.srv.owned.indexOf(t) < 0; }), coins: sent.coins, owned: sent.owned, prog: progPaid() }; try { localStorage.setItem('td_wpend', JSON.stringify(WSRV.pend)); } catch (e) {} }
+    if (!WSRV.pend.prog) WSRV.pend.prog = progPaid(); snap = WSRV.pend.prog; body.tx = WSRV.pend.id; body.d = WSRV.pend.d; body.buy = WSRV.pend.buy; sent.coins = WSRV.pend.coins; sent.owned = WSRV.pend.owned; }          // an unanswered batch goes again exactly as it was; what has changed since waits for the next one
+  for (const k in PROG) if (!PAID_KEY.test(k)) body.prog[k] = PROG[k]; for (const k in snap) body.prog[k] = snap[k];          // the bought things go as they stood when the batch was made: its coins and its purchases must tell one story
   WSRV.busy = true;
   lbCall('/save', body, function (r) { WSRV.busy = false;
     if (r && Array.isArray(r.owned)) { WSRV.pend = null; try { localStorage.removeItem('td_wpend'); } catch (e) {} const dc = WALLET.coins - sent.coins, nb = WALLET.owned.filter(function (t) { return sent.owned.indexOf(t) < 0; }), was = JSON.stringify(WALLET);       // dc, nb: what happened here while the request was on its way
       WSRV.srv = { coins: Math.max(0, r.coins | 0), owned: r.owned.filter(function (t) { return t >= 0 && t < CAR_TYPES.length; }) }; try { localStorage.setItem('td_wsrv', JSON.stringify(WSRV.srv)); } catch (e) {}
-      WALLET = { coins: Math.max(0, WSRV.srv.coins + dc), owned: WSRV.srv.owned.slice() }; for (const t of nb) if (!owns(t)) WALLET.owned.push(t); for (const t of [0, 3]) if (!owns(t)) WALLET.owned.push(t); saveWallet(true);
+      const tk = progTake(r.prog, snap);
+      WALLET = { coins: Math.max(0, WSRV.srv.coins + dc + tk.back), owned: WSRV.srv.owned.slice() }; for (const t of nb) if (!owns(t)) WALLET.owned.push(t); for (const t of [0, 3]) if (!owns(t)) WALLET.owned.push(t); saveWallet(true);
+      try { let g = false; if (!owns(garage.type)) { garage.type = WALLET.owned[0] || 0; g = true; } if (!paintOwned(garage.color)) { garage.color = 0; g = true; } if (g) saveGarage(); } catch (e) {}
       let nbest = false; if (r.best) for (const k in r.best) { const ms = r.best[k] | 0; if (ms > 0 && (!bestTimes[k] || ms < bestTimes[k])) { bestTimes[k] = ms; nbest = true; } } if (nbest) { try { localStorage.setItem('td_best', JSON.stringify(bestTimes)); } catch (e) {} }
-      const nprog = progMerge(r.prog), nlook = lookTake(r.look);
+      const nprog = tk.ch, nlook = lookTake(r.look);
+      if (r.denied) note('Покупка не прошла: на сервере не хватило монет. Гараж и баланс — как на сервере', 4600);
       if (rcSent > 0) { RC.n = Math.max(0, RC.n - rcSent); try { localStorage.setItem('td_rc', String(RC.n)); } catch (e) {} }
       if (r.bonus > 0) note('Бонус за приглашение: +' + (r.bonus | 0) + ' монет', 3600);
       if (typeof r.refs === 'number') { const was = REFS.n; REFS.n = Math.max(0, r.refs | 0); try { localStorage.setItem('td_refs', String(REFS.n)); } catch (e) {} if (REFS.n > was) toast('Друг зашёл по твоей ссылке: +' + 1000*(REFS.n - was) + ' монет'); try { playSubs(); } catch (e) {} }
-      if ((JSON.stringify(WALLET) !== was || nbest || nprog || nlook) && state === 'menu') { try { buildMenu(); } catch (e) {} }
+      if ((JSON.stringify(WALLET) !== was || nbest || nprog || nlook) && state === 'menu') { try { buildMenu(); } catch (e) {} try { if (GAR.open) buildGar(); } catch (e) {} }
+      if (state === 'finished' && NET.potTxt) { try { potLine(); } catch (e) {} }
       if (dc || nb.length) WSRV.again = true; }
     if (WSRV.again) { WSRV.again = false; walletSoon(); } });
 }
@@ -4258,7 +4276,7 @@ function netGroup(code, uid) { NET.scr = 'fri';
   if (uid !== '0' && me && me === uid) open(); else { wait('Подключаюсь…'); knock(); }
 }
 function netLeave() {
-  if (!NET.on) return; try { netSend({ t: 'bye', nid: NET.me }); } catch (e) {} NET.paid = 0; NET.potSum = 0;
+  if (!NET.on) return; try { netSend({ t: 'bye', nid: NET.me }); } catch (e) {} NET.paid = 0; NET.potSum = 0; NET.pid = ''; if (Object.keys(POTS).length) setTimeout(potSweep, 1200);
   chatReset(); voiceStop(); const tr = NET.tr; NET.on = false; NET.racing = false; NET.pub = false; NET.wait = null; NET.qtok = (NET.qtok || 0) + 1; NET.tr = null; NET.roster = []; setTimeout(function () { if (tr) tr.close(); }, 200);
 }
 // ---------------------------------------------------------------------------
@@ -4271,17 +4289,39 @@ function pubCode(k) { const q = STAKE_POOLS.indexOf(PUB.stake | 0); return (q >=
 // game's own, earned by racing; nothing is bought and nothing is paid out. With friends the host names the stake; open rooms have fixed tables.
 const STAKES = [0, 100, 250, 500, 1000, 2500, 5000], STAKE_POOLS = [100, 500, 2000];
 function stakeText() { const s = NET.stake | 0, n = Math.max(1, NET.roster.length); return s > 0 ? 'Взнос ' + s + ' с каждого · банк ' + s*n + ' забирает победитель' : ''; }
+// The stakes are held by the server. The host opens the bank with his own stake when he presses start; every other player pays in as the countdown
+// runs. The coins leave the purse there, not here. When the first of those who paid is home, the host names him and the server hands him the bank.
+// A bank nobody was named for gives the stakes back after a quarter of an hour; a list of banks paid into is kept to ask for them.
+const POTS = {}; try { const q = JSON.parse(localStorage.getItem('td_pots') || 'null'); if (q && typeof q === 'object') for (const k in q) if (/^[a-z0-9]{10,24}$/.test(k) && Date.now() - q[k] < 3*86400000) POTS[k] = { at: +q[k] || 0 }; } catch (e) {}
+function potsSave() { try { const o = {}; for (const k in POTS) o[k] = POTS[k].at; localStorage.setItem('td_pots', JSON.stringify(o)); } catch (e) {} }
+function potCan() { return lbOn() && !!lbInit(); }
+function potUid() { const u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user; return u ? +u.id || 0 : 0; }
+function potCall(body, cb) { body.init = lbInit(); lbCall('/pot', body, function (r, raw) { try { cb(r, raw); } catch (e) {} if (r) { clearTimeout(walletSoon.t); walletSync(); } }); }          // the purse has changed on the server: take it over
+function potSweep(force) {                 // banks that were never handed out: ask for the stake back
+  if (!potCan()) return; const now = Date.now();
+  for (const pid of Object.keys(POTS)) { const q = POTS[pid]; if (pid === NET.pid || (!force && now - (q.asked || 0) < 60000)) continue; q.asked = now;
+    potCall({ op: 'back', pid: pid }, function (r, raw) {
+      if (r) { delete POTS[pid]; potsSave(); if (r.back > 0) toast('Взнос ' + (r.back | 0) + ' монет вернулся'); }
+      else if (raw && raw.err === 'wait') { clearTimeout(potSweep.t); potSweep.t = setTimeout(function () { potSweep(true); }, (Math.min(900, raw.left | 0) + 3)*1000); }
+      else if (raw && raw.err === 'range') { delete POTS[pid]; potsSave(); } }); }
+}
 function potSettle() {                   // the host names the winner as soon as the first time is in, and tells everybody
-  if (!NET.host || !NET.racing || !(NET.potSum > 0) || NET.potDone) return; const pay = NET.payers || {}; let w = -1, best = Infinity, bank = 0; for (const k in pay) bank += pay[k] | 0;
+  if (!NET.host || !NET.pid || NET.potDone || NET.potWait) return; const pay = NET.payers || {}, pid = NET.pid; let w = -1, best = Infinity;
   for (const k in NET.results) if (pay[k] > 0 && NET.results[k] > 0 && NET.results[k] < best) { best = NET.results[k]; w = +k; }          // the first across the line among those who paid
-  if (w < 0) return; NET.potDone = true; const m = { t: 'pot', nid: w, sum: Math.min(bank, NET.potSum) }; try { NET.tr.all(m, -1); } catch (e) {} potGot(m); }
+  if (w < 0) return; NET.potWait = true;
+  potCall({ op: 'win', pid: pid, uid: pay[w] }, function (r, raw) { NET.potWait = false; if (NET.pid !== pid || NET.potDone) return;
+    if (r || (raw && raw.err === 'host')) { NET.potDone = true; if (!r && !NET.potTry) { toast('Банк не найден на сервере'); return; }          // 'host' after an answer that got lost: the bank has been handed out already
+      const m = { t: 'pot', pid: pid, nid: w, sum: r ? r.sum | 0 : (NET.stake | 0)*Object.keys(pay).length }; try { NET.tr.all(m, -1); } catch (e) {} potGot(m); }
+    else if (raw && raw.err === 'winner') { delete pay[w]; potSettle(); }
+    else { NET.potTry = (NET.potTry | 0) + 1; if (NET.potTry < 6) setTimeout(potSettle, 2500); } });
+}
 function potGot(m) {
-  if (!(NET.potSum > 0)) return; const mine = m.nid === NET.me, p = NET.roster.filter(function (q) { return q.nid === m.nid; })[0], sum = Math.min(m.sum | 0, NET.potSum);
-  if (mine && NET.paid > 0) { WALLET.coins += sum; saveWallet(); haptic('win'); } NET.paid = 0; NET.potSum = 0;
+  if (!NET.pid || (m.pid && m.pid !== NET.pid)) return; const mine = m.nid === NET.me, p = NET.roster.filter(function (q) { return q.nid === m.nid; })[0], sum = Math.max(0, m.sum | 0);
+  if (POTS[NET.pid]) { delete POTS[NET.pid]; potsSave(); } if (mine && NET.paid > 0) haptic('win'); NET.paid = 0; NET.potSum = 0; NET.pid = '';
   NET.potTxt = mine ? 'Банк твой: +' + sum + ' монет' : 'Банк ' + sum + ' монет забирает ' + (p ? p.name : 'победитель');
-  if (state === 'finished') potLine(); toast(NET.potTxt); }
-function potLine() { const fd = document.getElementById('fdaily'); let d = [].filter.call(fd.children, function (q) { return q.textContent.indexOf('ждёт победителя') >= 0; })[0]; if (!d) { d = document.createElement('div'); fd.appendChild(d); } d.textContent = NET.potTxt; fd.style.display = ''; const fc = document.getElementById('fcoins'); fc.textContent = fc.textContent.replace(/всего \d+/, 'всего ' + WALLET.coins); }
-function potRefund() { if (!(NET.paid > 0)) return false; WALLET.coins += NET.paid; saveWallet(); NET.paid = 0; NET.potSum = 0; return true; }          // the race fell apart before anybody won: the stake goes back
+  if (state === 'finished') potLine(); toast(NET.potTxt); if (!NET.host) { clearTimeout(walletSoon.t); walletSync(); } }          // the coins are on the server: the purse comes with its next answer
+function potLine() { const fd = document.getElementById('fdaily'); let d = [].filter.call(fd.children, function (q) { return q.textContent.indexOf('ждёт победителя') >= 0 || q.textContent.indexOf('Банк ') === 0; })[0]; if (!d) { d = document.createElement('div'); fd.appendChild(d); } d.textContent = NET.potTxt; fd.style.display = ''; const fc = document.getElementById('fcoins'); fc.textContent = fc.textContent.replace(/всего \d+/, 'всего ' + WALLET.coins); }
+function potRefund() { if (!NET.pid || !(NET.paid > 0)) return false; NET.paid = 0; NET.potSum = 0; NET.pid = ''; setTimeout(function () { potSweep(true); }, 1500); return true; }          // the race fell apart before anybody won: the server gives the stake back, at once to a lone payer, after its hold to the rest
 // knock on one room: cb('in', transport, my id) | 'busy' | 'none' (nobody there) | 'dead' (no answer) | 'fail' (transport, error)
 function pubKnock(code, cb) {
   netTransport(function (tr) { let fin = false, tm = 0; const end = function (r, a) { if (fin) return; fin = true; clearTimeout(tm); if (r !== 'in') { try { tr.close(); } catch (e) {} } cb(r, tr, a); };
@@ -4395,7 +4435,7 @@ function netSetCar(type, color) {                   // the player changes car or
   else { NET.tr.send(0, { t: 'car', type: type, color: color, tn: tuneSel(type) }); netLobby(); }
 }
 // «Готов»: each player says when he is set. An open room starts three seconds after the last one has said so (and by the clock at the latest); among friends the host sees who is set and starts when he likes.
-function netReady(v) { if (!NET.on || NET.racing) return; const me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0]; if (!me) return; v = v === undefined ? !me.rdy : !!v; if (v && NET.stake > WALLET.coins) { note('На взнос нужно ' + NET.stake + ' монет, у тебя ' + WALLET.coins, 2600); haptic('light'); return; } me.rdy = v ? 1 : 0; beep(v ? 880 : 520, 0.06, 'sine', 0.04);
+function netReady(v) { if (!NET.on || NET.racing) return; const me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0]; if (!me) return; v = v === undefined ? !me.rdy : !!v; if (v && NET.stake > 0 && !potCan()) { note('Гонки на взнос работают, когда игра открыта в Telegram', 2800); haptic('light'); return; } if (v && NET.stake > WALLET.coins) { note('На взнос нужно ' + NET.stake + ' монет, у тебя ' + WALLET.coins, 2600); haptic('light'); return; } me.rdy = v ? 1 : 0; beep(v ? 880 : 520, 0.06, 'sine', 0.04);
   if (NET.host) { netRoster(); if (NET.pub) pubBeat(); } else { NET.tr.send(0, { t: 'rdy', v: v ? 1 : 0 }); netLobby(); } }
 function netRoster() { NET.tr.all({ t: 'roster', list: NET.roster, track: NET.track, opt: NET.opt, stake: NET.stake | 0, pub: NET.pub ? 1 : 0 }, -1); voiceSync(); if (!NET.racing) netLobby(); }
 // The room keeps score from race to race: points for places, added up by the host when a race is over.
@@ -4517,17 +4557,34 @@ function netStart() {
   if (NET.roster.length < 2) { note(NET.pub ? 'Ждём второго игрока' : 'В комнате пока только ты — позови друзей', 2400); haptic('light'); return; }          // rooms are for people: no bots are added, so one player has nobody to race
   if (NET.stake > 0 && WALLET.coins < NET.stake) { note('На взнос нужно ' + NET.stake + ' монет, у тебя ' + WALLET.coins, 2600); haptic('light'); return; }
   { const lag = NET.roster.filter(function (p) { return p.nid !== 0 && !p.rdy; }); if (lag.length) { note('Ещё не готовы: ' + lag.map(function (p) { return p.name; }).join(', '), 2400); haptic('light'); return; } }
+  if (!(NET.stake > 0)) { netStartGo(''); return; }
+  if (!potCan()) { note('Гонки на взнос работают, когда игра открыта в Telegram', 2800); haptic('light'); return; } if (NET.potOpen) return;
+  let pid = ''; for (let k = 0; k < 14; k++) pid += 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random()*36)]; const stake = NET.stake | 0; NET.potOpen = true; note('Открываю банк…', 1500);
+  potCall({ op: 'pay', pid: pid, stake: stake, host: 1 }, function (r, raw) { NET.potOpen = false;
+    if (!r) { note(raw && raw.err === 'coins' ? 'На взнос не хватает монет: на сервере ' + (raw.coins | 0) : 'Сервер не ответил — банк не открыт, попробуй ещё раз', 3200); haptic('light'); return; }
+    POTS[pid] = { at: Date.now() }; potsSave();
+    if (!NET.on || !NET.host || NET.racing || (NET.stake | 0) !== stake || NET.roster.length < 2 || NET.roster.some(function (p) { return p.nid !== 0 && !p.rdy; })) { potSweep(true); note('Состав изменился — взнос возвращается', 2600); return; }          // somebody left or took his word back meanwhile
+    netStartGo(pid); });
+}
+function netStartGo(pid) {
   const np = NET.roster.length, nb = 0, L = LEVELS[level]; NET.auto = 0; NET.back = 0; NET.regroup = 0; NET.began = performance.now(); for (const p of NET.roster) { delete p.late; delete p.rdy; }
   const usedC = NET.roster.map(function (p) { return p.color; }), cols = [0,1,2,3,4,5,6,7].filter(function (c) { return usedC.indexOf(c) < 0; }), bl = [];
   for (let k = 0; k < nb; k++) bl.push({ nid: 100 + k, type: (k + 1 + NET.track*2) % CAR_TYPES.length, color: cols.length ? cols[k % cols.length] : k, skill: NET.pub && np > 1 ? PUB.skills[k % 3] : L.skills[4 - k] });
   const pl = NET.roster.map(function (p) { return p.nid; }); for (let i = pl.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i + 1)), t = pl[i]; pl[i] = pl[j]; pl[j] = t; }
-  const o = NET.opt || {}, m = { t: 'start', pub: NET.pub ? 1 : 0, track: NET.track, rev: !!o.rev, rain: !!o.rain, ko: !!o.ko && !(NET.stake > 0), laps: o.laps | 0, stake: NET.stake | 0, bots: bl, order: bl.map(function (b) { return b.nid; }).concat(pl), list: NET.roster };
+  const o = NET.opt || {}, m = { t: 'start', pub: NET.pub ? 1 : 0, track: NET.track, rev: !!o.rev, rain: !!o.rain, ko: !!o.ko && !(NET.stake > 0), laps: o.laps | 0, stake: NET.stake | 0, pid: pid, bots: bl, order: bl.map(function (b) { return b.nid; }).concat(pl), list: NET.roster };
   NET.tr.all(m, -1); netBegin(m);
 }
 function netBegin(m) {
-  rstatReset(); NET.paid = 0; NET.potSum = 0; NET.potDone = false; NET.potTxt = '';
-  if (m.stake > 0 && m.list.some(function (p) { return p.nid === NET.me; })) { const st = Math.min(m.stake | 0, WALLET.coins); WALLET.coins -= st; saveWallet(); NET.paid = st; NET.potSum = (m.stake | 0)*m.list.length;
-    if (NET.host) { NET.payers = {}; NET.payers[NET.me] = st; } else { try { NET.tr.send(0, { t: 'paid', nid: NET.me, sum: st }); } catch (e) {} } }          // the host adds up what each player says he has put in: a player on an old version puts in nothing and is not in the bank
+  rstatReset(); NET.paid = 0; NET.potSum = 0; NET.potDone = false; NET.potWait = false; NET.potTry = 0; NET.potTxt = ''; NET.pid = ''; NET.payers = null;
+  if (m.stake > 0 && m.list.some(function (p) { return p.nid === NET.me; })) { const pid = typeof m.pid === 'string' && /^[a-z0-9]{10,24}$/.test(m.pid) ? m.pid : '', st = m.stake | 0;
+    if (!pid) note('У хозяина старая версия игры — заезд без банка', 3200);
+    else if (NET.host) { NET.pid = pid; NET.paid = st; NET.potSum = st*m.list.length; NET.payers = {}; NET.payers[NET.me] = potUid(); }          // the host has paid already: that opened the bank
+    else if (!potCan()) note('Взнос не внесён: банк работает только в Telegram. Едешь вне банка', 3600);
+    else { NET.pid = pid; NET.potSum = st*m.list.length; let left = 3; const pay = function () {
+        potCall({ op: 'pay', pid: pid, stake: st }, function (r, raw) {
+          if (r) { POTS[pid] = { at: Date.now() }; potsSave(); if (NET.on && NET.pid === pid) { NET.paid = st; try { NET.tr.send(0, { t: 'paid', nid: NET.me, uid: potUid() }); } catch (e) {} } return; }
+          if (!raw && --left > 0 && NET.on && NET.pid === pid) { setTimeout(pay, 1500); return; }
+          if (NET.pid === pid) { NET.pid = ''; NET.potSum = 0; note(raw && raw.err === 'coins' ? 'Взнос не прошёл: на сервере ' + (raw.coins | 0) + ' монет. Едешь вне банка' : 'Взнос не прошёл — едешь вне банка', 3800); } }); }; pay(); } }
   audio(); NET.racing = true; NET.seen = performance.now(); NET.last = {}; for (const id in NET.conn) NET.last[id] = NET.seen; NET.sendT = 0; NET.roster = m.list; NET.awarded = false; CHAMP.on = false; RAIN = !!m.rain; clearTimeout(MTR.tm); MTR.want = -1; useTrack(m.track, !!m.rev); if (m.laps > 0 && m.laps <= 12) LAPS = m.laps | 0; rivalBot = null; document.getElementById('rival').style.display = 'none';
   { const me = m.list.filter(function (p) { return p.nid === NET.me; })[0]; if (me) { garage.type = me.type; garage.color = me.color; } }
   player = newCar(PAINTS[garage.color], garage.type); player.name = playerName; player.nid = NET.me; dressPlayer(player); player.K = netK(player.K); bots = []; cars = [];
@@ -4586,7 +4643,7 @@ function netMsg(from, m) {
     const who = NET.conn[from]; if (who === undefined) return; NET.last = NET.last || {}; NET.last[from] = performance.now();
     if (!NET.tr.mesh && (m.t === 'st' || m.t === 'use' || m.t === 'hit' || m.t === 'fin')) NET.tr.all(m, from);          // pass it on to the other guests
     if (m.t === 'bye') { netClosed(from); return; }
-    if (m.t === 'paid') { if (NET.racing && NET.payers && NET.stake > 0 && !(who in NET.payers)) NET.payers[who] = Math.max(0, Math.min(NET.stake | 0, m.sum | 0)); return; }          // once per race, and never more than the stake
+    if (m.t === 'paid') { const u = +m.uid; if (NET.payers && NET.pid && !(who in NET.payers) && Number.isSafeInteger(u) && u > 0) { NET.payers[who] = u; potSettle(); } return; }          // the player says under which Telegram id he paid; the server checks that he did when the bank is handed out
     if (m.t === 'rdy' && !NET.racing) { const p = NET.roster.filter(function (q) { return q.nid === who; })[0]; if (p) { p.rdy = m.v ? 1 : 0; netRoster(); if (NET.pub) pubBeat(); } return; }
     if (m.t === 'car' && !NET.racing) { const p = NET.roster.filter(function (q) { return q.nid === who; })[0]; if (p) { p.type = Math.abs(m.type | 0) % CAR_TYPES.length; p.color = netFreeColor(Math.abs(m.color | 0) % PAINTS.length, who); p.tn = tnClean(m.tn); netRoster(); } return; }
   } else {
@@ -4615,7 +4672,7 @@ function netMsg(from, m) {
 }
 function netClosed(from) {
   if (!NET.on) return;
-  if (!NET.host) { const was = NET.racing, pub = NET.pub, back = potRefund(); netLeave(); toMenu(); netOpen(); mpMsg(was ? 'Хозяин комнаты вышел, заезд прерван' + (back ? '. Взнос возвращён' : '') : 'Комната закрыта'); if (back) toast('Заезд сорван — взнос возвращён');
+  if (!NET.host) { const was = NET.racing, pub = NET.pub, back = potRefund(); netLeave(); toMenu(); netOpen(); mpMsg(was ? 'Хозяин комнаты вышел, заезд прерван' + (back ? '. Взнос вернётся в течение 15 минут' : '') : 'Комната закрыта'); if (back) toast('Заезд сорван — взнос вернётся в течение 15 минут');
     if (pub) { mpMsg('Хозяин комнаты вышел — ищу другую…'); setTimeout(function () { if (!NET.on && !NET.busy && !document.getElementById('mp').classList.contains('hidden')) netQuick('Хозяин комнаты вышел — ищу другую…'); }, 400 + Math.random()*1600); }
     return; }
   const nid = NET.conn[from]; if (nid === undefined) return; delete NET.conn[from]; const p = NET.roster.filter(function (q) { return q.nid === nid; })[0];
@@ -5005,8 +5062,8 @@ const API_URL = window.__tdApi || 'https://turbo-drift.basirxujamuradov.workers.
 const LB = { track: 0, data: {}, fail: {} };
 function lbOn() { return !!API_URL; }
 function lbInit() { return tg && tg.initData ? tg.initData : ''; }
-function lbCall(path, body, cb) { let done = false; const end = function (r) { if (!done) { done = true; clearTimeout(tm); cb(r); } }, tm = setTimeout(function () { end(null); }, 9000);
-  try { fetch(API_URL + path, { method: 'POST', body: JSON.stringify(body) }).then(function (r) { return r.json(); }).then(function (j) { end(j && j.ok ? j : null); }, function () { end(null); }); } catch (e) { end(null); } }
+function lbCall(path, body, cb) { let done = false; const end = function (r, raw) { if (!done) { done = true; clearTimeout(tm); cb(r, raw); } }, tm = setTimeout(function () { end(null); }, 9000);          // raw: the answer even when it says no
+  try { fetch(API_URL + path, { method: 'POST', body: JSON.stringify(body) }).then(function (r) { return r.json(); }).then(function (j) { end(j && j.ok ? j : null, j); }, function () { end(null); }); } catch (e) { end(null); } }
 function lbSend(track, ms, car, cb) { if (!lbOn() || !lbInit()) { if (cb) cb(null); return; }
   lbCall('/score', { track: lbId(track), ms: ms, car: car, init: lbInit() }, function (r) { if (r) { LB.data[track] = r; try { localStorage.setItem('td_lc' + lbId(track), String(ms)); } catch (e) {} } if (cb) cb(r); }); }
 // ---- The tournament of the week: one track from Monday to Sunday (UTC), everybody's best time on it in the usual conditions.
@@ -5121,8 +5178,8 @@ document.getElementById('wmenu').addEventListener('click', welcomeClose);
 document.getElementById('mphost').addEventListener('click', netHost);
 document.getElementById('mpquick').addEventListener('click', function () { audio(); NET.scr = 'onl'; PUB.stake = 0; netOpen(); }); document.getElementById('mpfind').addEventListener('click', function () { PUB.stake = 0; netQuick(); }); document.getElementById('mpmake').addEventListener('click', function () { PUB.stake = 0; netQuick('', true); });
 STAKE_POOLS.forEach(function (n) { const b = document.createElement('button'); b.className = 'ghost'; b.textContent = String(n); b.setAttribute('aria-label', 'Гонка со взносом ' + n + ' монет');
-  b.addEventListener('click', function () { if (WALLET.coins < n) { mpMsg('На взнос нужно ' + n + ' монет, у тебя ' + WALLET.coins); haptic('light'); return; } PUB.stake = n; netQuick(); }); document.getElementById('mpstakes').appendChild(b); });
-document.getElementById('mpstakebtn').addEventListener('click', function () { if (!NET.on || !NET.host || NET.pub || NET.racing) return; const at = STAKES.indexOf(NET.stake | 0); NET.stake = STAKES[(at + 1) % STAKES.length]; if (NET.stake > 0 && NET.opt) NET.opt.ko = false; for (const p of NET.roster) delete p.rdy;          // a new sum: whoever agreed to the old one agrees again
+  b.addEventListener('click', function () { if (!potCan()) { mpMsg('Столы со взносом работают, когда игра открыта в Telegram'); haptic('light'); return; } if (WALLET.coins < n) { mpMsg('На взнос нужно ' + n + ' монет, у тебя ' + WALLET.coins); haptic('light'); return; } PUB.stake = n; netQuick(); }); document.getElementById('mpstakes').appendChild(b); });
+document.getElementById('mpstakebtn').addEventListener('click', function () { if (!NET.on || !NET.host || NET.pub || NET.racing) return; if (!potCan()) { note('Гонки на взнос работают, когда игра открыта в Telegram', 2800); haptic('light'); return; } const at = STAKES.indexOf(NET.stake | 0); NET.stake = STAKES[(at + 1) % STAKES.length]; if (NET.stake > 0 && NET.opt) NET.opt.ko = false; for (const p of NET.roster) delete p.rdy;          // a new sum: whoever agreed to the old one agrees again
   if (NET.stake > WALLET.coins) toast('У тебя ' + WALLET.coins + ' монет: на такой взнос не хватит'); netRoster(); });
 
 document.getElementById('helpopen').addEventListener('click', function () { document.getElementById('help').classList.remove('hidden'); });
