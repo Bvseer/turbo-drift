@@ -139,7 +139,7 @@ async function week(env, q) {
 // What the bot says. In a private chat it answers anything with the invitation to play. In a group it keeps silent until it is called by a command
 // (/play, /race, /top, /help — with or without @name), and its buttons there are plain links: Telegram allows the button that opens a Mini App directly only in private chats.
 const TRACK_NAMES = ['Кольцо', 'Змейка', 'Шпильки', 'Токио', 'Осака', 'Ташкент', 'Париж', 'Мадрид', 'Лондон', 'Лос-Анджелес', 'Сан-Франциско', 'Майами', 'Дубай', 'Монако', 'Чикаго'];
-const BOT_COMMANDS = [{ command: 'play', description: 'Открыть игру' }, { command: 'race', description: 'Создать комнату и позвать всех' }, { command: 'top', description: 'Турнир недели: лучшие времена' }, { command: 'help', description: 'Что умеет бот' }];
+const BOT_COMMANDS = [{ command: 'play', description: 'Открыть игру' }, { command: 'race', description: 'Приватная комната: только для этого чата' }, { command: 'online', description: 'Онлайн-гонка со случайными соперниками' }, { command: 'top', description: 'Турнир недели: лучшие времена' }, { command: 'help', description: 'Что умеет бот' }];
 const fmtMs = (ms) => { const m = Math.floor(ms/60000), s = Math.floor(ms % 60000/1000), c = Math.floor(ms % 1000/10); return m + ':' + String(s).padStart(2, '0') + '.' + String(c).padStart(2, '0'); };
 async function weekText(env) {
   const wk = weekNow(), ti = weekTrack(wk); let rows = [];
@@ -162,13 +162,15 @@ async function telegram(env, request) {
     const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', rnd = crypto.getRandomValues(new Uint8Array(5)); let code = ''; for (const b of rnd) code += A[b % A.length];
     const anon = !m.from || m.from.is_bot || !!m.sender_chat || !Number.isSafeInteger(m.from.id), who = anon ? '' : String(m.from.first_name || m.from.username || 'Игрок').replace(/[\u0000-\u001f<>]/g, ' ').slice(0, 24);
     const roomBtn = { text: '🚗 В комнату ' + code, url: link + '?startapp=g_' + code + '_' + (anon ? 0 : m.from.id) }, gameBtn = { text: '🏁 Просто играть', url: link };
-    await send({ text: anon ? '🏁 Гонка! Комната ' + code + '.\n\nЖмите «В комнату». Откроет её тот, кто зайдёт первым, — он и даст старт.'
-      : '🏁 ' + who + ' собирает гонку — комната ' + code + '.\n\nЖмите «В комнату». Она откроется, когда ' + who + ' сам зайдёт по этой кнопке: он хозяин и даёт старт. Кто пришёл раньше — подождёт его прямо в игре.', reply_markup: { inline_keyboard: [[roomBtn], [gameBtn]] } }); return new Response('ok'); }
-  if (cmd === 'help') { await send({ text: 'Команды:\n/play — открыть игру\n/race — создать свою комнату и позвать всех в неё\n/top — турнир недели, лучшие времена\n\nВ группе команду надёжнее писать с именем бота: /play@' + bot, reply_markup: { inline_keyboard: [[playBtn]] } }); return new Response('ok'); }
+    await send({ text: anon ? '🔒 Приватная гонка — комната ' + code + '. Попасть в неё можно только по этой кнопке.\n\nЖмите «В комнату». Откроет её тот, кто зайдёт первым, — он и даст старт.'
+      : '🔒 ' + who + ' собирает приватную гонку — комната ' + code + '. Попасть в неё можно только по этой кнопке.\n\nЖмите «В комнату». Она откроется, когда ' + who + ' сам зайдёт по этой кнопке: он хозяин и даёт старт. Кто пришёл раньше — подождёт его прямо в игре.', reply_markup: { inline_keyboard: [[roomBtn], [gameBtn]] } }); return new Response('ok'); }
+  if (cmd === 'online') { const who = String(m.from && !m.from.is_bot && (m.from.first_name || m.from.username) || '').replace(/[\u0000-\u001f<>]/g, ' ').slice(0, 24);          // the open rooms of the quick match: strangers may be there too
+    await send({ text: '🌍 ' + (who ? who + ' зовёт в онлайн-гонку' : 'Онлайн-гонка') + '.\n\nКнопка посадит в открытую комнату с игроками со всего мира — туда попадают и посторонние. Для гонки только своей компанией есть /race.', reply_markup: { inline_keyboard: [[raceBtn], [{ text: '🏁 Просто играть', url: link }]] } }); return new Response('ok'); }
+  if (cmd === 'help') { await send({ text: 'Команды:\n/play — открыть игру\n/race — приватная комната: бот даёт ссылку, по ней заходят только свои\n/online — онлайн-гонка в открытой комнате со случайными соперниками\n/top — турнир недели, лучшие времена\n\nВ группе команду надёжнее писать с именем бота: /play@' + bot, reply_markup: { inline_keyboard: [[playBtn]] } }); return new Response('ok'); }
   if (!priv && cmd !== 'play' && cmd !== 'start') return new Response('ok');          // some other bot's command
   if (priv && text.indexOf('/start') === 0) { const k = (text.split(/\s+/)[1] || 'direct').replace(/[^\w-]/g, '').slice(0, 32) || 'direct';      // t.me/<bot>?start=<label>: which advert brought the player
     try { await env.DB.prepare('INSERT INTO src (k, n) VALUES (?, 1) ON CONFLICT (k) DO UPDATE SET n = n + 1').bind(k).run(); } catch (e) {} }
-  await send({ text: intro, reply_markup: { inline_keyboard: [[playBtn], [raceBtn]] } });
+  await send({ text: priv ? intro : intro + '\n\n/race — приватная комната для этого чата\n/online — гонка со случайными соперниками', reply_markup: { inline_keyboard: priv ? [[playBtn], [raceBtn]] : [[playBtn]] } });
   return new Response('ok');
 }
 
