@@ -77,8 +77,8 @@ async function score(env, q, request) {
 const COINS_MAX = 10000000;
 async function withSave(env, work) {          // the table is made the first time it is needed: no new setup step
   try { return await work(); } catch (e) { const m = String(e && e.message || e);
-    if (/no such table/i.test(m)) { await env.DB.prepare('CREATE TABLE IF NOT EXISTS save (uid INTEGER PRIMARY KEY, coins INTEGER NOT NULL, owned TEXT NOT NULL, best TEXT NOT NULL, at INTEGER NOT NULL, prog TEXT, look TEXT)').run(); return await work(); }
-    if (/no such column|no column named|has no column/i.test(m)) { for (const c of ['prog', 'look']) { try { await env.DB.prepare('ALTER TABLE save ADD COLUMN ' + c + ' TEXT').run(); } catch (e2) {} } return await work(); }       // a table made before stages and the career existed
+    if (/no such table/i.test(m)) { await env.DB.prepare('CREATE TABLE IF NOT EXISTS save (uid INTEGER PRIMARY KEY, coins INTEGER NOT NULL, owned TEXT NOT NULL, best TEXT NOT NULL, at INTEGER NOT NULL, prog TEXT, look TEXT, tx TEXT)').run(); return await work(); }
+    if (/no such column|no column named|has no column/i.test(m)) { for (const c of ['prog', 'look', 'tx']) { try { await env.DB.prepare('ALTER TABLE save ADD COLUMN ' + c + ' TEXT').run(); } catch (e2) {} } return await work(); }       // a table made before stages and the career existed
     throw e; }
 }
 // Progress that only grows (stages of the cars, parts bought, career stars): a flat map of small integers. The larger number wins;
@@ -96,6 +96,8 @@ function lookClean(v, now) { if (!v || typeof v !== 'object') return null; const
 // label of the link that brought him and, if a friend's link did, the friend. Every day he plays leaves one row more; from the two the
 // page /stats works out how many of each day's newcomers were back a day, three days and a week later.
 const DAY_S = 86400, dayNow = () => Math.floor((Date.now()/1000 + 5*3600)/DAY_S);          // the days turn at midnight in Tashkent
+const FIRST_MAX = 2000;                                                                   // how many coins the server takes on trust from a player it sees for the first time
+const JUMP = 2500;                                                                        // a gain in one save that no race, task or prize gives: worth a line in the list
 const REF_NEW = 1000, REF_OLD = 1000, REF_MAX = 100;                                      // coins to the newcomer and to the friend whose link he came by; how many newcomers one friend is paid for
 const srcClean = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 24);
 async function withStat(env, work) {
@@ -103,10 +105,11 @@ async function withStat(env, work) {
     await env.DB.batch([env.DB.prepare('CREATE TABLE IF NOT EXISTS usr (uid INTEGER PRIMARY KEY, d0 INTEGER NOT NULL, src TEXT, ref INTEGER, old INTEGER NOT NULL DEFAULT 0, races INTEGER NOT NULL DEFAULT 0)'),
       env.DB.prepare('CREATE INDEX IF NOT EXISTS usr_d0 ON usr (d0)'), env.DB.prepare('CREATE INDEX IF NOT EXISTS usr_ref ON usr (ref)'),
       env.DB.prepare('CREATE TABLE IF NOT EXISTS act (day INTEGER NOT NULL, uid INTEGER NOT NULL, races INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, uid))'), env.DB.prepare('CREATE INDEX IF NOT EXISTS act_uid ON act (uid, day)'),
-      env.DB.prepare('CREATE TABLE IF NOT EXISTS grp (chat INTEGER PRIMARY KEY, title TEXT, at INTEGER NOT NULL, week INTEGER NOT NULL DEFAULT 0)')]); return await work(); }
+      env.DB.prepare('CREATE TABLE IF NOT EXISTS grp (chat INTEGER PRIMARY KEY, title TEXT, at INTEGER NOT NULL, week INTEGER NOT NULL DEFAULT 0)'),
+      env.DB.prepare('CREATE TABLE IF NOT EXISTS jump (id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER NOT NULL, at INTEGER NOT NULL, d INTEGER NOT NULL, coins INTEGER NOT NULL, how TEXT)')]); return await work(); }
 }
 // fresh: the server has never kept anything for this player — he is new. Somebody it already knew when the counting began is marked old and left out of the shares.
-async function track(env, uid, fresh, q) {
+async function track(env, uid, fresh, q, name) {
   const day = dayNow(), rc = Math.max(0, Math.min(200, q.rc | 0)), out = { bonus: 0, refs: 0 };
   await withStat(env, async () => {
     if (!(await env.DB.prepare('SELECT d0 FROM usr WHERE uid = ?').bind(uid).first())) { let ref = null; const r = Math.round(+q.ref);
@@ -115,7 +118,8 @@ async function track(env, uid, fresh, q) {
       const ins = await env.DB.prepare('INSERT OR IGNORE INTO usr (uid, d0, src, ref, old, races) VALUES (?1, ?2, ?3, ?4, ?5, 0)').bind(uid, day, fresh ? (ref ? 'ref' : (srcClean(q.src) || 'direct')) : 'old', ref, fresh ? 0 : 1).run();
       if (ref && ins && ins.meta && ins.meta.changes) { await env.DB.prepare('UPDATE save SET coins = MIN(?, coins + ?) WHERE uid = ?').bind(COINS_MAX, REF_OLD, ref).run(); out.bonus = REF_NEW; } }
     await env.DB.prepare('INSERT INTO act (day, uid, races) VALUES (?1, ?2, ?3) ON CONFLICT (day, uid) DO UPDATE SET races = races + excluded.races').bind(day, uid, rc).run();
-    if (rc > 0) await env.DB.prepare('UPDATE usr SET races = races + ? WHERE uid = ?').bind(rc, uid).run();
+    const put = () => env.DB.prepare('UPDATE usr SET races = races + ?1, name = ?2 WHERE uid = ?3').bind(rc, name || null, uid).run();
+    try { await put(); } catch (e) { if (!/name/.test(String(e && e.message || e))) throw e; try { await env.DB.prepare('ALTER TABLE usr ADD COLUMN name TEXT').run(); } catch (x) {} await put(); }          // the name column came a day later than the table
     out.refs = (await env.DB.prepare('SELECT COUNT(*) AS n FROM usr WHERE ref = ?').bind(uid).first()).n | 0; });
   return out;
 }
@@ -127,42 +131,94 @@ async function stats(env) {
     cohorts: await all('SELECT u.d0 AS day, COUNT(*) AS n, SUM(' + back(1) + ') AS r1, SUM(' + back(3) + ') AS r3, SUM(' + back(7) + ') AS r7, SUM(EXISTS(SELECT 1 FROM act a WHERE a.uid = u.uid AND a.day > u.d0)) AS ever FROM usr u WHERE u.old = 0 AND u.d0 >= ? GROUP BY u.d0 ORDER BY u.d0 DESC', from),
     sources: await all('SELECT u.src AS src, COUNT(*) AS n, COALESCE(SUM(u.d0 < ?1), 0) AS base, COALESCE(SUM(u.d0 < ?1 AND ' + back(1) + '), 0) AS r1, COALESCE(SUM(u.races), 0) AS races FROM usr u WHERE u.old = 0 GROUP BY u.src ORDER BY n DESC LIMIT 40', day),
     refs: await all('SELECT ref, COUNT(*) AS n FROM usr WHERE ref IS NOT NULL GROUP BY ref ORDER BY n DESC LIMIT 10'),
-    groups: ((await env.DB.prepare('SELECT COUNT(*) AS n FROM grp').first()) || {}).n | 0 }));
+    groups: ((await env.DB.prepare('SELECT COUNT(*) AS n FROM grp').first()) || {}).n | 0,
+    players: await withSave(env, () => all('SELECT s.uid AS uid, s.coins AS coins, s.owned AS owned, s.at AS at, u.name AS name, u.d0 AS d0, u.src AS src, u.races AS races, u.old AS old FROM save s LEFT JOIN usr u ON u.uid = s.uid ORDER BY s.coins DESC LIMIT 200')),
+    jumps: await all('SELECT j.uid AS uid, j.at AS at, j.d AS d, j.coins AS coins, j.how AS how, u.name AS name FROM jump j LEFT JOIN usr u ON u.uid = j.uid ORDER BY j.id DESC LIMIT 60') }));
 }
+// The page of figures: a row of headline numbers, three small charts of the last two weeks (one measure each, on its own scale),
+// then the same and the rest as tables. Drawn here as plain HTML and SVG, nothing is loaded from outside.
+const CAR_INFO = [['Вектор GT', 0], ['Аурум V10', 25000], ['Гром 427', 5000], ['Спарк RS', 0], ['Атлас', 3000], ['Зефир', 2000], ['Фантом V12', 16000], ['Ион', 8000], ['Легат V8', 12000]];          // the game's cars by number: name and price
 function statsPage(st, starts, recs) {
-  const esc = (v) => String(v).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])), date = (d) => { const t = new Date(d*DAY_S*1000); return String(t.getUTCDate()).padStart(2, '0') + '.' + String(t.getUTCMonth() + 1).padStart(2, '0'); };
-  const pc = (a, b) => b > 0 ? Math.round(a*100/b) + '%' : '—', tab = (head, rows) => '<table><tr>' + head.map((h) => '<th>' + h + '</th>').join('') + '</tr>' + (rows.length ? rows.map((r) => '<tr>' + r.map((c) => '<td>' + esc(c) + '</td>').join('') + '</tr>').join('') : '<tr><td colspan="' + head.length + '">пока пусто</td></tr>') + '</table>';
-  const dau = {}; for (const r of st.days) dau[r.day] = r; const coh = {}; for (const r of st.cohorts) coh[r.day] = r; const rows = [];
-  for (let d = st.day; d > st.day - 14; d--) { const a = dau[d] || { dau: 0, races: 0 }, c = coh[d] || { n: 0, r1: 0, r3: 0, r7: 0, ever: 0 };
-    rows.push([date(d), c.n, a.dau, a.races, st.day - d >= 1 ? pc(c.r1, c.n) : '…', st.day - d >= 3 ? pc(c.r3, c.n) : '…', st.day - d >= 7 ? pc(c.r7, c.n) : '…', pc(c.ever, c.n)]); }
-  return '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Turbo Drift — статистика</title>' +
-    '<style>body{font:15px/1.45 system-ui,sans-serif;margin:18px;background:#0e1630;color:#e8ecff}h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:22px 0 6px;color:#ffd23f}p{margin:4px 0;opacity:.8}table{border-collapse:collapse;width:100%;max-width:760px}th,td{padding:5px 9px;text-align:right;border-bottom:1px solid rgba(255,255,255,.12);white-space:nowrap}th{font-size:12px;opacity:.7;font-weight:600}td:first-child,th:first-child{text-align:left}</style>' +
-    '<h1>Turbo Drift — статистика</h1><p>Игроков всего: <b>' + (st.total.players | 0) + '</b>, из них новых с начала подсчёта: <b>' + (st.total.fresh | 0) + '</b>. Заездов: <b>' + (st.total.races | 0) + '</b>. Групп с ботом: <b>' + st.groups + '</b>. С рекордами: <b>' + recs + '</b>.</p>' +
-    '<h2>По дням (Ташкент)</h2>' + tab(['День', 'Новых', 'Играло', 'Заездов', 'Вернулись на 1-й день', 'на 3-й', 'на 7-й', 'хоть раз'], rows) +
-    '<p>Возврат считается от новичков этого дня; «…» — срок ещё не прошёл.</p>' +
-    '<h2>Откуда пришли новички</h2>' + tab(['Источник', 'Новых', 'Вернулись на 1-й день', 'Заездов на игрока'], st.sources.map((r) => [r.src || 'direct', r.n, pc(r.r1, r.base), r.n ? (r.races/r.n).toFixed(1) : '0'])) +
-    '<p>direct — открыли игру без метки; ref — по приглашению друга; group — по кнопке бота в группе; challenge — по вызову «обгони моё время»; свои метки задаются ссылкой <code>?startapp=src_метка</code>.</p>' +
-    '<h2>Приглашения</h2>' + tab(['Игрок (Telegram ID)', 'Привёл'], st.refs.map((r) => [r.ref, r.n])) +
-    '<h2>Запуски бота по меткам ?start=</h2>' + tab(['Метка', 'Запусков'], starts.map((r) => [r.k, r.n]));
+  const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const date = (d) => { const t = new Date(d*DAY_S*1000); return String(t.getUTCDate()).padStart(2, '0') + '.' + String(t.getUTCMonth() + 1).padStart(2, '0'); };
+  const dau = {}, coh = {}; for (const r of st.days) dau[r.day] = r; for (const r of st.cohorts) coh[r.day] = r;
+  const days = []; for (let d = st.day - 13; d <= st.day; d++) { const a = dau[d] || {}, c = coh[d] || {}; days.push({ d: d, age: st.day - d, n: c.n | 0, dau: a.dau | 0, races: a.races | 0, r1: c.r1 | 0, r3: c.r3 | 0, r7: c.r7 | 0, ever: c.ever | 0 }); }
+  const today = days[13], yest = days[12], sum = (k, minAge) => days.reduce((t, x) => t + (x.age >= minAge ? x[k] : 0), 0), share = (a, b) => b > 0 ? Math.round(a*100/b) : null;
+  const d1 = share(sum('r1', 1), sum('n', 1)), d7 = share(sum('r7', 7), sum('n', 7));
+  const tile = (label, value, note) => '<div class="tile"><span>' + label + '</span><b>' + esc(value) + '</b><small>' + esc(note || ' ') + '</small></div>';
+  // a column chart of one measure: columns no wider than 24, rounded at the top, square on the baseline; the peak and today carry their values
+  const chart = (title, key, unit) => { const W = 340, H = 150, L = 30, R = 6, T = 16, B = 22, pw = W - L - R, ph = H - T - B, band = pw/14, bw = Math.min(24, band - 4), top = Math.max(1, ...days.map((x) => x[key]));
+    const step = top <= 4 ? 1 : Math.pow(10, Math.floor(Math.log10(top/2))), nice = [1, 2, 5, 10].map((k) => k*step).filter((v) => top/v <= 4)[0] || step*10, max = Math.ceil(top/nice)*nice, y = (v) => T + ph - v/max*ph, peak = days.reduce((a, x) => x[key] > a[key] ? x : a, days[0]);
+    let g = ''; for (let v = 0; v <= max + 1e-9; v += nice) g += '<line class="grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '"/><text class="tick" x="' + (L - 6) + '" y="' + (y(v) + 3.5).toFixed(1) + '" text-anchor="end">' + v + '</text>';
+    days.forEach((x, i) => { const cx = L + band*(i + 0.5), x0 = cx - bw/2, v = x[key], h = v/max*ph, r = Math.min(4, h), yt = T + ph - h;
+      if (v > 0) g += '<path class="bar" d="M' + x0.toFixed(1) + ',' + (T + ph) + 'V' + (yt + r).toFixed(1) + 'Q' + x0.toFixed(1) + ',' + yt.toFixed(1) + ' ' + (x0 + r).toFixed(1) + ',' + yt.toFixed(1) + 'H' + (x0 + bw - r).toFixed(1) + 'Q' + (x0 + bw).toFixed(1) + ',' + yt.toFixed(1) + ' ' + (x0 + bw).toFixed(1) + ',' + (yt + r).toFixed(1) + 'V' + (T + ph) + 'Z"/>';
+      if (v > 0 && (x === peak || x.age === 0)) g += '<text class="val" x="' + cx.toFixed(1) + '" y="' + (yt - 4).toFixed(1) + '" text-anchor="middle">' + v + '</text>';
+      if (i % 3 === 1) g += '<text class="tick" x="' + cx.toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle">' + date(x.d) + '</text>';
+      g += '<rect class="hit" tabindex="0" x="' + (L + band*i).toFixed(1) + '" y="' + T + '" width="' + band.toFixed(1) + '" height="' + ph + '" data-tip="' + date(x.d) + ' · ' + v + ' ' + unit + '"><title>' + date(x.d) + ': ' + v + ' ' + unit + '</title></rect>'; });
+    return '<figure><figcaption>' + title + '</figcaption><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + title + ' по дням за две недели">' + g + '<line class="axis" x1="' + L + '" x2="' + (W - R) + '" y1="' + (T + ph) + '" y2="' + (T + ph) + '"/></svg></figure>'; };
+  const meter = (a, b, due) => !due ? '<td class="dim">…</td>' : b > 0 ? '<td><span class="pc">' + share(a, b) + '%</span><i class="m"><u style="width:' + share(a, b) + '%"></u></i></td>' : '<td class="dim">—</td>';
+  const table = (head, rows, empty) => '<div class="scroll"><table><thead><tr>' + head.map((h) => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' + (rows.length ? rows.join('') : '<tr><td class="dim" colspan="' + head.length + '">' + empty + '</td></tr>') + '</tbody></table></div>';
+  const stamp = (at) => { const t = new Date((at + 5*3600)*1000); return String(t.getUTCDate()).padStart(2, '0') + '.' + String(t.getUTCMonth() + 1).padStart(2, '0') + ' ' + String(t.getUTCHours()).padStart(2, '0') + ':' + String(t.getUTCMinutes()).padStart(2, '0'); };
+  const srcMax = Math.max(1, ...st.sources.map((r) => r.n)), SRC = { direct: 'без метки', ref: 'приглашение друга', group: 'кнопка бота в группе', challenge: 'вызов «обгони моё время»', room: 'ссылка на комнату', bot_online: 'бот: онлайн-гонка', bot_friends: 'бот: гонка с друзьями' };
+  return '<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Turbo Drift — статистика</title><style>' +
+    ':root{color-scheme:light dark;--surface:#fcfcfb;--card:#ffffff;--line:#e4e3de;--text:#0b0b0b;--text2:#52514e;--muted:#8a8982;--series:#2a78d6;--track:#ecebe6}' +
+    '@media(prefers-color-scheme:dark){:root{--surface:#1a1a19;--card:#232322;--line:#383835;--text:#f0efec;--text2:#c3c2b7;--muted:#8f8e86;--series:#3987e5;--track:#30302e}}' +
+    '*{box-sizing:border-box}body{margin:0;padding:20px 16px 40px;background:var(--surface);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}main{max-width:1080px;margin:0 auto}' +
+    'header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}h1{font-size:22px;margin:0}header span{color:var(--text2);font-size:13px}header a{color:var(--text);font-size:13px;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:5px 12px}' +
+    'h2{font-size:15px;margin:26px 0 8px}p.note{color:var(--text2);font-size:13px;margin:8px 0 0;max-width:760px}code{font-size:12.5px;background:var(--track);padding:1px 5px;border-radius:5px}' +
+    '.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:10px}.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}.tile span{font-size:12.5px;color:var(--text2)}.tile b{font-size:28px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums}.tile small{font-size:12px;color:var(--muted);min-height:17px}' +
+    '.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-top:10px}figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 12px 6px}figcaption{font-size:13px;font-weight:600;margin-bottom:2px}svg{display:block;width:100%;height:auto;overflow:visible}' +
+    '.bar{fill:var(--series)}.grid{stroke:var(--line);stroke-width:1}.axis{stroke:var(--muted);stroke-width:1}.tick{fill:var(--muted);font-size:10px}.val{fill:var(--text);font-size:11px;font-weight:600}.hit{fill:transparent;outline:none}.hit:hover,.hit:focus{fill:var(--text);fill-opacity:.07}' +
+    '.scroll{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{padding:7px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}tbody tr:last-child td{border-bottom:0}th{font-size:12px;font-weight:600;color:var(--text2)}td:first-child,th:first-child{text-align:left}td.dim{color:var(--muted)}tr.now td:first-child{font-weight:700}' +
+    '.pc{display:inline-block;min-width:38px}.m{display:inline-block;vertical-align:middle;width:56px;height:6px;border-radius:3px;background:var(--track);margin-left:8px;overflow:hidden}.m u{display:block;height:100%;background:var(--series);border-radius:3px}.w .m{width:120px}' +
+    '#tip{position:fixed;z-index:9;pointer-events:none;background:var(--text);color:var(--surface);font-size:12.5px;padding:4px 9px;border-radius:7px;transform:translate(-50%,-130%);white-space:nowrap;display:none}' +
+    '</style><main><header><h1>Turbo Drift — статистика</h1><span>дни по Ташкенту · счёт идёт с выкладки этой версии сервера</span><a href="">Обновить</a></header>' +
+    '<div class="tiles">' + tile('Игроков всего', st.total.players | 0, 'новых с начала счёта: ' + (st.total.fresh | 0)) + tile('Новых сегодня', today.n, 'вчера: ' + yest.n) + tile('Играло сегодня', today.dau, 'вчера: ' + yest.dau) + tile('Заездов сегодня', today.races, 'вчера: ' + yest.races) +
+      tile('Возврат на 1-й день', d1 === null ? '—' : d1 + '%', d1 === null ? 'появится завтра' : 'новички за 2 недели') + tile('Возврат на 7-й день', d7 === null ? '—' : d7 + '%', d7 === null ? 'появится через неделю' : 'кому уже есть 7 дней') + tile('Групп с ботом', st.groups, 'с рекордами: ' + recs + ' игроков') + '</div>' +
+    '<div class="charts">' + chart('Играло в день', 'dau', 'игроков') + chart('Новых игроков в день', 'n', 'новых') + chart('Заездов в день', 'races', 'заездов') + '</div>' +
+    '<h2>По дням</h2>' + table(['День', 'Новых', 'Играло', 'Заездов', 'Вернулись на 1-й день', 'на 3-й', 'на 7-й', 'хоть раз'], days.slice().reverse().map((x) => '<tr' + (x.age === 0 ? ' class="now"' : '') + '><td>' + date(x.d) + (x.age === 0 ? ' · сегодня' : '') + '</td><td>' + x.n + '</td><td>' + x.dau + '</td><td>' + x.races + '</td>' + meter(x.r1, x.n, x.age >= 1) + meter(x.r3, x.n, x.age >= 3) + meter(x.r7, x.n, x.age >= 7) + meter(x.ever, x.n, x.age >= 1) + '</tr>'), '') +
+    '<p class="note">Возврат считается от новичков этого дня: какая их доля снова открыла игру через день, через три и через семь. «…» — срок ещё не подошёл, «—» — новичков в этот день не было.</p>' +
+    '<h2>Откуда пришли новички</h2>' + table(['Источник', 'Новых', 'Вернулись на 1-й день', 'Заездов на игрока'], st.sources.map((r) => '<tr><td>' + esc(SRC[r.src] || r.src || 'без метки') + (SRC[r.src] ? '' : ' <span class="dim" style="color:var(--muted)">· своя метка</span>') + '</td><td class="w"><span class="pc">' + r.n + '</span><i class="m"><u style="width:' + Math.round(r.n*100/srcMax) + '%"></u></i></td>' + meter(r.r1, r.base, r.base > 0) + '<td>' + (r.n ? (r.races/r.n).toFixed(1) : '0') + '</td></tr>'), 'Новичков пока не было') +
+    '<p class="note">Своя метка задаётся ссылкой <code>https://t.me/TurboDriftBot/play?startapp=src_метка</code> — латиница, цифры, дефис. Ставь разную метку на каждый пост или рекламу и сравнивай строки.</p>' +
+    '<h2>Игроки: монеты и машины</h2>' + table(['Игрок', 'Монет', 'Машины', 'Гараж стоит', 'Заездов', 'Пришёл', 'Был'], (st.players || []).map((r) => { let own = []; try { own = JSON.parse(r.owned) || []; } catch (e) {} const paid = own.filter((t) => CAR_INFO[t] && CAR_INFO[t][1] > 0).sort((a, b) => CAR_INFO[b][1] - CAR_INFO[a][1]), worth = paid.reduce((t, c) => t + CAR_INFO[c][1], 0);
+      return '<tr><td>' + esc(r.name || 'ID ' + r.uid) + (r.name ? ' <span style="color:var(--muted)">· ' + r.uid + '</span>' : '') + '</td><td>' + r.coins + '</td><td style="text-align:left;white-space:normal">' + (paid.length ? esc(paid.map((t) => CAR_INFO[t][0]).join(', ')) : '<span style="color:var(--muted)">только стартовые</span>') + '</td><td>' + worth + '</td><td>' + (r.races === null || r.races === undefined ? '<span style="color:var(--muted)">—</span>' : r.races) + '</td><td>' + (r.d0 ? (r.old ? 'до ' : '') + date(r.d0) + (r.src && r.src !== 'old' ? ' · ' + esc(SRC[r.src] || r.src) : '') : '<span style="color:var(--muted)">—</span>') + '</td><td>' + stamp(r.at) + '</td></tr>'; }), 'Игроков пока нет') +
+    '<p class="note">По убыванию монет, первые 200. «Гараж стоит» — сумма цен купленных машин; тюнинг и стейджи сюда не входят. «Заездов» считается с выкладки этой версии: много монет и дорогих машин при малом числе заездов — повод посмотреть на список ниже.</p>' +
+    '<h2>Крупные начисления и отказы</h2>' + table(['Когда', 'Игрок', 'Прибавилось', 'Стало', 'Как'], (st.jumps || []).map((r) => '<tr><td>' + stamp(r.at) + '</td><td>' + esc(r.name || 'ID ' + r.uid) + '</td><td>' + (r.d > 0 ? '+' + r.d : '—') + '</td><td>' + r.coins + '</td><td>' + esc(r.how || '') + '</td></tr>'), 'С выкладки этой версии крупных начислений не было') +
+    '<p class="note">Сюда попадает прибавка от ' + JUMP + ' монет за одно сохранение — столько не дают ни заезд, ни задания, ни приз турнира. Честная причина одна: выигранный банк в гонке на ставку. «Не принято» — устройство, которое сервер видит впервые, прислало кошелёк больше разрешённого: монеты и машины оттуда не зачтены, в силе запись сервера.</p>' +
+    '<h2>Приглашения</h2>' + table(['Игрок (Telegram ID)', 'Привёл друзей'], st.refs.map((r) => '<tr><td>' + esc(r.ref) + '</td><td>' + r.n + '</td></tr>'), 'По приглашениям пока никто не пришёл') +
+    '<h2>Запуски бота по меткам ?start=</h2>' + table(['Метка', 'Запусков'], starts.map((r) => '<tr><td>' + esc(r.k) + '</td><td>' + r.n + '</td></tr>'), 'Запусков пока не было') +
+    '<p class="note">Это нажатия «Запустить» в чате с ботом по ссылке <code>t.me/TurboDriftBot?start=метка</code>; игроки считаются выше.</p></main><div id="tip"></div>' +
+    '<script>(function(){var t=document.getElementById("tip");function show(e){var el=e.target;if(!el.getAttribute||!el.getAttribute("data-tip"))return;var r=el.getBoundingClientRect();t.textContent=el.getAttribute("data-tip");t.style.left=(r.left+r.width/2)+"px";t.style.top=(e.clientY||r.top+20)+"px";t.style.display="block"}function hide(){t.style.display="none"}' +
+    'document.addEventListener("mousemove",function(e){if(e.target.getAttribute&&e.target.getAttribute("data-tip"))show(e);else hide()});document.addEventListener("focusin",show);document.addEventListener("focusout",hide);document.addEventListener("touchstart",function(e){if(e.target.getAttribute&&e.target.getAttribute("data-tip"))show({target:e.target,clientY:e.touches[0].clientY});else hide()},{passive:true})})();</script></html>';
 }
 async function save(env, q) {
   const me = await whoIs(q.init, env); if (!me) return json({ ok: false, err: 'auth' }, 401);
   const cars = (a) => { const r = []; if (Array.isArray(a)) for (const t of a.slice(0, 64)) if (Number.isInteger(t) && t >= 0 && t < CARS && r.indexOf(t) < 0) r.push(t); return r; };
   const num = (v) => Math.max(-COINS_MAX, Math.min(COINS_MAX, Math.round(+v) || 0)), clamp = (v) => Math.max(0, Math.min(COINS_MAX, v));
-  const row = await withSave(env, () => env.DB.prepare('SELECT coins, owned, best, prog, look FROM save WHERE uid = ?').bind(me.id).first());
-  let coins = 0, owned = [0, 3], best = {}, prog = {}, look = null, fresh = !row;
+  const row = await withSave(env, () => env.DB.prepare('SELECT coins, owned, best, prog, look, tx FROM save WHERE uid = ?').bind(me.id).first());
+  let coins = 0, owned = [0, 3], best = {}, prog = {}, look = null, fresh = !row, txs = [];
+  // A batch of changes carries a label. The game sends the same batch again when it got no answer; the label tells that it has been counted already.
+  if (row && row.tx) { try { txs = JSON.parse(row.tx).filter((x) => typeof x === 'string').slice(-12); } catch (e) { txs = []; } }
+  const tx = typeof q.tx === 'string' && /^[a-z0-9]{6,24}$/.test(q.tx) ? q.tx : '', seen = !!tx && txs.indexOf(tx) >= 0, before = row ? row.coins | 0 : 0; if (tx && !seen) txs.push(tx);
   if (row) { coins = row.coins | 0; try { owned = cars(JSON.parse(row.owned)); } catch (e) {} try { best = JSON.parse(row.best) || {}; } catch (e) { best = {}; } try { prog = progJoin({}, JSON.parse(row.prog || '{}')); } catch (e) { prog = {}; } }
   progJoin(prog, q.prog);
-  let st = { bonus: 0, refs: 0 }; try { st = await track(env, me.id, fresh, q); } catch (e) {}          // the count must never stand in the way of the save itself
+  let st = { bonus: 0, refs: 0 }; try { st = await track(env, me.id, fresh, q, me.name); } catch (e) {}          // the count must never stand in the way of the save itself
   { const now = Date.now(); if (row && row.look) { try { look = lookClean(JSON.parse(row.look), now); } catch (e) { look = null; } } const mine = lookClean(q.look, now); if (mine && (!look || mine.t > look.t)) look = mine; }
-  if (q.first && typeof q.first === 'object') { const fc = clamp(num(q.first.coins)); coins = fresh ? fc : Math.max(coins, fc); for (const t of cars(q.first.owned)) if (owned.indexOf(t) < 0) owned.push(t); }
-  else { coins = clamp(coins + num(q.d)); for (const t of cars(q.buy)) if (owned.indexOf(t) < 0) owned.push(t); }
+  // A device that has never talked to the server sends its whole purse. It is believed only a little: a newcomer may bring a small sum and the two
+  // free cars; for a player the server already knows, the server's own record stands and the device takes it over. What was not accepted is written down.
+  let refused = '';
+  if (q.first && typeof q.first === 'object') { const fc = clamp(num(q.first.coins)), fo = cars(q.first.owned), extra = fo.filter((t) => owned.indexOf(t) < 0);
+    if (fresh) coins = Math.min(fc, FIRST_MAX);
+    if (fc - coins >= JUMP || extra.length) refused = (fresh ? 'не принято у новичка: ' : 'не принято с нового устройства: ') + fc + ' монет' + (extra.length ? ', машины № ' + extra.join(', ') : ''); }
+  else if (!seen) { coins = clamp(coins + num(q.d)); for (const t of cars(q.buy)) if (owned.indexOf(t) < 0) owned.push(t); }
   if (st.bonus > 0) coins = clamp(coins + st.bonus);          // came by a friend's link: the newcomer's share
   for (const t of [0, 3]) if (owned.indexOf(t) < 0) owned.push(t);
   if (q.best && typeof q.best === 'object') { let n = 0; for (const k in q.best) { if (++n > 300) break; const ms = Math.round(+q.best[k]); if (!/^[a-z0-9]{1,8}$/.test(k) || !(ms >= 20000 && ms <= MAX_MS)) continue; if (!best[k] || ms < best[k]) best[k] = ms; } }
   const keys = Object.keys(best); if (keys.length > 400) best = Object.fromEntries(keys.slice(0, 400).map((k) => [k, best[k]]));
-  await env.DB.prepare('INSERT INTO save (uid, coins, owned, best, at, prog, look) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7) ON CONFLICT (uid) DO UPDATE SET coins = excluded.coins, owned = excluded.owned, best = excluded.best, at = excluded.at, prog = excluded.prog, look = excluded.look')
-    .bind(me.id, coins, JSON.stringify(owned), JSON.stringify(best), Math.floor(Date.now()/1000), JSON.stringify(prog), look ? JSON.stringify(look) : null).run();
+  await env.DB.prepare('INSERT INTO save (uid, coins, owned, best, at, prog, look, tx) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) ON CONFLICT (uid) DO UPDATE SET coins = excluded.coins, owned = excluded.owned, best = excluded.best, at = excluded.at, prog = excluded.prog, look = excluded.look, tx = excluded.tx')
+    .bind(me.id, coins, JSON.stringify(owned), JSON.stringify(best), Math.floor(Date.now()/1000), JSON.stringify(prog), look ? JSON.stringify(look) : null, JSON.stringify(txs.slice(-12))).run();
+  if (refused) { try { await withStat(env, () => env.DB.prepare('INSERT INTO jump (uid, at, d, coins, how) VALUES (?1, ?2, 0, ?3, ?4)').bind(me.id, Math.floor(Date.now()/1000), coins, refused.slice(0, 120)).run()); } catch (e) {} }
+  if (coins - before - st.bonus >= JUMP) { try { await withStat(env, () => env.DB.prepare('INSERT INTO jump (uid, at, d, coins, how) VALUES (?1, ?2, ?3, ?4, ?5)').bind(me.id, Math.floor(Date.now()/1000), coins - before - st.bonus, coins, q.first ? (fresh ? 'первый вход' : 'новое устройство') : 'за раз').run()); } catch (e) {} }          // far more than a race pays: kept for the owner to look at
   return json({ ok: true, coins: coins, owned: owned, best: best, prog: prog, look: look, bonus: st.bonus, refs: st.refs });
 }
 
