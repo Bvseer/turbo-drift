@@ -144,6 +144,7 @@
   .mode b { font-size: 16.5px; font-weight: 900; line-height: 1.15; } .mode small { font-size: 11.5px; font-weight: 700; opacity: .72; line-height: 1.2; } .mode:active { transform: translateY(2px); }
   .mode.gold { grid-column: 1 / -1; color: #1a2140; background: linear-gradient(180deg, #ffe27a, #ffc21f); box-shadow: 0 8px 22px rgba(255,194,31,.35); } .mode.gold b { font-size: 21px; } .mode.gold small { font-size: 12.5px; }
   .mode.blue { background: linear-gradient(180deg, #5fb0ff, #2c6fe6); box-shadow: 0 8px 22px rgba(44,111,230,.35); }
+  .mode.invite { grid-column: 1 / -1; min-height: 52px; flex-direction: row; gap: 10px; background: rgba(255,210,63,.1); box-shadow: inset 0 0 0 1.5px rgba(255,210,63,.55); } .mode.invite b { color: #ffd23f; font-size: 15.5px; } body.wide .mode.invite { grid-column: 1 / -1; } body.land .mode.invite { min-height: 44px; }
   body.wide .modes { grid-template-columns: repeat(4, minmax(0, 1fr)); width: min(900px, 100%); } body.wide .mode.gold { grid-column: span 2; }
   body.land #playscr h1 { font-size: 20px; margin-bottom: 8px; } body.land .mode { min-height: 78px; padding: 8px 6px; } body.land .mode b { font-size: 15px; } body.land .mode.gold b { font-size: 18px; } body.land #playscr .btns { margin-top: 10px; } body.land #playscr .btns button { padding: 8px; font-size: 14px; }
   body.tiny .mode b { font-size: 14px; } body.tiny .mode small { font-size: 10.5px; }
@@ -504,6 +505,7 @@
     <button class="mode" id="weekopen"><b>Турнир недели</b><small id="weeksub"></small></button>
     <button class="mode" id="dailyopen"><b>Задания</b><small id="dailysub"></small></button>
     <button class="mode" id="trainopen"><b>Тренировка</b><small>трасса без соперников</small></button>
+    <button class="mode invite" id="inviteopen"><b>Позвать друга</b><small id="invitesub">+1000 монет тебе и другу</small></button>
   </div>
 </div>
 
@@ -636,10 +638,11 @@
     <div><b>Голос</b> — кнопка с микрофоном в комнате, в заезде и на финише. Микрофон выключен, пока сам не включишь; чужие голоса слышно сразу. Заглушить всех — кнопка «Голоса» в комнате или кнопка с динамиком под паузой в заезде; одного игрока — нажми на 🎤 возле его имени в комнате</div>
     <div><b>Онлайн-гонка</b> — комната с другими игроками. Старт даёт хозяин комнаты, когда все нажали «Готов»; автостарта нет. Ботов в ней нет, только люди. «Найти гонку» заводит в комнату к другим, «Создать свою» открывает твою. Трассу, круги и условия выбирает хозяин комнаты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Гонка на ставку</b> — в комнате с друзьями хозяин назначает взнос, в «Онлайн» есть столы на 100, 500 и 2000 монет. Взнос списывается на старте у каждого, весь банк получает тот, кто финишировал первым. Вышел из заезда сам — взнос остаётся в банке; если заезд сорвался из-за хозяина комнаты, взнос возвращается. Выбывания в таких заездах нет</div>
+    <div><b>Позвать друга</b> — в разделе «Играть». Друг, который пришёл по твоей ссылке и раньше не играл, получает 1000 монет, и ты тоже</div>
     <div><b>Тренировка</b> — трасса без соперников, с подсказками по шагам: руль, занос, бонусы. Монеты и рекорды в ней не идут</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 104</div>
+    <div style="opacity:.5;margin-top:8px">версия 105</div>
   </div>
 </div>
 
@@ -722,7 +725,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 104</div>
+  <div class="fver">Turbo Drift · версия 105</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -761,6 +764,8 @@ function initTelegram() {
     const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
     if (sp && !challenge) { challenge = parseChallenge(sp); showChallenge(); }
     const gm = /^g_([A-Za-z0-9]{4,6})_(\d{1,16})$/.exec(String(sp || ''));
+    try { if (!localStorage.getItem('td_src')) { const s0 = String(sp || ''), rm = /^ref_(\d{1,16})$/.exec(s0), sm = /^src_([A-Za-z0-9_-]{1,24})$/.exec(s0);          // what brought the player here the very first time: the server counts newcomers by it
+      localStorage.setItem('td_src', rm ? 'ref' : sm ? sm[1].toLowerCase() : gm ? 'group' : s0 === 'online' ? 'bot_online' : s0 === 'friends' ? 'bot_friends' : challenge ? 'challenge' : roomFromLink(s0) ? 'room' : 'direct'); if (rm) localStorage.setItem('td_ref', rm[1]); } } catch (e) {}
     if (gm) { challenge = null; setTimeout(function () { netGroup(gm[1].toUpperCase(), gm[2]); }, 0); } else
     { const rc = roomFromLink(sp); if (rc) { document.getElementById('welcome').classList.add('hidden'); netOpen(); document.getElementById('mpcode').value = rc; netJoin(rc); } else if (sp === 'online') { PUB.stake = 0; netQuick(); } else if (sp === 'friends') { document.getElementById('welcome').classList.add('hidden'); NET.scr = 'fri'; netOpen(); } else if (challenge) document.getElementById('welcome').classList.add('hidden'); }
     loadCloud(); walletSoon();
@@ -3415,11 +3420,13 @@ function saveWallet(quiet) { try { localStorage.setItem('td_wallet', JSON.string
 // The device sends only what changed since the server's last answer (coins earned or spent, cars bought) and takes the whole state back; a device that
 // comes for the first time sends all it has, and the server joins it to what it keeps. Outside Telegram there is no id to keep it under: there everything stays on the device as before.
 const WSRV = { srv: null, busy: false, again: false };
+const RC = { n: 0 }, REFS = { n: 0 }; try { RC.n = Math.max(0, parseInt(localStorage.getItem('td_rc') || '0', 10) || 0); REFS.n = Math.max(0, parseInt(localStorage.getItem('td_refs') || '0', 10) || 0); } catch (e) {}          // races finished since the server last heard of them; friends who came by this player's link
 try { const q = JSON.parse(localStorage.getItem('td_wsrv') || 'null'); if (q && Array.isArray(q.owned)) WSRV.srv = { coins: q.coins | 0, owned: q.owned }; } catch (e) {}
 function walletSoon() { clearTimeout(walletSoon.t); walletSoon.t = setTimeout(walletSync, 1500); }
 function walletSync() {
   if (!lbOn() || !lbInit()) return; if (WSRV.busy) { WSRV.again = true; return; }
   const sent = { coins: WALLET.coins, owned: WALLET.owned.slice() }, body = { init: lbInit(), best: bestTimes, prog: PROG }; if (LOOK.t > 0) body.look = lookGet();
+  try { const s0 = localStorage.getItem('td_src'), r0 = localStorage.getItem('td_ref'); if (s0) body.src = s0; if (r0) body.ref = +r0; } catch (e) {} const rcSent = RC.n; if (rcSent > 0) body.rc = rcSent;
   if (!WSRV.srv) body.first = sent; else { body.d = sent.coins - WSRV.srv.coins; body.buy = sent.owned.filter(function (t) { return WSRV.srv.owned.indexOf(t) < 0; }); }
   WSRV.busy = true;
   lbCall('/save', body, function (r) { WSRV.busy = false;
@@ -3428,6 +3435,9 @@ function walletSync() {
       WALLET = { coins: Math.max(0, WSRV.srv.coins + dc), owned: WSRV.srv.owned.slice() }; for (const t of nb) if (!owns(t)) WALLET.owned.push(t); for (const t of [0, 3]) if (!owns(t)) WALLET.owned.push(t); saveWallet(true);
       let nbest = false; if (r.best) for (const k in r.best) { const ms = r.best[k] | 0; if (ms > 0 && (!bestTimes[k] || ms < bestTimes[k])) { bestTimes[k] = ms; nbest = true; } } if (nbest) { try { localStorage.setItem('td_best', JSON.stringify(bestTimes)); } catch (e) {} }
       const nprog = progMerge(r.prog), nlook = lookTake(r.look);
+      if (rcSent > 0) { RC.n = Math.max(0, RC.n - rcSent); try { localStorage.setItem('td_rc', String(RC.n)); } catch (e) {} }
+      if (r.bonus > 0) note('Бонус за приглашение: +' + (r.bonus | 0) + ' монет', 3600);
+      if (typeof r.refs === 'number') { const was = REFS.n; REFS.n = Math.max(0, r.refs | 0); try { localStorage.setItem('td_refs', String(REFS.n)); } catch (e) {} if (REFS.n > was) toast('Друг зашёл по твоей ссылке: +' + 1000*(REFS.n - was) + ' монет'); try { playSubs(); } catch (e) {} }
       if ((JSON.stringify(WALLET) !== was || nbest || nprog || nlook) && state === 'menu') { try { buildMenu(); } catch (e) {} }
       if (dc || nb.length) WSRV.again = true; }
     if (WSRV.again) { WSRV.again = false; walletSoon(); } });
@@ -3707,7 +3717,7 @@ function buildDaily() {
 function dailyBadge() { const b = document.getElementById('dailysub'), n = dailyDone(); if (b) b.textContent = n >= 3 ? 'на сегодня всё сделано' : 'сделано ' + n + ' из 3'; }
 function finishRace(koPlace) {
   const ko = KO.on, mp = NET.racing, tr = TRAIN.on && !mp;
-  state = 'finished'; finishMs = Math.round(raceT*1000); player.done = true; trainShow(); haptic('win'); if (!ko || koPlace === 1) beep(660, 0.5, 'triangle', 0.08, 1320);
+  state = 'finished'; finishMs = Math.round(raceT*1000); player.done = true; trainShow(); RC.n++; try { localStorage.setItem('td_rc', String(RC.n)); } catch (e) {} haptic('win'); if (!ko || koPlace === 1) beep(660, 0.5, 'triangle', 0.08, 1320);
   const ahead = cars.filter(function (b) { return b !== player && b.done; }).length; place = ko ? koPlace : ahead + 1;
   if (!ko) netFinished(player.nid, finishMs);
   const key = T.key, std = ko || LAPS === stdLaps(), isBest = !ko && !tr && std && (!bestTimes[key] || finishMs < bestTimes[key]);
@@ -5039,7 +5049,7 @@ function topDraw() {
 let champPick = false;                                  // the championship is picked like a track; «Старт» starts whatever is picked
 function playGo() { for (const id of ['setup', 'prefs']) document.getElementById(id).classList.add('hidden'); TRAIN.on = false; TRAIN.hints = false; if (champPick) { BACKTO = ''; champStart(); } else { BACKTO = 'bots'; CHAMP.on = false; startRace(lastTrack, false); } }
 // «Играть» opens the list of ways to race; the two solo ones then ask for a track on the same screen, told apart by SETUP.mode
-function playSubs() { const n = dailyDone(), w = TRACKS[weekTrack()]; document.getElementById('playsub').textContent = n < 3 ? 'Задания на сегодня: ' + n + ' из 3' : 'Гонки · онлайн · карьера'; document.getElementById('weeksub').textContent = (w ? w.name : '') + ' · приз до 3000'; dailyBadge(); careerBadge(); }
+function playSubs() { const n = dailyDone(), w = TRACKS[weekTrack()]; document.getElementById('playsub').textContent = n < 3 ? 'Задания на сегодня: ' + n + ' из 3' : 'Гонки · онлайн · карьера'; document.getElementById('weeksub').textContent = (w ? w.name : '') + ' · приз до 3000'; document.getElementById('invitesub').textContent = REFS.n > 0 ? 'пришло друзей: ' + REFS.n + ' · +1000 монет за каждого' : '+1000 монет тебе и другу'; dailyBadge(); careerBadge(); }
 function playOpen() { playSubs(); document.getElementById('playscr').classList.remove('hidden'); }
 function playClose() { document.getElementById('playscr').classList.add('hidden'); }
 function setupOpen(mode) { SETUP.mode = mode === 'train' ? 'train' : 'bots'; const el = document.getElementById('setup'), tr = SETUP.mode === 'train'; el.classList.toggle('train', tr); document.getElementById('setuph1').textContent = tr ? 'Тренировка' : 'Гонка с ботами'; if (tr) champPick = false; buildMenu(); el.classList.remove('hidden'); el.scrollTop = 0; }
@@ -5052,6 +5062,13 @@ function showChallenge() {
   txt.querySelectorAll('b')[0].textContent = challenge.name; txt.querySelector('span').textContent = TRACKS[challenge.track].name + (challenge.rev ? ', обратно' : '') + (challenge.rain ? ', дождь' : ''); txt.querySelectorAll('b')[1].textContent = fmt(challenge.ms);
   const btn = document.createElement('button'); btn.className = 'main'; btn.style.marginTop = '10px'; btn.textContent = 'Принять вызов';
   btn.addEventListener('click', function () { CHAMP.on = false; startRace(challenge.track, true); }); el.appendChild(txt); el.appendChild(btn);
+}
+// A friend who comes by this link and is new to the game brings a thousand coins to both: the server sees whose link it was.
+function invite() {
+  const uid = tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id; if (!uid || !APP_LINK) { note('Приглашения работают, когда игра открыта в Telegram', 2600); return; }
+  const link = APP_LINK + '?startapp=ref_' + uid, text = 'Гоняем в Turbo Drift — 3D-гонки прямо в Telegram: ракеты, дрифт, заезды с друзьями. Заходи по ссылке — на старте получишь 1000 монет.';
+  if (tg.openTelegramLink) { try { tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text)); return; } catch (e) {} }
+  try { navigator.clipboard.writeText(text + ' ' + link).then(function () { note('Ссылка-приглашение скопирована'); }, function () {}); } catch (e) {}
 }
 function share() {
   if (LAPS !== stdLaps() && !KO.on) { note('Вызов можно бросить только с заезда на обычное число кругов', 2600); return; }
@@ -5066,7 +5083,7 @@ const CAR_ORDER = CAR_TYPES.map(function (c, i) { return i; }).sort(function (a,
 function carShift(from, d, ownedOnly) { let k = CAR_ORDER.indexOf(from) + d; while (k >= 0 && k < CAR_ORDER.length) { if (!ownedOnly || owns(CAR_ORDER[k])) return CAR_ORDER[k]; k += d; } return from; }
 for (const d of [-1, 1]) document.getElementById(d < 0 ? 'carprev' : 'carnext').addEventListener('click', function () { const cur = garage.view === undefined ? garage.type : garage.view, nx = carShift(cur, d, false); if (nx === cur) return; garage.view = nx; if (owns(garage.view)) { garage.type = garage.view; saveGarage(); lookTouch(); } buildGarage(); });
 document.getElementById('buycar').addEventListener('click', buyCar); document.getElementById('champ').addEventListener('click', function () { champPick = true; buildMenu(); });
-document.getElementById('botsopen').addEventListener('click', function () { audio(); setupOpen('bots'); }); document.getElementById('trainopen').addEventListener('click', function () { audio(); setupOpen('train'); }); document.getElementById('playclose').addEventListener('click', playClose); document.getElementById('setupclose').addEventListener('click', function () { document.getElementById('setup').classList.add('hidden'); });
+document.getElementById('botsopen').addEventListener('click', function () { audio(); setupOpen('bots'); }); document.getElementById('trainopen').addEventListener('click', function () { audio(); setupOpen('train'); }); document.getElementById('playclose').addEventListener('click', playClose); document.getElementById('inviteopen').addEventListener('click', function () { audio(); invite(); }); document.getElementById('setupclose').addEventListener('click', function () { document.getElementById('setup').classList.add('hidden'); });
 document.getElementById('setupgo').addEventListener('click', setupGo);
 document.getElementById('topopen').addEventListener('click', topOpen); document.getElementById('topclose').addEventListener('click', function () { document.getElementById('top').classList.add('hidden'); }); document.getElementById('topopen').style.display = lbOn() ? '' : 'none';
 document.getElementById('prefsopen').addEventListener('click', function () { document.getElementById('prefs').classList.remove('hidden'); }); document.getElementById('prefsclose').addEventListener('click', function () { document.getElementById('prefs').classList.add('hidden'); });

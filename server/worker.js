@@ -92,6 +92,59 @@ function lookClean(v, now) { if (!v || typeof v !== 'object') return null; const
   const int = (x, hi) => { const n = Math.round(+x); return n >= 0 && n <= hi ? n : 0; }, out = { t: t, car: int(v.car, CARS - 1), home: int(v.home, 63), tune: {} }; let n = 0;
   if (v.tune && typeof v.tune === 'object') for (const k in v.tune) { if (++n > 40) break; const a = v.tune[k]; if (!/^\d{1,2}$/.test(k) || +k >= CARS || !Array.isArray(a)) continue; out.tune[+k] = a.slice(0, 8).map((x) => int(x, 63)); }
   return out; }
+// Measurements: who came, from where, and who came back. A player gets a row the first time the game saves for him — with the day, the
+// label of the link that brought him and, if a friend's link did, the friend. Every day he plays leaves one row more; from the two the
+// page /stats works out how many of each day's newcomers were back a day, three days and a week later.
+const DAY_S = 86400, dayNow = () => Math.floor((Date.now()/1000 + 5*3600)/DAY_S);          // the days turn at midnight in Tashkent
+const REF_NEW = 1000, REF_OLD = 1000, REF_MAX = 100;                                      // coins to the newcomer and to the friend whose link he came by; how many newcomers one friend is paid for
+const srcClean = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 24);
+async function withStat(env, work) {
+  try { return await work(); } catch (e) { if (!/no such table/i.test(String(e && e.message || e))) throw e;
+    await env.DB.batch([env.DB.prepare('CREATE TABLE IF NOT EXISTS usr (uid INTEGER PRIMARY KEY, d0 INTEGER NOT NULL, src TEXT, ref INTEGER, old INTEGER NOT NULL DEFAULT 0, races INTEGER NOT NULL DEFAULT 0)'),
+      env.DB.prepare('CREATE INDEX IF NOT EXISTS usr_d0 ON usr (d0)'), env.DB.prepare('CREATE INDEX IF NOT EXISTS usr_ref ON usr (ref)'),
+      env.DB.prepare('CREATE TABLE IF NOT EXISTS act (day INTEGER NOT NULL, uid INTEGER NOT NULL, races INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, uid))'), env.DB.prepare('CREATE INDEX IF NOT EXISTS act_uid ON act (uid, day)'),
+      env.DB.prepare('CREATE TABLE IF NOT EXISTS grp (chat INTEGER PRIMARY KEY, title TEXT, at INTEGER NOT NULL, week INTEGER NOT NULL DEFAULT 0)')]); return await work(); }
+}
+// fresh: the server has never kept anything for this player — he is new. Somebody it already knew when the counting began is marked old and left out of the shares.
+async function track(env, uid, fresh, q) {
+  const day = dayNow(), rc = Math.max(0, Math.min(200, q.rc | 0)), out = { bonus: 0, refs: 0 };
+  await withStat(env, async () => {
+    if (!(await env.DB.prepare('SELECT d0 FROM usr WHERE uid = ?').bind(uid).first())) { let ref = null; const r = Math.round(+q.ref);
+      if (fresh && Number.isSafeInteger(r) && r > 0 && r !== uid && (await env.DB.prepare('SELECT 1 AS x FROM save WHERE uid = ?').bind(r).first())
+        && ((await env.DB.prepare('SELECT COUNT(*) AS n FROM usr WHERE ref = ?').bind(r).first()).n | 0) < REF_MAX) ref = r;
+      const ins = await env.DB.prepare('INSERT OR IGNORE INTO usr (uid, d0, src, ref, old, races) VALUES (?1, ?2, ?3, ?4, ?5, 0)').bind(uid, day, fresh ? (ref ? 'ref' : (srcClean(q.src) || 'direct')) : 'old', ref, fresh ? 0 : 1).run();
+      if (ref && ins && ins.meta && ins.meta.changes) { await env.DB.prepare('UPDATE save SET coins = MIN(?, coins + ?) WHERE uid = ?').bind(COINS_MAX, REF_OLD, ref).run(); out.bonus = REF_NEW; } }
+    await env.DB.prepare('INSERT INTO act (day, uid, races) VALUES (?1, ?2, ?3) ON CONFLICT (day, uid) DO UPDATE SET races = races + excluded.races').bind(day, uid, rc).run();
+    if (rc > 0) await env.DB.prepare('UPDATE usr SET races = races + ? WHERE uid = ?').bind(rc, uid).run();
+    out.refs = (await env.DB.prepare('SELECT COUNT(*) AS n FROM usr WHERE ref = ?').bind(uid).first()).n | 0; });
+  return out;
+}
+async function stats(env) {
+  const day = dayNow(), from = day - 13, all = (sql, ...b) => env.DB.prepare(sql).bind(...b).all().then((r) => r.results || []), back = (k) => 'EXISTS(SELECT 1 FROM act a WHERE a.uid = u.uid AND a.day = u.d0 + ' + k + ')';
+  return await withStat(env, async () => ({ ok: true, day: day,
+    total: await env.DB.prepare('SELECT COUNT(*) AS players, COALESCE(SUM(old = 0), 0) AS fresh, COALESCE(SUM(races), 0) AS races FROM usr').first(),
+    days: await all('SELECT day, COUNT(*) AS dau, COALESCE(SUM(races), 0) AS races FROM act WHERE day >= ? GROUP BY day ORDER BY day DESC', from),
+    cohorts: await all('SELECT u.d0 AS day, COUNT(*) AS n, SUM(' + back(1) + ') AS r1, SUM(' + back(3) + ') AS r3, SUM(' + back(7) + ') AS r7, SUM(EXISTS(SELECT 1 FROM act a WHERE a.uid = u.uid AND a.day > u.d0)) AS ever FROM usr u WHERE u.old = 0 AND u.d0 >= ? GROUP BY u.d0 ORDER BY u.d0 DESC', from),
+    sources: await all('SELECT u.src AS src, COUNT(*) AS n, COALESCE(SUM(u.d0 < ?1), 0) AS base, COALESCE(SUM(u.d0 < ?1 AND ' + back(1) + '), 0) AS r1, COALESCE(SUM(u.races), 0) AS races FROM usr u WHERE u.old = 0 GROUP BY u.src ORDER BY n DESC LIMIT 40', day),
+    refs: await all('SELECT ref, COUNT(*) AS n FROM usr WHERE ref IS NOT NULL GROUP BY ref ORDER BY n DESC LIMIT 10'),
+    groups: ((await env.DB.prepare('SELECT COUNT(*) AS n FROM grp').first()) || {}).n | 0 }));
+}
+function statsPage(st, starts, recs) {
+  const esc = (v) => String(v).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])), date = (d) => { const t = new Date(d*DAY_S*1000); return String(t.getUTCDate()).padStart(2, '0') + '.' + String(t.getUTCMonth() + 1).padStart(2, '0'); };
+  const pc = (a, b) => b > 0 ? Math.round(a*100/b) + '%' : '—', tab = (head, rows) => '<table><tr>' + head.map((h) => '<th>' + h + '</th>').join('') + '</tr>' + (rows.length ? rows.map((r) => '<tr>' + r.map((c) => '<td>' + esc(c) + '</td>').join('') + '</tr>').join('') : '<tr><td colspan="' + head.length + '">пока пусто</td></tr>') + '</table>';
+  const dau = {}; for (const r of st.days) dau[r.day] = r; const coh = {}; for (const r of st.cohorts) coh[r.day] = r; const rows = [];
+  for (let d = st.day; d > st.day - 14; d--) { const a = dau[d] || { dau: 0, races: 0 }, c = coh[d] || { n: 0, r1: 0, r3: 0, r7: 0, ever: 0 };
+    rows.push([date(d), c.n, a.dau, a.races, st.day - d >= 1 ? pc(c.r1, c.n) : '…', st.day - d >= 3 ? pc(c.r3, c.n) : '…', st.day - d >= 7 ? pc(c.r7, c.n) : '…', pc(c.ever, c.n)]); }
+  return '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Turbo Drift — статистика</title>' +
+    '<style>body{font:15px/1.45 system-ui,sans-serif;margin:18px;background:#0e1630;color:#e8ecff}h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:22px 0 6px;color:#ffd23f}p{margin:4px 0;opacity:.8}table{border-collapse:collapse;width:100%;max-width:760px}th,td{padding:5px 9px;text-align:right;border-bottom:1px solid rgba(255,255,255,.12);white-space:nowrap}th{font-size:12px;opacity:.7;font-weight:600}td:first-child,th:first-child{text-align:left}</style>' +
+    '<h1>Turbo Drift — статистика</h1><p>Игроков всего: <b>' + (st.total.players | 0) + '</b>, из них новых с начала подсчёта: <b>' + (st.total.fresh | 0) + '</b>. Заездов: <b>' + (st.total.races | 0) + '</b>. Групп с ботом: <b>' + st.groups + '</b>. С рекордами: <b>' + recs + '</b>.</p>' +
+    '<h2>По дням (Ташкент)</h2>' + tab(['День', 'Новых', 'Играло', 'Заездов', 'Вернулись на 1-й день', 'на 3-й', 'на 7-й', 'хоть раз'], rows) +
+    '<p>Возврат считается от новичков этого дня; «…» — срок ещё не прошёл.</p>' +
+    '<h2>Откуда пришли новички</h2>' + tab(['Источник', 'Новых', 'Вернулись на 1-й день', 'Заездов на игрока'], st.sources.map((r) => [r.src || 'direct', r.n, pc(r.r1, r.base), r.n ? (r.races/r.n).toFixed(1) : '0'])) +
+    '<p>direct — открыли игру без метки; ref — по приглашению друга; group — по кнопке бота в группе; challenge — по вызову «обгони моё время»; свои метки задаются ссылкой <code>?startapp=src_метка</code>.</p>' +
+    '<h2>Приглашения</h2>' + tab(['Игрок (Telegram ID)', 'Привёл'], st.refs.map((r) => [r.ref, r.n])) +
+    '<h2>Запуски бота по меткам ?start=</h2>' + tab(['Метка', 'Запусков'], starts.map((r) => [r.k, r.n]));
+}
 async function save(env, q) {
   const me = await whoIs(q.init, env); if (!me) return json({ ok: false, err: 'auth' }, 401);
   const cars = (a) => { const r = []; if (Array.isArray(a)) for (const t of a.slice(0, 64)) if (Number.isInteger(t) && t >= 0 && t < CARS && r.indexOf(t) < 0) r.push(t); return r; };
@@ -100,15 +153,17 @@ async function save(env, q) {
   let coins = 0, owned = [0, 3], best = {}, prog = {}, look = null, fresh = !row;
   if (row) { coins = row.coins | 0; try { owned = cars(JSON.parse(row.owned)); } catch (e) {} try { best = JSON.parse(row.best) || {}; } catch (e) { best = {}; } try { prog = progJoin({}, JSON.parse(row.prog || '{}')); } catch (e) { prog = {}; } }
   progJoin(prog, q.prog);
+  let st = { bonus: 0, refs: 0 }; try { st = await track(env, me.id, fresh, q); } catch (e) {}          // the count must never stand in the way of the save itself
   { const now = Date.now(); if (row && row.look) { try { look = lookClean(JSON.parse(row.look), now); } catch (e) { look = null; } } const mine = lookClean(q.look, now); if (mine && (!look || mine.t > look.t)) look = mine; }
   if (q.first && typeof q.first === 'object') { const fc = clamp(num(q.first.coins)); coins = fresh ? fc : Math.max(coins, fc); for (const t of cars(q.first.owned)) if (owned.indexOf(t) < 0) owned.push(t); }
   else { coins = clamp(coins + num(q.d)); for (const t of cars(q.buy)) if (owned.indexOf(t) < 0) owned.push(t); }
+  if (st.bonus > 0) coins = clamp(coins + st.bonus);          // came by a friend's link: the newcomer's share
   for (const t of [0, 3]) if (owned.indexOf(t) < 0) owned.push(t);
   if (q.best && typeof q.best === 'object') { let n = 0; for (const k in q.best) { if (++n > 300) break; const ms = Math.round(+q.best[k]); if (!/^[a-z0-9]{1,8}$/.test(k) || !(ms >= 20000 && ms <= MAX_MS)) continue; if (!best[k] || ms < best[k]) best[k] = ms; } }
   const keys = Object.keys(best); if (keys.length > 400) best = Object.fromEntries(keys.slice(0, 400).map((k) => [k, best[k]]));
   await env.DB.prepare('INSERT INTO save (uid, coins, owned, best, at, prog, look) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7) ON CONFLICT (uid) DO UPDATE SET coins = excluded.coins, owned = excluded.owned, best = excluded.best, at = excluded.at, prog = excluded.prog, look = excluded.look')
     .bind(me.id, coins, JSON.stringify(owned), JSON.stringify(best), Math.floor(Date.now()/1000), JSON.stringify(prog), look ? JSON.stringify(look) : null).run();
-  return json({ ok: true, coins: coins, owned: owned, best: best, prog: prog, look: look });
+  return json({ ok: true, coins: coins, owned: owned, best: best, prog: prog, look: look, bonus: st.bonus, refs: st.refs });
 }
 
 // The tournament of the week: one track, Monday to Sunday (UTC), everybody's best time on it in the usual conditions. When the week is over,
@@ -146,13 +201,30 @@ async function week(env, q) {
 // What the bot says. In a private chat it answers anything with the invitation to play. In a group it keeps silent until it is called by a command
 // (/play, /race, /top, /help — with or without @name), and its buttons there are plain links: Telegram allows the button that opens a Mini App directly only in private chats.
 const TRACK_NAMES = ['Кольцо', 'Змейка', 'Шпильки', 'Токио', 'Осака', 'Ташкент', 'Париж', 'Мадрид', 'Лондон', 'Лос-Анджелес', 'Сан-Франциско', 'Майами', 'Дубай', 'Монако', 'Чикаго'];
-const BOT_COMMANDS = [{ command: 'play', description: 'Открыть игру' }, { command: 'race', description: 'Приватная комната: только для этого чата' }, { command: 'online', description: 'Онлайн-гонка со случайными соперниками' }, { command: 'top', description: 'Турнир недели: лучшие времена' }, { command: 'help', description: 'Что умеет бот' }];
+const BOT_COMMANDS = [{ command: 'play', description: 'Открыть игру' }, { command: 'race', description: 'Приватная комната: только для этого чата' }, { command: 'online', description: 'Онлайн-гонка со случайными соперниками' }, { command: 'top', description: 'Турнир недели: лучшие времена' }, { command: 'stop', description: 'Не присылать итоги недели в этот чат' }, { command: 'help', description: 'Что умеет бот' }];
 const fmtMs = (ms) => { const m = Math.floor(ms/60000), s = Math.floor(ms % 60000/1000), c = Math.floor(ms % 1000/10); return m + ':' + String(s).padStart(2, '0') + '.' + String(c).padStart(2, '0'); };
 async function weekText(env) {
   const wk = weekNow(), ti = weekTrack(wk); let rows = [];
   try { rows = (await withWeek(env, () => env.DB.prepare('SELECT name, ms FROM week WHERE wk = ? ORDER BY ms ASC, at ASC LIMIT 10').bind(wk).all())).results || []; } catch (e) {}
   const left = Math.max(0, wk*WEEK_S - 3*86400 + WEEK_S - Date.now()/1000), d = Math.floor(left/86400), h = Math.floor(left % 86400/3600);
   return '🏆 Турнир недели — трасса «' + TRACK_NAMES[ti] + '»\n' + (rows.length ? rows.map((r, i) => (i + 1) + '. ' + r.name + ' — ' + fmtMs(r.ms)).join('\n') : 'Пока никто не проехал. Будь первым!') + '\n\nДо конца: ' + (d ? d + ' д ' : '') + h + ' ч. Призы: до 3000 монет.';
+}
+// Mondays: every group that uses the bot is told how last week's tournament ended and which track the new week is on. A group is written
+// to once a week; one that has thrown the bot out is forgotten. Runs from a cron trigger, a hundred groups at a time.
+async function weekPost(env) {
+  const wk = weekNow(), bot = env.BOT_NAME || 'TurboDriftBot', app = env.APP_NAME || 'play', link = 'https://t.me/' + bot + '/' + app, out = { sent: 0, gone: 0, failed: 0 };
+  let rows = [], groups = [];
+  try { rows = (await withWeek(env, () => env.DB.prepare('SELECT name, ms FROM week WHERE wk = ? ORDER BY ms ASC, at ASC LIMIT 5').bind(wk - 1).all())).results || []; } catch (e) {}
+  try { groups = (await withStat(env, () => env.DB.prepare('SELECT chat FROM grp WHERE week < ? ORDER BY at DESC LIMIT 100').bind(wk).all())).results || []; } catch (e) {}
+  const text = (rows.length ? '🏆 Итоги недели в Turbo Drift — трасса «' + TRACK_NAMES[weekTrack(wk - 1)] + '»\n' + rows.map((r, i) => (i + 1) + '. ' + r.name + ' — ' + fmtMs(r.ms)).join('\n') + '\n\n' : '') +
+    '🏁 Новая неделя: турнир на трассе «' + TRACK_NAMES[weekTrack(wk)] + '». Лучшее время недели получает 3000 монет.\n\n/race — гонка этим чатом · /top — таблица · /stop — не присылать итоги';
+  for (const g of groups) { let ok = false, code = 0;
+    try { const r = await fetch('https://api.telegram.org/bot' + env.BOT_TOKEN + '/sendMessage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: g.chat, text: text, reply_markup: { inline_keyboard: [[{ text: '🏁 Играть', url: link }]] } }) });
+      code = r.status; let j = null; try { j = await r.json(); } catch (e) {} ok = !!(j && j.ok); } catch (e) {}
+    if (ok) { out.sent++; await env.DB.prepare('UPDATE grp SET week = ? WHERE chat = ?').bind(wk, g.chat).run(); }
+    else if (code === 403 || code === 400) { out.gone++; await env.DB.prepare('DELETE FROM grp WHERE chat = ?').bind(g.chat).run(); }          // thrown out of the group, or the group is no more
+    else out.failed++; }
+  return out;
 }
 async function telegram(env, request) {
   if (!env.HOOK_SECRET || request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== env.HOOK_SECRET) return new Response('no', { status: 403 });
@@ -164,6 +236,10 @@ async function telegram(env, request) {
   const playBtn = priv ? { text: '🏁 Играть', web_app: { url: game } } : { text: '🏁 Играть', url: link }, raceBtn = { text: '🌍 Онлайн-гонка', url: link + '?startapp=online' }, friendsBtn = { text: '👥 Гонка с друзьями', url: link + '?startapp=friends' };          // «friends» opens the game on its room screen: make a room or enter a friend's code
   const intro = '🏁 Turbo Drift — гонки с бонусами прямо в Telegram.\n\nОбгоняй, стреляй ракетами, уходи на турбо. Гоняй с ботами, с друзьями или с игроками со всего мира — и попади в таблицу рекордов.';
   if (!priv && !cmd) return new Response('ok');                       // in a group: only when called
+  if (!priv && (m.chat.type === 'group' || m.chat.type === 'supergroup') && ['play', 'start', 'race', 'room', 'online', 'top', 'help', 'stop'].indexOf(cmd) >= 0) {          // a group that uses the bot gets the results of the week on Mondays; /stop turns that off
+    try { await withStat(env, () => env.DB.prepare(cmd === 'stop' ? 'INSERT INTO grp (chat, title, at, week) VALUES (?1, ?2, ?3, 999999) ON CONFLICT (chat) DO UPDATE SET week = 999999' : 'INSERT INTO grp (chat, title, at, week) VALUES (?1, ?2, ?3, 0) ON CONFLICT (chat) DO UPDATE SET title = excluded.title, at = excluded.at, week = CASE WHEN ?4 = 1 AND grp.week = 999999 THEN 0 ELSE grp.week END')
+      .bind(...(cmd === 'stop' ? [m.chat.id, String(m.chat.title || '').slice(0, 64), Math.floor(Date.now()/1000)] : [m.chat.id, String(m.chat.title || '').slice(0, 64), Math.floor(Date.now()/1000), cmd === 'top' ? 1 : 0])).run()); } catch (e) {} }
+  if (cmd === 'stop' && !priv) { await send({ text: 'Хорошо, итоги недели в этот чат присылать не буду. Вернуть: /top' }); return new Response('ok'); }
   if (cmd === 'top') { await send({ text: await weekText(env), reply_markup: { inline_keyboard: [[playBtn]] } }); return new Response('ok'); }
   if (cmd === 'race' || cmd === 'room') {          // a room of the caller's own: the link carries a fresh code and who called. The game opens the room when he comes in by it; whoever is early waits for him there
     const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', rnd = crypto.getRandomValues(new Uint8Array(5)); let code = ''; for (const b of rnd) code += A[b % A.length];
@@ -196,14 +272,17 @@ export default {
         const track = q.track | 0; if (!(track >= 0 && track < TRACKS)) return json({ ok: false, err: 'range' }, 400);
         return json(await board(env, track, await whoIs(q.init, env)));
       }
-      if (path === '/setup' || path === '/stats') {
+      if (path === '/setup' || path === '/stats' || path === '/weekpost') {
         if (!env.HOOK_SECRET || url.searchParams.get('key') !== env.HOOK_SECRET) return json({ ok: false, err: 'key' }, 403);
         if (path === '/setup') return json(Object.assign({ ok: true }, await setup(env, url.origin)));
-        const src = (await env.DB.prepare('SELECT k, n FROM src ORDER BY n DESC LIMIT 100').all()).results || [], pl = await env.DB.prepare('SELECT COUNT(DISTINCT uid) AS n FROM best').first();
-        return json({ ok: true, starts: src, players_with_records: pl ? pl.n : 0 });
+        if (path === '/weekpost') return json(Object.assign({ ok: true }, await weekPost(env)));
+        let src = [], pl = null; try { src = (await env.DB.prepare('SELECT k, n FROM src ORDER BY n DESC LIMIT 100').all()).results || []; pl = await env.DB.prepare('SELECT COUNT(DISTINCT uid) AS n FROM best').first(); } catch (e) {}
+        const st = await stats(env); if (url.searchParams.get('json')) return json(Object.assign({ starts: src, players_with_records: pl ? pl.n : 0 }, st));
+        return new Response(statsPage(st, src, pl ? pl.n : 0), { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
       }
       if (path === '/') return json({ ok: true, name: 'Turbo Drift', db: !!env.DB, token: !!env.BOT_TOKEN, key: !!env.HOOK_SECRET });
       return json({ ok: false, err: 'path' }, 404);
     } catch (e) { return json({ ok: false, err: 'server', msg: String(e && e.message || e).slice(0, 200) }, 500); }
-  }
+  },
+  async scheduled(event, env, ctx) { ctx.waitUntil(weekPost(env).catch(() => {})); }          // the cron trigger: Monday morning
 };
