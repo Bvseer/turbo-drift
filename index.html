@@ -574,7 +574,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 91</div>
+    <div style="opacity:.5;margin-top:8px">версия 92</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -651,7 +651,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 91</div>
+  <div class="fver">Turbo Drift · версия 92</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -3920,12 +3920,22 @@ function hset(id, v) { let c = HUDC[id]; if (!c) c = HUDC[id] = { el: document.g
 function hstyle(id, prop, v) { let c = HUDC[id]; if (!c) c = HUDC[id] = { el: document.getElementById(id), v: null, s: {} }; if (c.s[prop] !== v) { c.s[prop] = v; c.el.style[prop] = v; } }
 function hudReset() { for (const k in HUDC) { HUDC[k].v = null; HUDC[k].s = {}; } }
 let hudTick = 0;
+// In a room everybody's car stands on the grid behind the player's own, two abreast, in its colour and with its parts: who has come is seen, not only read in the list.
+const LOBBY = { sig: '' };
+function lobbyCars() {
+  const others = NET.roster.filter(function (p) { return p.nid !== NET.me; }).slice(0, 7), sig = others.map(function (p) { return p.nid + ':' + p.type + ':' + p.color + ':' + (p.tn || []).join(''); }).join('|');
+  if (sig === LOBBY.sig && cars[0] === demo && cars.length === others.length + 1) return; LOBBY.sig = sig;
+  const sn = Math.sin(demo.h), cs = Math.cos(demo.h); cars = [demo];
+  others.forEach(function (p, k) { const t = Math.abs(p.type | 0) % CAR_TYPES.length, c = newCar(PAINTS[p.color] || PAINTS[0], t), row = Math.floor(k/2) + 1, side = k % 2 ? 1 : -1, lat = side*1.8, back = row*3.5 + (k % 2 ? 0.9 : 0);
+    c.x = demo.x - sn*back + cs*lat; c.z = demo.z - cs*back - sn*lat; c.h = demo.h; c.idx = demo.idx; c.tn = tnClean(p.tn); c.net = true; c.nid = p.nid; c.name = p.name; cars.push(c); });
+}
 function update(dt) {
   if (state === 'menu') {                       // background: a car on autopilot
     const vt = NET.on || garage.view === undefined ? garage.type : garage.view;
     if (!demo) { demo = newCar(PAINTS[garage.color], vt); const i = T.N - 6; demo.x = T.x[i]; demo.z = T.z[i]; demo.h = T.h[i]; demo.idx = i; player = demo; cars = [demo]; bots = []; }     // the chosen car on the grid
     if (demo.type !== vt || (!GAR.open && demo.color !== PAINTS[garage.color])) { demo.type = vt; demo.K = CAR_TYPES[vt].st; demo.color = PAINTS[garage.color]; demo.css = null; }
     { const lk = garLook(vt); demo.tn = lk.tn; if (demo.color !== PAINTS[lk.color]) { demo.color = PAINTS[lk.color]; demo.css = null; } }
+    if (NET.on && !NET.racing) lobbyCars(); else if (cars.length !== 1 || cars[0] !== demo) { cars = [demo]; LOBBY.sig = ''; }
     menuT += dt;
   } else if (state === 'countdown') {
     countT -= dt; const n = Math.ceil(countT - 0.2), label = n >= 1 ? String(n) : 'GO!';
@@ -4541,6 +4551,8 @@ function camera(dt) {
   if (state === 'menu') {                       // slow orbit around the chosen car
     if (GAR.open) { const f = Math.min(1, dt*6); GAR.ang += wrap(GAR.angT - GAR.ang)*f; GAR.hgt += (GAR.hgtT - GAR.hgt)*f; GAR.dist += (GAR.distT - GAR.dist)*f; stageBox(dt);         // in the garage the car is looked at from where the chosen part shows best, or from wherever the finger has turned it
       const ga = player.h + GAR.ang; camEye = [player.x + Math.sin(ga)*GAR.dist, GAR.hgt, player.z + Math.cos(ga)*GAR.dist]; camLook = [player.x, 0.42, player.z]; camFov = 44; return; }
+    if (cars.length > 1 && stageBox(dt)) { const rows = Math.ceil((cars.length - 1)/2), la = player.h + 0.5*Math.sin(menuT*0.3), LD = 5.4 + rows*1.7, sn = Math.sin(player.h), cs = Math.cos(player.h), bk = rows*1.55;          // a room with company: seen from the front and from above, swaying a little, so that the whole grid is in the picture
+      camEye = [player.x + Math.sin(la)*LD, 2.0 + rows*0.75, player.z + Math.cos(la)*LD]; camLook = [player.x - sn*bk, 0.3, player.z - cs*bk]; camFov = 44; return; }
     const a = player.h + 2.5 + menuT*0.35, D = portrait ? 5.4 : 4.6;
     if (stageBox(dt)) { camEye = [player.x + Math.sin(a)*4.6, 1.25 + Math.sin(menuT*0.5)*0.25, player.z + Math.cos(a)*4.6]; camLook = [player.x, 0.45, player.z]; camFov = 44; return; }
     camEye = [player.x + Math.sin(a)*D, 1.25 + Math.sin(menuT*0.5)*0.25, player.z + Math.cos(a)*D]; camLook = [player.x, portrait ? -0.95 : 0.15, player.z]; camFov = portrait ? 62 : 44; return;
