@@ -154,7 +154,7 @@ async function telegram(env, request) {
   const priv = m.chat.type === 'private', text = String(m.text || ''), game = env.GAME_URL || 'https://bvseer.github.io/turbo-drift/', bot = env.BOT_NAME || 'TurboDriftBot', app = env.APP_NAME || 'play', link = 'https://t.me/' + bot + '/' + app;
   const send = (body) => fetch('https://api.telegram.org/bot' + env.BOT_TOKEN + '/sendMessage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ chat_id: m.chat.id }, m.message_thread_id ? { message_thread_id: m.message_thread_id } : {}, body)) });
   const cm = /^\/([a-z_]+)(?:@(\w+))?(?:\s|$)/i.exec(text), cmd = cm && (!cm[2] || cm[2].toLowerCase() === bot.toLowerCase()) ? cm[1].toLowerCase() : '';
-  const playBtn = priv ? { text: '🏁 Играть', web_app: { url: game } } : { text: '🏁 Играть', url: link }, raceBtn = { text: '🌍 Онлайн-гонка', url: link + '?startapp=online' };
+  const playBtn = priv ? { text: '🏁 Играть', web_app: { url: game } } : { text: '🏁 Играть', url: link }, raceBtn = { text: '🌍 Онлайн-гонка', url: link + '?startapp=online' }, friendsBtn = { text: '👥 Гонка с друзьями', url: link + '?startapp=friends' };          // «friends» opens the game on its room screen: make a room or enter a friend's code
   const intro = '🏁 Turbo Drift — гонки с бонусами прямо в Telegram.\n\nОбгоняй, стреляй ракетами, уходи на турбо. Гоняй с ботами, с друзьями или с игроками со всего мира — и попади в таблицу рекордов.';
   if (!priv && !cmd) return new Response('ok');                       // in a group: only when called
   if (cmd === 'top') { await send({ text: await weekText(env), reply_markup: { inline_keyboard: [[playBtn]] } }); return new Response('ok'); }
@@ -170,7 +170,7 @@ async function telegram(env, request) {
   if (!priv && cmd !== 'play' && cmd !== 'start') return new Response('ok');          // some other bot's command
   if (priv && text.indexOf('/start') === 0) { const k = (text.split(/\s+/)[1] || 'direct').replace(/[^\w-]/g, '').slice(0, 32) || 'direct';      // t.me/<bot>?start=<label>: which advert brought the player
     try { await env.DB.prepare('INSERT INTO src (k, n) VALUES (?, 1) ON CONFLICT (k) DO UPDATE SET n = n + 1').bind(k).run(); } catch (e) {} }
-  await send({ text: priv ? intro : intro + '\n\n/race — приватная комната для этого чата\n/online — гонка со случайными соперниками', reply_markup: { inline_keyboard: priv ? [[playBtn], [raceBtn]] : [[playBtn]] } });
+  await send({ text: priv ? intro : intro + '\n\n/race — приватная комната для этого чата\n/online — гонка со случайными соперниками', reply_markup: { inline_keyboard: priv ? [[playBtn], [raceBtn], [friendsBtn]] : [[playBtn]] } });
   return new Response('ok');
 }
 

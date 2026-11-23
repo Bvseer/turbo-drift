@@ -614,7 +614,7 @@
     <div><b>Тренировка</b> — трасса без соперников, с подсказками по шагам: руль, занос, бонусы. Монеты и рекорды в ней не идут</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 97</div>
+    <div style="opacity:.5;margin-top:8px">версия 98</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -694,7 +694,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 97</div>
+  <div class="fver">Turbo Drift · версия 98</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -734,7 +734,7 @@ function initTelegram() {
     if (sp && !challenge) { challenge = parseChallenge(sp); showChallenge(); }
     const gm = /^g_([A-Za-z0-9]{4,6})_(\d{1,16})$/.exec(String(sp || ''));
     if (gm) { challenge = null; setTimeout(function () { netGroup(gm[1].toUpperCase(), gm[2]); }, 0); } else
-    { const rc = roomFromLink(sp); if (rc) { document.getElementById('welcome').classList.add('hidden'); netOpen(); document.getElementById('mpcode').value = rc; netJoin(rc); } else if (sp === 'online') netQuick(); else if (challenge) document.getElementById('welcome').classList.add('hidden'); }
+    { const rc = roomFromLink(sp); if (rc) { document.getElementById('welcome').classList.add('hidden'); netOpen(); document.getElementById('mpcode').value = rc; netJoin(rc); } else if (sp === 'online') netQuick(); else if (sp === 'friends') { document.getElementById('welcome').classList.add('hidden'); NET.scr = 'fri'; netOpen(); } else if (challenge) document.getElementById('welcome').classList.add('hidden'); }
     loadCloud(); walletSoon();
   } catch (e) {}
 }
