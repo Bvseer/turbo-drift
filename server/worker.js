@@ -77,8 +77,8 @@ async function score(env, q, request) {
 const COINS_MAX = 10000000;
 async function withSave(env, work) {          // the table is made the first time it is needed: no new setup step
   try { return await work(); } catch (e) { const m = String(e && e.message || e);
-    if (/no such table/i.test(m)) { await env.DB.prepare('CREATE TABLE IF NOT EXISTS save (uid INTEGER PRIMARY KEY, coins INTEGER NOT NULL, owned TEXT NOT NULL, best TEXT NOT NULL, at INTEGER NOT NULL, prog TEXT)').run(); return await work(); }
-    if (/no such column|no column named|has no column/i.test(m)) { try { await env.DB.prepare('ALTER TABLE save ADD COLUMN prog TEXT').run(); } catch (e2) {} return await work(); }       // a table made before stages and the career existed
+    if (/no such table/i.test(m)) { await env.DB.prepare('CREATE TABLE IF NOT EXISTS save (uid INTEGER PRIMARY KEY, coins INTEGER NOT NULL, owned TEXT NOT NULL, best TEXT NOT NULL, at INTEGER NOT NULL, prog TEXT, look TEXT)').run(); return await work(); }
+    if (/no such column|no column named|has no column/i.test(m)) { for (const c of ['prog', 'look']) { try { await env.DB.prepare('ALTER TABLE save ADD COLUMN ' + c + ' TEXT').run(); } catch (e2) {} } return await work(); }       // a table made before stages and the career existed
     throw e; }
 }
 // Progress that only grows (stages of the cars, parts bought, career stars): a flat map of small integers. The larger number wins;
@@ -86,22 +86,29 @@ async function withSave(env, work) {          // the table is made the first tim
 function progJoin(into, from) { if (!from || typeof from !== 'object') return into; let n = 0;
   for (const k in from) { if (++n > 300) break; const v = Math.round(+from[k]); if (!/^[a-z0-9]{1,8}$/.test(k) || !(v >= 0 && v <= 1048575)) continue; const was = into[k] | 0; into[k] = k[0] === 'o' ? (was | v) : Math.max(was, v); }
   const keys = Object.keys(into); if (keys.length > 300) for (const k of keys.slice(300)) delete into[k]; return into; }
+// What the player has picked to drive: the car, its paint, the parts fitted to each car. Unlike the progress above this can go back as well as
+// forward, so the newest choice wins: every device stamps its choice with the time it was made.
+function lookClean(v, now) { if (!v || typeof v !== 'object') return null; const t = Math.min(now, Math.round(+v.t) || 0); if (!(t > 0)) return null;
+  const int = (x, hi) => { const n = Math.round(+x); return n >= 0 && n <= hi ? n : 0; }, out = { t: t, car: int(v.car, CARS - 1), home: int(v.home, 63), tune: {} }; let n = 0;
+  if (v.tune && typeof v.tune === 'object') for (const k in v.tune) { if (++n > 40) break; const a = v.tune[k]; if (!/^\d{1,2}$/.test(k) || +k >= CARS || !Array.isArray(a)) continue; out.tune[+k] = a.slice(0, 8).map((x) => int(x, 63)); }
+  return out; }
 async function save(env, q) {
   const me = await whoIs(q.init, env); if (!me) return json({ ok: false, err: 'auth' }, 401);
   const cars = (a) => { const r = []; if (Array.isArray(a)) for (const t of a.slice(0, 64)) if (Number.isInteger(t) && t >= 0 && t < CARS && r.indexOf(t) < 0) r.push(t); return r; };
   const num = (v) => Math.max(-COINS_MAX, Math.min(COINS_MAX, Math.round(+v) || 0)), clamp = (v) => Math.max(0, Math.min(COINS_MAX, v));
-  const row = await withSave(env, () => env.DB.prepare('SELECT coins, owned, best, prog FROM save WHERE uid = ?').bind(me.id).first());
-  let coins = 0, owned = [0, 3], best = {}, prog = {}, fresh = !row;
+  const row = await withSave(env, () => env.DB.prepare('SELECT coins, owned, best, prog, look FROM save WHERE uid = ?').bind(me.id).first());
+  let coins = 0, owned = [0, 3], best = {}, prog = {}, look = null, fresh = !row;
   if (row) { coins = row.coins | 0; try { owned = cars(JSON.parse(row.owned)); } catch (e) {} try { best = JSON.parse(row.best) || {}; } catch (e) { best = {}; } try { prog = progJoin({}, JSON.parse(row.prog || '{}')); } catch (e) { prog = {}; } }
   progJoin(prog, q.prog);
+  { const now = Date.now(); if (row && row.look) { try { look = lookClean(JSON.parse(row.look), now); } catch (e) { look = null; } } const mine = lookClean(q.look, now); if (mine && (!look || mine.t > look.t)) look = mine; }
   if (q.first && typeof q.first === 'object') { const fc = clamp(num(q.first.coins)); coins = fresh ? fc : Math.max(coins, fc); for (const t of cars(q.first.owned)) if (owned.indexOf(t) < 0) owned.push(t); }
   else { coins = clamp(coins + num(q.d)); for (const t of cars(q.buy)) if (owned.indexOf(t) < 0) owned.push(t); }
   for (const t of [0, 3]) if (owned.indexOf(t) < 0) owned.push(t);
   if (q.best && typeof q.best === 'object') { let n = 0; for (const k in q.best) { if (++n > 300) break; const ms = Math.round(+q.best[k]); if (!/^[a-z0-9]{1,8}$/.test(k) || !(ms >= 20000 && ms <= MAX_MS)) continue; if (!best[k] || ms < best[k]) best[k] = ms; } }
   const keys = Object.keys(best); if (keys.length > 400) best = Object.fromEntries(keys.slice(0, 400).map((k) => [k, best[k]]));
-  await env.DB.prepare('INSERT INTO save (uid, coins, owned, best, at, prog) VALUES (?1, ?2, ?3, ?4, ?5, ?6) ON CONFLICT (uid) DO UPDATE SET coins = excluded.coins, owned = excluded.owned, best = excluded.best, at = excluded.at, prog = excluded.prog')
-    .bind(me.id, coins, JSON.stringify(owned), JSON.stringify(best), Math.floor(Date.now()/1000), JSON.stringify(prog)).run();
-  return json({ ok: true, coins: coins, owned: owned, best: best, prog: prog });
+  await env.DB.prepare('INSERT INTO save (uid, coins, owned, best, at, prog, look) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7) ON CONFLICT (uid) DO UPDATE SET coins = excluded.coins, owned = excluded.owned, best = excluded.best, at = excluded.at, prog = excluded.prog, look = excluded.look')
+    .bind(me.id, coins, JSON.stringify(owned), JSON.stringify(best), Math.floor(Date.now()/1000), JSON.stringify(prog), look ? JSON.stringify(look) : null).run();
+  return json({ ok: true, coins: coins, owned: owned, best: best, prog: prog, look: look });
 }
 
 // The tournament of the week: one track, Monday to Sunday (UTC), everybody's best time on it in the usual conditions. When the week is over,

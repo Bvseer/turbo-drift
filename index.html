@@ -159,6 +159,12 @@
   /* the way back is the same on every screen: top left */
   .backbtn { position: fixed; left: 10px; top: 10px; z-index: 4; display: flex; align-items: center; gap: 3px; height: 40px; padding: 0 15px 0 10px; border-radius: 20px; font-size: 14px; white-space: nowrap; background: rgba(10,13,24,.72); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.22); }
   .backbtn i { font-style: normal; font-size: 25px; line-height: 1; margin-top: -4px; } body:not(.wide) .backbtn { width: 40px; padding: 0; justify-content: center; } body:not(.wide) .backbtn span { display: none; } body.land .backbtn { height: 34px; left: 8px; top: 8px; font-size: 13px; padding: 0 12px 0 8px; } body.land #mp.inroom .backbtn { width: 34px; padding: 0; justify-content: center; } body.land #mp.inroom .backbtn span { display: none; }
+  /* a narrow upright window on a PC (Telegram's own): the race panels shrink to the phone's sizes, wide rows fold */
+  body.kbd:not(.wide) #map { width: 104px; height: 104px; } body.kbd:not(.wide) .btn-pause { top: 124px; } body.kbd:not(.wide) .gaps { left: 104px; top: 8px; font-size: 13.5px; }
+  body.kbd:not(.wide) .keys { bottom: 74px; font-size: 10.5px; max-width: 48vw; }
+  body:not(.wide) .cstages { flex-direction: column; overflow-x: visible; gap: 6px; width: min(440px, 100%); justify-content: flex-start; } body:not(.wide) .cstage { flex: 0 0 auto; flex-direction: row; flex-wrap: wrap; max-width: none; min-width: 0; padding: 7px; gap: 5px; } body:not(.wide) .cstage > b { flex: 0 0 100%; font-size: 11.5px; margin: 0; text-align: left; padding-left: 3px; } body:not(.wide) .cev { flex: 1 1 0; min-width: 0; padding: 6px 8px; } body:not(.wide) .cev span { font-size: 12px; line-height: 1.15; } body:not(.wide) .cev i { font-size: 12px; }
+  body:not(.wide) #career h1 { margin-top: 34px; } body:not(.wide) .cinfo { font-size: 12.5px; }
+  body:not(.wide) #prefs .uisw { flex-wrap: wrap; row-gap: 4px; margin-bottom: 10px; } body:not(.wide) #prefs .uisw::before { flex: 0 0 100%; text-align: left; margin: 0; } body:not(.wide) #prefs .uisw .lv { flex: 1 1 0; min-width: 0; } body:not(.wide) #prefs .fpssw .lv { font-size: 10.5px; letter-spacing: -.2px; padding-left: 0; padding-right: 0; }
   .pubonly { display: none; } #mphostbox.pubhost .pubonly { display: block; font-size: 12.5px; margin: 8px 0 6px; opacity: .8; } #mphostbox.pubhost .frionly, #mphostbox.pubhost #mpstakebtn { display: none; }
   body.land #mphostbox.pubhost .pubonly { display: none; } body.land #mphostbox.pubhost { margin-top: 6px; } body.land #mphostbox.pubhost #mptracks .track { min-height: 29px; padding: 3px 4px; font-size: 12px; border-radius: 10px; } body.land #mphostbox.pubhost #mptracks { gap: 5px; } body.land #mphostbox.pubhost #mpopts { margin-bottom: 5px; } body.land #mphostbox.pubhost #mpopts .lv { padding: 6px 1px; font-size: 11px; }
   body.land #mppub .pubstat { font-size: 18px; margin: 0 0 2px; } body.land #mppub #pubsub { font-size: 11.5px; margin-bottom: 0; } body.land #mppub .btns { margin-top: 5px; } body.land #mppub .btns button { padding: 8px; font-size: 15px; }
@@ -189,6 +195,13 @@
   body.land .gbot { padding: 6px; gap: 4px; border-radius: 13px; } body.land .grow { gap: 6px; } body.land .gopts { gap: 5px; } body.land .gopt { min-width: 92px; padding: 6px 10px; border-radius: 10px; column-gap: 8px; } body.land .gopt i { width: 20px; height: 20px; } body.land .gopt b { font-size: 12.5px; } body.land .gopt small { font-size: 10.5px; }
   body.land .ginfo { font-size: 11px; min-height: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } body.land #gbuy { flex-basis: 170px; padding: 6px; font-size: 13.5px; border-radius: 10px; } body.land .gstage span { font-size: 10px; }
   body.tiny .gtabs { width: 104px; } body.tiny #gbuy { flex-basis: 150px; font-size: 13px; }
+  /* garage in a narrow upright window (Telegram on a PC): one column — the car on top, sections and parts in rows that scroll sideways, the button full width */
+  body:not(.wide) #garage { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto auto; gap: 7px; padding: 8px 8px 10px; background: linear-gradient(180deg, rgba(8,11,24,.55) 0, rgba(8,11,24,0) 22%, rgba(8,11,24,0) 55%, rgba(8,11,24,.7) 100%); }
+  body:not(.wide) .gtop { grid-column: 1; order: 1; flex-wrap: wrap; gap: 6px 10px; padding: 6px 8px 8px 6px; } body:not(.wide) .gtop .gback { padding: 8px 12px; font-size: 13px; } body:not(.wide) .gtitle b { font-size: 16.5px; } body:not(.wide) .gtitle small { font-size: 11px; }
+  body:not(.wide) .gtop .coins { font-size: 13.5px; padding: 4px 11px 4px 6px; } body:not(.wide) .gtop .stats { order: 5; flex: 1 0 100%; justify-content: space-between; gap: 6px; padding: 0 4px; } body:not(.wide) .gtop .stats span { flex: 1 1 0; min-width: 0; font-size: 9.5px; } body:not(.wide) .gtop .stats i { width: 100%; }
+  body:not(.wide) .gstage { order: 2; } body:not(.wide) .gtabs { order: 3; grid-row: auto; width: auto; flex-direction: row; overflow-x: auto; overflow-y: hidden; padding: 6px; gap: 6px; scrollbar-width: none; touch-action: pan-x; } body:not(.wide) .gtabs::-webkit-scrollbar { display: none; }
+  body:not(.wide) .gtab { flex: 0 0 auto; min-width: 92px; min-height: 46px; max-height: none; padding: 0 12px; border-left: 0; border-bottom: 3px solid transparent; align-items: center; text-align: center; } body:not(.wide) .gtab.on { border-bottom-color: #ffd23f; } body:not(.wide) .gtab b { font-size: 13.5px; } body:not(.wide) .gtab small { font-size: 11px; }
+  body:not(.wide) .gbot { order: 4; padding: 8px; } body:not(.wide) .grow { flex-direction: column; } body:not(.wide) .gopts { flex: 0 0 auto; } body:not(.wide) .gopt { min-width: 104px; padding: 8px 11px; } body:not(.wide) #gbuy { flex: 0 0 auto; width: 100%; padding: 12px 8px; } body:not(.wide) .ginfo { font-size: 12px; }
   /* career */
   .cstages { display: flex; gap: 8px; width: 100%; max-width: 900px; overflow-x: auto; padding: 4px 2px 8px; box-sizing: border-box; justify-content: safe center; } .cstage { flex: 1 1 0; min-width: 106px; max-width: 170px; display: flex; flex-direction: column; gap: 5px; padding: 9px; border-radius: 14px; background: rgba(255,255,255,.07); } .cstage > b { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; opacity: .85; margin-bottom: 1px; } .cstage.locked { opacity: .5; }
   .cev { border: 0; border-radius: 10px; padding: 7px 9px; font: inherit; color: #fff; background: rgba(255,255,255,.1); display: flex; flex-direction: column; align-items: flex-start; gap: 1px; cursor: pointer; text-align: left; } .cev span { font-size: 13px; font-weight: 700; } .cev i { font-style: normal; font-size: 13px; color: #ffd23f; letter-spacing: 1px; } .cev.boss { background: rgba(255,90,60,.2); } .cev.on { outline: 2.5px solid #ffd23f; } .cev.locked i { color: #fff; opacity: .6; font-size: 11px; letter-spacing: 0; }
@@ -626,7 +639,7 @@
     <div><b>Тренировка</b> — трасса без соперников, с подсказками по шагам: руль, занос, бонусы. Монеты и рекорды в ней не идут</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 101</div>
+    <div style="opacity:.5;margin-top:8px">версия 102</div>
   </div>
 </div>
 
@@ -709,7 +722,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 101</div>
+  <div class="fver">Turbo Drift · версия 102</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -789,6 +802,7 @@ function loadCloud() {
   try { if (!tg.CloudStorage) return;
     // what Telegram's own storage kept from the time before the server: joined to this device's wallet once (every car of both, the larger purse); from then on the server keeps the wallet
     tg.CloudStorage.getItem('daily', function (err, v) { if (err || !v) return; try { const d = JSON.parse(v); if (dailyOk(d) && ((d.last | 0) > DAILY.last || ((d.day | 0) === DAILY.day && d.tasks.filter(function (q) { return q.done; }).length > DAILY.tasks.filter(function (q) { return q.done; }).length))) { DAILY = { day: d.day | 0, tasks: d.tasks, all: !!d.all, streak: d.streak | 0, last: d.last | 0 }; if (state === 'menu') buildMenu(); } } catch (e) {} });
+    tg.CloudStorage.getItem('look', function (err, v) { if (err || !v) return; try { if (lookTake(JSON.parse(v)) && state === 'menu') buildMenu(); } catch (e) {} });
     tg.CloudStorage.getItem('prog', function (err, v) { if (err || !v) return; try { if (progMerge(JSON.parse(v)) && state === 'menu') buildMenu(); } catch (e) {} });
     tg.CloudStorage.getItem('wallet', function (err, v) { if (err) return; try { if (localStorage.getItem('td_wcloud')) return; localStorage.setItem('td_wcloud', '1');
         const w = v ? JSON.parse(v) : null, co = w && Array.isArray(w.owned) ? w.owned.filter(function (t) { return t >= 0 && t < CAR_TYPES.length; }) : [], cc = w ? Math.max(0, w.coins | 0) : 0; let got = false;
@@ -3384,7 +3398,7 @@ try { const q = JSON.parse(localStorage.getItem('td_wsrv') || 'null'); if (q && 
 function walletSoon() { clearTimeout(walletSoon.t); walletSoon.t = setTimeout(walletSync, 1500); }
 function walletSync() {
   if (!lbOn() || !lbInit()) return; if (WSRV.busy) { WSRV.again = true; return; }
-  const sent = { coins: WALLET.coins, owned: WALLET.owned.slice() }, body = { init: lbInit(), best: bestTimes, prog: PROG };
+  const sent = { coins: WALLET.coins, owned: WALLET.owned.slice() }, body = { init: lbInit(), best: bestTimes, prog: PROG }; if (LOOK.t > 0) body.look = lookGet();
   if (!WSRV.srv) body.first = sent; else { body.d = sent.coins - WSRV.srv.coins; body.buy = sent.owned.filter(function (t) { return WSRV.srv.owned.indexOf(t) < 0; }); }
   WSRV.busy = true;
   lbCall('/save', body, function (r) { WSRV.busy = false;
@@ -3392,8 +3406,8 @@ function walletSync() {
       WSRV.srv = { coins: Math.max(0, r.coins | 0), owned: r.owned.filter(function (t) { return t >= 0 && t < CAR_TYPES.length; }) }; try { localStorage.setItem('td_wsrv', JSON.stringify(WSRV.srv)); } catch (e) {}
       WALLET = { coins: Math.max(0, WSRV.srv.coins + dc), owned: WSRV.srv.owned.slice() }; for (const t of nb) if (!owns(t)) WALLET.owned.push(t); for (const t of [0, 3]) if (!owns(t)) WALLET.owned.push(t); saveWallet(true);
       let nbest = false; if (r.best) for (const k in r.best) { const ms = r.best[k] | 0; if (ms > 0 && (!bestTimes[k] || ms < bestTimes[k])) { bestTimes[k] = ms; nbest = true; } } if (nbest) { try { localStorage.setItem('td_best', JSON.stringify(bestTimes)); } catch (e) {} }
-      const nprog = progMerge(r.prog);
-      if ((JSON.stringify(WALLET) !== was || nbest || nprog) && state === 'menu') { try { buildMenu(); } catch (e) {} }
+      const nprog = progMerge(r.prog), nlook = lookTake(r.look);
+      if ((JSON.stringify(WALLET) !== was || nbest || nprog || nlook) && state === 'menu') { try { buildMenu(); } catch (e) {} }
       if (dc || nb.length) WSRV.again = true; }
     if (WSRV.again) { WSRV.again = false; walletSoon(); } });
 }
@@ -4659,7 +4673,7 @@ function mirrorTick(dt) {
   MIRROR.a = MIRROR.on ? Math.min(1, MIRROR.a + dt*7) : Math.max(0, MIRROR.a - dt*7); MIRROR.d = near;
   const show = MIRROR.a > 0.04; hstyle('mirror', 'display', show ? '' : 'none'); if (!show) return;
   const vw = viewW(); let w2, x, y;
-  if (document.body.classList.contains('kbd')) { w2 = Math.min(340, vw*0.3); x = (vw - w2)/2; y = KO.on ? 96 : 10; }
+  if (document.body.classList.contains('kbd')) { const slim = !WIDE; w2 = slim ? Math.min(200, vw*0.44) : Math.min(340, vw*0.3); x = (vw - w2)/2; y = slim ? 134 : (KO.on ? 96 : 10); }          // in a narrow window the top edge is taken by the place and the map: the mirror goes under them
   else { const l = vw/2 + 72, r = vw - 124; w2 = Math.max(112, Math.min(230, r - l)); x = r - w2; y = 8; }         // on a phone the speed sits in the middle of the top edge: the mirror goes between it and the map
   x = Math.round(x); w2 = Math.round(w2); const h2 = Math.round(w2/3.1); MIRROR.r = [x, y, w2, h2];
   hstyle('mirror', 'left', x + 'px'); hstyle('mirror', 'top', y + 'px'); hstyle('mirror', 'width', w2 + 'px'); hstyle('mirror', 'height', Math.max(8, Math.round(h2*MIRROR.a)) + 'px');
@@ -4757,6 +4771,18 @@ function toMenu() {
 }
 function homeColor(set) { try { if (set !== undefined) localStorage.setItem('td_home', String(set)); const h = parseInt(localStorage.getItem('td_home') || '', 10); if (h >= 0 && h < PAINTS.length && paintOwned(h)) return h; } catch (e) {} return paintOwned(garage.color) ? garage.color : 0; }
 function saveGarage() { try { localStorage.setItem('td_car', JSON.stringify({ type: garage.type, color: garage.color })); } catch (e) {} }
+// The look the player has picked — which car, its paint, the parts fitted to every car — follows him from device to device. It can change back
+// and forth, so every choice is stamped with its time and the newest one wins; the server and Telegram's own storage both carry it.
+const LOOK = { t: 0 }; try { LOOK.t = Math.max(0, parseInt(localStorage.getItem('td_lk') || '0', 10) || 0); if (!LOOK.t && (localStorage.getItem('td_tune') || localStorage.getItem('td_home'))) LOOK.t = 1; } catch (e) {}          // 1: picked before choices were stamped — older than anything stamped
+function lookGet() { return { t: LOOK.t, car: garage.type | 0, home: homeColor(), tune: TUNE_SEL }; }
+function lookTouch() { LOOK.t = Date.now(); try { localStorage.setItem('td_lk', String(LOOK.t)); } catch (e) {} try { if (tg && tg.CloudStorage) tg.CloudStorage.setItem('look', JSON.stringify(lookGet())); } catch (e) {} walletSoon(); }
+function lookTake(r) {
+  if (!r || typeof r !== 'object' || !(+r.t > LOOK.t)) return false;
+  try { if (r.tune && typeof r.tune === 'object') { const q = {}; for (const k in r.tune) { const t = parseInt(k, 10); if (t >= 0 && t < CAR_TYPES.length && Array.isArray(r.tune[k])) q[t] = r.tune[k].slice(0, TUNE_KEYS.length).map(function (v) { return v | 0; }); } TUNE_SEL = q; tuneSave(); }
+    const h = r.home | 0; if (h >= 0 && h < PAINTS.length) localStorage.setItem('td_home', String(h));
+    LOOK.t = +r.t; localStorage.setItem('td_lk', String(LOOK.t)); } catch (e) {}
+  if (!NET.on) { const c = r.car | 0; if (c >= 0 && c < CAR_TYPES.length && owns(c)) { garage.type = c; garage.view = c; } garage.color = homeColor(); saveGarage(); }
+  return true; }
 function statBars(el, t, room) {
   const st0 = owns(t) ? fullK(t, stageOf(t), (tuneSel(t) || [0, 0, 0, 0, 0])[4]) : CAR_TYPES[t].st, st = room ? netK(st0) : st0, rows = [['Скорость', (st.top - 0.94)/0.30], ['Разгон', (st.acc - 0.90)/0.22], ['Управление', (st.grip - 0.90)/0.21], ['Броня', (st.arm - 0.75)/0.75]]; el.innerHTML = '';
   rows.forEach(function (r) { const sp = document.createElement('span'), i = document.createElement('i'), u = document.createElement('u'); u.style.width = Math.round(Math.max(0.08, Math.min(1, r[1]))*100) + '%'; u.style.background = statColor(r[1]); i.appendChild(u); sp.appendChild(document.createTextNode(r[0])); sp.appendChild(i); el.appendChild(sp); });
@@ -4774,7 +4800,7 @@ function buildGarage() {
   if (!mine) { const need = C.price - WALLET.coins; buy.classList.toggle('poor', need > 0); buy.textContent = need > 0 ? C.price + ' · не хватает ' + need : 'Купить за ' + C.price; return; }
   PAINTS.forEach(function (p, i) { if (!paintOwned(i)) return; const b = document.createElement('button'); b.className = 'sw' + (i === garage.color ? ' on' : '');
     b.style.background = 'rgb(' + p.map(function (v) { return Math.round(Math.pow(v, 0.8)*255); }).join(',') + ')';
-    b.setAttribute('aria-label', 'Цвет ' + (i + 1)); b.addEventListener('click', function () { garage.color = i; homeColor(i); saveGarage(); buildGarage(); }); sw.appendChild(b); });
+    b.setAttribute('aria-label', 'Цвет ' + (i + 1)); b.addEventListener('click', function () { garage.color = i; homeColor(i); saveGarage(); lookTouch(); buildGarage(); }); sw.appendChild(b); });
 }
 // ---- The garage: stage, outside parts and paint of the car that stands in the showroom. The car fills the middle of the screen and can be turned with a finger;
 // what can be changed is listed on the left with what is on the car now; the choices run along the bottom. A choice not yet bought is shown on the car at once, before any money is spent.
@@ -4843,16 +4869,16 @@ function garPick(i) {                              // a card is tapped: it is sh
   const t = garCar(); GAR.pv = i; const q = garState(i);
   if (q.use) { garUse(i); return; } haptic('light'); buildGar();
 }
-function garUse(i) { const t = garCar(), cat = GAR.cat; if (cat === 'paint') { garage.color = i; homeColor(i); saveGarage(); } else { const ki = TUNE_KEYS.indexOf(cat), q = tuneSel(t) || [0, 0, 0, 0, 0]; q[ki] = i; TUNE_SEL[t] = q; tuneSave(); } GAR.pop = i; haptic('light'); beep(520, 0.07, 'triangle', 0.04, 700); buildGar(); }
+function garUse(i) { const t = garCar(), cat = GAR.cat; if (cat === 'paint') { garage.color = i; homeColor(i); saveGarage(); } else { const ki = TUNE_KEYS.indexOf(cat), q = tuneSel(t) || [0, 0, 0, 0, 0]; q[ki] = i; TUNE_SEL[t] = q; tuneSave(); } lookTouch(); GAR.pop = i; haptic('light'); beep(520, 0.07, 'triangle', 0.04, 700); buildGar(); }
 function garAct() {                                // the big button: buy what is being looked at, or put on what is owned
   if (!GAR.open) return; const t = garCar(), cat = GAR.cat, i = GAR.pv, q = garState(i);
   if (q.use) { garUse(i); return; }
   if (q.buy === undefined) { if (cat === 'paint' && !paintOwned(i)) note('Эту краску дают за победу над чемпионом в карьере', 2400); return; }
   if (WALLET.coins < q.buy) { note('Не хватает ' + fmtN(q.buy - WALLET.coins) + ' монет — они даются за гонки, задания и карьеру', 2600); haptic('light'); return; }
   WALLET.coins -= q.buy; saveWallet();
-  if (cat === 'paint') { progSet('oc', 1 << i); garage.color = i; homeColor(i); saveGarage(); note('Краска «' + PAINT_NAMES[i] + '» — твоя', 2000); GAR.pop = i; }
+  if (cat === 'paint') { progSet('oc', 1 << i); garage.color = i; homeColor(i); saveGarage(); lookTouch(); note('Краска «' + PAINT_NAMES[i] + '» — твоя', 2000); GAR.pop = i; }
   else if (cat === 'stage') { progSet('s' + t, i); note(STAGE_INFO[i][0] + ' стоит на ' + CAR_TYPES[t].name, 2200); GAR.pop = i; GAR.pv = Math.min(3, i + 1); }
-  else { const ki = TUNE_KEYS.indexOf(cat), sel = tuneSel(t) || [0, 0, 0, 0, 0]; progSet(tuneKey(t, cat), 1 << i); sel[ki] = i; TUNE_SEL[t] = sel; tuneSave(); note(TUNE_PARTS[cat].name + ' «' + TUNE_PARTS[cat].opts[i][0] + '» — установлено', 2000); GAR.pop = i; }
+  else { const ki = TUNE_KEYS.indexOf(cat), sel = tuneSel(t) || [0, 0, 0, 0, 0]; progSet(tuneKey(t, cat), 1 << i); sel[ki] = i; TUNE_SEL[t] = sel; tuneSave(); lookTouch(); note(TUNE_PARTS[cat].name + ' «' + TUNE_PARTS[cat].opts[i][0] + '» — установлено', 2000); GAR.pop = i; }
   beep(660, 0.25, 'triangle', 0.07, 1320); haptic('win'); buildGar();
 }
 // the car turns under the finger: sideways to walk around it, up and down to look from above or from the road
@@ -4864,7 +4890,7 @@ function garAct() {                                // the big button: buy what i
   const end = function (e) { if (GAR.drag && GAR.drag.id === e.pointerId) GAR.drag = null; }; el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
 })();
 function buyCar() { const t = garage.view, C = CAR_TYPES[t]; if (owns(t)) return; if (WALLET.coins < C.price) { note('Не хватает ' + (C.price - WALLET.coins) + ' монет — они даются за заезды', 2200); return; }
-  WALLET.coins -= C.price; WALLET.owned.push(t); saveWallet(); garage.type = t; saveGarage(); buildGarage(); beep(660, 0.25, 'triangle', 0.07, 1320); haptic('win'); }
+  WALLET.coins -= C.price; WALLET.owned.push(t); saveWallet(); garage.type = t; saveGarage(); lookTouch(); buildGarage(); beep(660, 0.25, 'triangle', 0.07, 1320); haptic('win'); }
 function buildOpts() {
   const el = document.getElementById('opts'); el.innerHTML = '';
   [['rev', 'Обратно'], ['rain', 'Дождь'], ['ko', 'Выбывание']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (opt[o[0]] ? ' on' : '') + (o[0] === 'ko' ? ' botonly' : ''); b.textContent = o[1];
@@ -5014,7 +5040,7 @@ function share() {
 // The showroom runs from the free cars to the dearest and stops at both ends: past the dearest car there is nothing, and the arrow there is dimmed.
 const CAR_ORDER = CAR_TYPES.map(function (c, i) { return i; }).sort(function (a, b) { return CAR_TYPES[a].price - CAR_TYPES[b].price || a - b; });
 function carShift(from, d, ownedOnly) { let k = CAR_ORDER.indexOf(from) + d; while (k >= 0 && k < CAR_ORDER.length) { if (!ownedOnly || owns(CAR_ORDER[k])) return CAR_ORDER[k]; k += d; } return from; }
-for (const d of [-1, 1]) document.getElementById(d < 0 ? 'carprev' : 'carnext').addEventListener('click', function () { const cur = garage.view === undefined ? garage.type : garage.view, nx = carShift(cur, d, false); if (nx === cur) return; garage.view = nx; if (owns(garage.view)) { garage.type = garage.view; saveGarage(); } buildGarage(); });
+for (const d of [-1, 1]) document.getElementById(d < 0 ? 'carprev' : 'carnext').addEventListener('click', function () { const cur = garage.view === undefined ? garage.type : garage.view, nx = carShift(cur, d, false); if (nx === cur) return; garage.view = nx; if (owns(garage.view)) { garage.type = garage.view; saveGarage(); lookTouch(); } buildGarage(); });
 document.getElementById('buycar').addEventListener('click', buyCar); document.getElementById('champ').addEventListener('click', function () { champPick = true; buildMenu(); });
 document.getElementById('botsopen').addEventListener('click', function () { audio(); setupOpen('bots'); }); document.getElementById('trainopen').addEventListener('click', function () { audio(); setupOpen('train'); }); document.getElementById('playclose').addEventListener('click', playClose); document.getElementById('setupclose').addEventListener('click', function () { document.getElementById('setup').classList.add('hidden'); });
 document.getElementById('setupgo').addEventListener('click', setupGo);
