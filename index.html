@@ -130,6 +130,29 @@
   .arrow { width: 44px; height: 44px; border-radius: 14px; border: 0; background: rgba(255,255,255,.18); color: #fff; font-size: 26px; font-weight: 800; line-height: 1; }
   .carname { min-width: 200px; font-size: 20px; font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,.5); }
   .swatches { display: flex; gap: 8px; margin-bottom: 14px; }
+  /* home: one big button and three quiet ones; everything to do with racing lives on the «Играть» screen */
+  .homerow { display: flex; gap: 8px; width: min(340px, 100%); margin-top: 8px; } .homerow button { flex: 1 1 0; min-width: 0; padding: 12px 4px; font-size: 14.5px; white-space: nowrap; }
+  body.mob .homerow { width: min(360px, 100%); } body.kbd.wide .homerow { width: 100%; } body:not(.wide) .msheet .homerow { width: min(440px, 100%); } body.land .homerow button { padding: 9px 4px; font-size: 13.5px; }
+  #play { padding: 15px 20px; margin-bottom: 0; } #play span { font-size: 25px; letter-spacing: .5px; } #play small { font-size: 12.5px; } body.land #play { padding: 11px 16px; } body.land #play span { font-size: 21px; }
+  body.wide #menu .mhead { grid-row: 1 / 5; align-self: center; }
+  body:not(.wide) #menu .mcenter { flex: 1 1 0; min-height: 0; } body:not(.wide) #menu .stage { flex: 1 1 0; height: auto; min-height: 110px; } body:not(.wide) #menu .msheet { flex: 0 0 auto; padding: 14px 16px 18px; } body:not(.wide) #menu .msheet .playbtn { margin-top: 0; }
+  body:not(.wide) #menu .mver { left: 8px; top: 8px; bottom: auto; font-size: 10.5px; padding: 2px 7px; }
+  #playscr { justify-content: flex-start; background: rgba(14,22,48,.97); touch-action: pan-y; } #playscr::before, #playscr::after { content: ''; flex: 1 0 0px; } #playscr > * { flex-shrink: 0; }
+  #playscr h1 { font-size: 28px; margin: 0 0 12px; } #playscr .btns { margin-top: 14px; width: min(220px, 100%); }
+  .modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: min(440px, 100%); }
+  .mode { border: 0; border-radius: 16px; padding: 12px 8px; min-height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font: inherit; color: #fff; background: rgba(255,255,255,.1); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.13); cursor: pointer; min-width: 0; }
+  .mode b { font-size: 16.5px; font-weight: 900; line-height: 1.15; } .mode small { font-size: 11.5px; font-weight: 700; opacity: .72; line-height: 1.2; } .mode:active { transform: translateY(2px); }
+  .mode.gold { grid-column: 1 / -1; color: #1a2140; background: linear-gradient(180deg, #ffe27a, #ffc21f); box-shadow: 0 8px 22px rgba(255,194,31,.35); } .mode.gold b { font-size: 21px; } .mode.gold small { font-size: 12.5px; }
+  .mode.blue { background: linear-gradient(180deg, #5fb0ff, #2c6fe6); box-shadow: 0 8px 22px rgba(44,111,230,.35); }
+  body.wide .modes { grid-template-columns: repeat(4, minmax(0, 1fr)); width: min(900px, 100%); } body.wide .mode.gold { grid-column: span 2; }
+  body.land #playscr h1 { font-size: 20px; margin-bottom: 8px; } body.land .mode { min-height: 78px; padding: 8px 6px; } body.land .mode b { font-size: 15px; } body.land .mode.gold b { font-size: 18px; } body.land #playscr .btns { margin-top: 10px; } body.land #playscr .btns button { padding: 8px; font-size: 14px; }
+  body.tiny .mode b { font-size: 14px; } body.tiny .mode small { font-size: 10.5px; }
+  #setup .trainonly { display: none; } #setup.train .trainonly { display: block; } #setup.train .botonly { display: none !important; } #trainnote { font-size: 13px; margin: 2px 0 10px; opacity: .85; }
+  body.land #prefs .btns { flex-direction: row; gap: 10px; } #helpopen { padding: 10px 14px; font-size: 13.5px; }
+  .trainhint { position: fixed; left: 50%; top: 24%; transform: translateX(-50%); width: max-content; max-width: min(520px, 76vw); padding: 9px 16px; border-radius: 14px; background: rgba(10,13,24,.78); border: 1.5px solid rgba(255,210,63,.65); color: #fff; font-size: 16px; font-weight: 800; line-height: 1.25; text-align: center; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  .trainhint.show { opacity: 1; } body.land .trainhint { font-size: 14.5px; padding: 7px 14px; top: 22%; }
+  .screen#playscr, .screen#setup, .screen#prefs, .screen#daily, .screen#career, .screen#week, .screen#help, .screen#top { background: #0e1630; }
+  #mphostbox > .btns, #mprdybox { width: 100%; margin-left: auto; margin-right: auto; }
   #mpgo.waitrdy { background: rgba(255,255,255,.14); color: rgba(255,255,255,.8); box-shadow: none; } .kickx { border: 0; margin-left: 8px; width: 22px; height: 22px; border-radius: 50%; background: rgba(235,64,52,.3); color: #ffb9b2; font: inherit; font-size: 11px; line-height: 1; cursor: pointer; padding: 0; }
   .arrow.end { opacity: .22; pointer-events: none; }
   .mver { position: absolute; left: 12px; bottom: 8px; font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 9px; background: rgba(10,13,24,.55); color: #ffd23f; opacity: .85; pointer-events: none; z-index: 2; }
@@ -239,7 +262,7 @@
   body.land #prefs { flex-direction: row; flex-wrap: wrap; align-content: center; justify-content: center; column-gap: 22px; } body.land #prefs::before, body.land #prefs::after { display: none; } body.land #prefs h1, body.land #prefs .btns { flex: 0 0 100%; text-align: center; }
   body.land #prefs .levels { width: min(360px, 46%); margin-bottom: 8px; } body.land #prefs .btns { margin-top: 4px; display: flex; justify-content: center; align-items: center; } body.land #prefs .uisw .lv { font-size: 11px; padding: 6px 2px; } body.land #prefs .fpssw { width: min(742px, 95%); order: -1; } body.land #prefs h1 { order: -2; } body.land #prefs .btns button { flex: 0 0 auto; width: min(300px, 60%); padding-top: 10px; padding-bottom: 10px; }
   /* world records */
-  .homelinks { flex-wrap: wrap; justify-content: center; } #topopen { flex: 1 1 auto; color: #ffd23f; } .homelinks .hl2 { flex: 1 1 40%; }
+  .homelinks { flex-wrap: wrap; justify-content: center; } .homelinks .hl2 { flex: 1 1 40%; }
   #top { justify-content: flex-start; background: rgba(14,22,48,.97); touch-action: pan-y; } #top::before, #top::after { content: ''; flex: 1 0 0px; } #top > * { flex-shrink: 0; } #top h1 { font-size: 26px; margin: 0 0 10px; } body.land #top h1 { font-size: 20px; margin-bottom: 6px; }
   #toptabs { width: min(440px, 100%); margin-bottom: 10px; } .toplist { width: min(440px, 100%); gap: 4px; display: flex; flex-direction: column; } .toplist div { padding: 6px 12px; font-size: 14px; gap: 8px; }
   .toplist div > span { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; } .toplist i.rk { all: unset; display: inline-block; min-width: 22px; margin-right: 6px; color: #ffd23f; font-style: normal; font-variant-numeric: tabular-nums; }
@@ -406,6 +429,7 @@
   <div class="tiltbar" id="tiltbar"><i id="tiltdot"></i></div>
   <div id="tags"></div>
   <div class="status" id="status"></div>
+  <div class="trainhint" id="trainhint"></div>
   <div class="keys" id="keysbar"><span class="kb"><kbd>↑</kbd> газ</span><span class="kb"><kbd>↓</kbd> тормоз / занос</span><span class="kb"><kbd>←</kbd><kbd>→</kbd> руль</span><span class="kb"><kbd>Q</kbd><kbd>E</kbd> бонус</span><span class="kb"><kbd>Пробел</kbd> применить</span><span class="kb"><kbd>Shift</kbd>+<kbd>Пробел</kbd> выстрел назад</span><span class="kb"><kbd>Esc</kbd> пауза</span></div>
   <div class="bottom">
     <div class="bar"><i id="boost"></i></div>
@@ -438,33 +462,43 @@
     <button class="main buy" id="buycar" style="display:none"></button>
   </div>
   <div class="msheet">
-    <div class="mcol mleft">
-      <div class="homelinks o4"><button class="ghost hl2" id="careeropen">Карьера</button><button class="ghost hl2" id="tuneopen">Тюнинг</button><button class="ghost hl2" id="dailyopen">Задания</button><button class="ghost hl2" id="weekopen">Турнир</button><button class="ghost" id="topopen" style="display:none">🏆 Рекорды</button><button class="ghost" id="prefsopen">Настройки</button><button class="ghost" id="helpopen">Как играть</button></div>
-    </div>
     <div class="mcol mright">
-      <div class="challenge o2" id="challenge" style="display:none"></div>
-      <button class="main playbtn o2" id="play"><span>Играть</span><small id="playsub"></small></button>
-      <button class="ghost setupbtn o2" id="setupopen">Трасса и соперники ›</button>
-      <button class="playbtn netbtn o3" id="mpquick"><span>Онлайн-гонка</span><small>с игроками со всего мира</small></button>
-      <button class="ghost playbtn frbtn o3" id="mpopen"><span>С друзьями</span><small>своя комната по коду</small></button>
+      <div class="challenge" id="challenge" style="display:none"></div>
+      <button class="main playbtn" id="play"><span>Играть</span><small id="playsub"></small></button>
+      <div class="homerow"><button class="ghost" id="tuneopen">Гараж</button><button class="ghost" id="topopen" style="display:none">Рекорды</button><button class="ghost" id="prefsopen">Настройки</button></div>
     </div>
   </div>
 </div>
 
+<div class="screen hidden" id="playscr">
+  <h1>Играть</h1>
+  <div class="modes">
+    <button class="mode gold" id="botsopen"><b>Гонка с ботами</b><small id="botssub"></small></button>
+    <button class="mode blue" id="mpquick"><b>Онлайн</b><small>игроки со всего мира</small></button>
+    <button class="mode" id="mpopen"><b>С друзьями</b><small>своя комната по коду</small></button>
+    <button class="mode" id="careeropen"><b>Карьера</b><small id="careersub"></small></button>
+    <button class="mode" id="weekopen"><b>Турнир недели</b><small id="weeksub"></small></button>
+    <button class="mode" id="dailyopen"><b>Задания</b><small id="dailysub"></small></button>
+    <button class="mode" id="trainopen"><b>Тренировка</b><small>трасса без соперников</small></button>
+  </div>
+  <div class="btns"><button class="ghost" id="playclose">Назад</button></div>
+</div>
+
 <div class="screen hidden" id="setup">
-  <h1>Заезд</h1>
+  <h1 id="setuph1">Гонка с ботами</h1>
   <div class="setupgrid">
     <div class="scol">
       <div class="seclabel">Трасса</div>
       <div class="tracks" id="tracks"></div><div class="tdesc" id="tdesc"></div>
-      <button class="track champ" id="champ"><span>Чемпионат<small>Пять случайных трасс подряд, очки за места</small></span><b>× 5</b></button>
+      <button class="track champ botonly" id="champ"><span>Чемпионат<small>Пять случайных трасс подряд, очки за места</small></span><b>× 5</b></button>
     </div>
     <div class="scol">
-      <div class="seclabel">Соперники</div>
-      <div class="levels" id="levels"></div>
+      <div class="seclabel botonly">Соперники</div>
+      <div class="levels botonly" id="levels"></div>
+      <div class="sub trainonly" id="trainnote">Ты один на трассе: спокойно учи повороты и управление. Монеты и рекорды в тренировке не идут</div>
       <div class="seclabel">Условия</div>
       <div class="levels opts" id="opts"></div>
-      <div class="btns"><button class="main" id="setupgo">Играть</button><button class="ghost" id="setupclose">Назад</button></div>
+      <div class="btns"><button class="main" id="setupgo">Старт</button><button class="ghost" id="setupclose">Назад</button></div>
     </div>
   </div>
 </div>
@@ -527,7 +561,7 @@
   <div class="levels uisw ecosw" id="ecosw"></div>
   <div class="levels uisw sndsw" id="sndsw"></div>
   <div class="levels uisw mussw" id="mussw"></div>
-  <div class="btns"><button class="main" id="prefsclose">Готово</button></div>
+  <div class="btns"><button class="main" id="prefsclose">Готово</button><button class="ghost" id="helpopen">Справка: бонусы и правила</button></div>
 </div>
 
 <div class="screen hidden" id="welcome">
@@ -540,7 +574,7 @@
   <div class="btns"><button class="main" id="wgo">Поехали!</button><button class="ghost" id="wmenu">Сначала посмотреть меню</button></div>
 </div>
 <div class="screen hidden" id="help">
-  <h1 style="font-size:28px">Как играть</h1>
+  <h1 style="font-size:28px">Справка</h1>
   <div class="hints">
     <div class="for-mob">
       <b>Газ</b> — автоматический, машина разгоняется сама<br>
@@ -572,10 +606,11 @@
     <div><b>Чат</b> — кнопка 💬 в комнате и на финише<span class="for-pc">, или клавиша <kbd>T</kbd></span><span class="for-mob">, дальше «Написать»</span>. В заезде писать нельзя — там говорят голосом. Чат можно выключить</div>
     <div><b>Звук</b> игры выключается в настройках и на экране паузы</div>
     <div><b>Голос</b> — кнопка с микрофоном в комнате, в заезде и на финише. Микрофон выключен, пока сам не включишь; чужие голоса слышно сразу. Заглушить всех — кнопка «Голоса» в комнате или кнопка с динамиком под паузой в заезде; одного игрока — нажми на 🎤 возле его имени в комнате</div>
-    <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
+    <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока. Ботов в ней нет, только люди. Зашёл во время заезда — поедешь в следующем</div>
+    <div><b>Тренировка</b> — трасса без соперников, с подсказками по шагам: руль, занос, бонусы. Монеты и рекорды в ней не идут</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 94</div>
+    <div style="opacity:.5;margin-top:8px">версия 96</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -617,8 +652,8 @@
       <div class="voicerow" id="voicerow" style="display:none"><button class="micbtn" id="micbtn"></button><button id="earbtn"></button></div>
     </div>
     <div class="mcol mright">
-      <div id="mphostbox"><div class="levels opts" id="mpopts"></div><div class="tracks" id="mptracks"></div><div class="btns"><button class="main" id="mpgo">Старт</button></div><div class="sub" style="margin-top:8px">С друзьями гонка идёт без ботов; если ты в комнате один, поедут боты</div></div>
-      <div id="mppub" style="display:none"><div class="pubstat" id="pubstat"></div><div class="sub" id="pubsub"></div><div class="btns"><button class="main" id="pubrdy" style="display:none">Готов</button><button class="ghost" id="pubbots">Погонять с ботами, пока жду</button></div></div>
+      <div id="mphostbox"><div class="levels opts" id="mpopts"></div><div class="tracks" id="mptracks"></div><div class="btns"><button class="main" id="mpgo">Старт</button></div><div class="sub" style="margin-top:8px">Гонка только между вами, без ботов. Старт — когда вас хотя бы двое и все готовы</div></div>
+      <div id="mppub" style="display:none"><div class="pubstat" id="pubstat"></div><div class="sub" id="pubsub"></div><div class="btns"><button class="main" id="pubrdy" style="display:none">Готов</button></div></div>
       <div class="sub" id="mpwait" style="display:none">Ждём, когда хозяин комнаты начнёт заезд…<span id="mpoptline"></span></div>
       <div class="btns" id="mprdybox" style="display:none"><button class="main" id="mprdy">Готов</button></div>
     </div>
@@ -652,7 +687,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 94</div>
+  <div class="fver">Turbo Drift · версия 96</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -3405,14 +3440,14 @@ function setupRace(trackId, useChallenge) {
   const types = CAR_TYPES.map(function (q, i) { return i; }).filter(function (t) { return t !== garage.type; }), cols = [0,1,2,3,4,5,6,7].filter(function (c) { return c !== garage.color; });
   const L = LEVELS[level], SK = CAREER.ev ? CAREER.ev.skills : L.skills; bots = [];
   for (let k = 0; k < 5; k++) bots.push(newBot(PAINTS[cols[k]], SK[4 - k], 0, 'Бот', types[(k + (CHAMP.on ? 0 : T.id*2)) % types.length]));        // the quickest starts in front
-  rivalBot = null;
+  rivalBot = null; if (TRAIN.on) bots = [];          // training: the track to yourself
   if (CAREER.ev && CAREER.ev.boss) { const B = CAREER.ev.boss, b = newBot(PAINTS[8 + CAREER.ev.st], B.skill, 0, B.name, B.type); b.boss = true; b.tn = tnClean(B.tn); bots = [b]; }          // the duel: the champion alone, in his own colours
   if (useChallenge && challenge && challenge.track === trackId) { rivalBot = newBot(PAINTS[cols[6]], skillForTime(challenge.ms), 0, challenge.name, types[3]); rivalBot.rival = true; bots.push(rivalBot); }
   cars = bots.concat([player]);
   bots.forEach(function (b, k) { gridPlace(b, k); if (b.rival) placeBot(b); b.lap = 0; botReady(b); });
   gridPlace(player, bots.length);
   if (opt.laps > 0 && !ch && !CHAMP.on) LAPS = opt.laps;
-  resetRaceState(); koSetup(opt.ko && !ch && !CHAMP.on); ghostSetup();
+  resetRaceState(); koSetup(opt.ko && !ch && !CHAMP.on && !TRAIN.on); ghostSetup(); trainReset();
   const r = document.getElementById('rival');
   if (rivalBot) { r.style.display = 'block'; r.textContent = 'Соперник: ' + challenge.name + ' — ' + fmt(challenge.ms); } else r.style.display = 'none';
 }
@@ -3433,11 +3468,11 @@ function beginCountdown() {
   TILT.zero = Math.abs(TILT.roll) < 30 ? TILT.roll : 0; document.body.classList.toggle('tilt', TILT.mode === 'tilt' && document.body.classList.contains('mob'));
   { const kb = document.getElementById('keysbar'); kb.classList.remove('gone'); clearTimeout(beginCountdown.t); beginCountdown.t = setTimeout(function () { kb.classList.add('gone'); }, 14000); }
   state = 'countdown'; countT = 3.2; lastShown = ''; LAUNCH.at = null; LAUNCH.prev = null; LAUNCH.open = false;
-  try { const hn = parseInt(localStorage.getItem('td_hint') || '0', 10), mob = document.body.classList.contains('mob'); if (hn < 6) { localStorage.setItem('td_hint', String(hn + 1));
+  try { const hn = parseInt(localStorage.getItem('td_hint') || '0', 10), mob = document.body.classList.contains('mob'); if (hn < 6 && !TRAIN.hints) { localStorage.setItem('td_hint', String(hn + 1));
     const text = hn < 2 ? (mob ? (document.body.classList.contains('tilt') ? 'Наклоняй телефон — это руль' : 'Веди пальцем по полосе слева — это руль') : '↑ газ · ← → руль · Пробел — бонус') : (mob ? 'Держи ТОРМОЗ, отпусти на GO — рывок' : 'Газ ровно на GO — рывок');
     setTimeout(function () { if (state === 'countdown') note(text, 2600); }, 400); } } catch (e) {}
-  for (const id of ['menu','finish','paused','mp','setup','prefs','top']) document.getElementById(id).classList.add('hidden');
-  document.getElementById('hud').style.display = 'block'; document.getElementById('linkbox').style.display = 'none';
+  for (const id of ['menu','playscr','finish','paused','mp','setup','prefs','top']) document.getElementById(id).classList.add('hidden');
+  document.getElementById('hud').style.display = 'block'; trainShow(); document.getElementById('linkbox').style.display = 'none';
 }
 function progress(c) { return c.rival ? c.s - c.s0 + T.N : c.lap*T.N + c.idx; }
 // After the finish the player may ride along with whoever is still racing: the camera, the sound and the map follow that car.
@@ -3545,9 +3580,32 @@ function buildCareer() {
   info.appendChild(t); const go = document.getElementById('careergo'); go.textContent = i === 2 ? 'Вызвать на дуэль' : 'Старт';
   const el = host.children[st]; if (el && el.scrollIntoView) { try { el.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e2) {} }
 }
-function careerBadge() { const b = document.getElementById('careeropen'); if (b) b.textContent = 'Карьера ★' + careerTotal(); }
+function careerBadge() { const b = document.getElementById('careersub'); if (b) b.textContent = 'Мировой тур · ★ ' + careerTotal() + ' из 45'; }
 // ---- What happened in this race, for the daily tasks and the career stars
 const RSTAT = { hits: 0, taken: 0, items: 0, drift: 0, over: 0, pos: 0 };
+// Training: the track with no rivals, nothing won and nothing recorded. The hints lead a newcomer through the controls one
+// action at a time and wait until he has done each; the very first race of a new player shows them too.
+const SETUP = { mode: 'bots' }, TRAIN = { on: false, hints: false, step: 0, t: 0, L: 0, R: 0, d0: 0, i0: 0 }; let BACKTO = '';
+function trainHintsOn() { try { const v = localStorage.getItem('td_trh'); if (v === '1' || v === '0') return v === '1'; return !localStorage.getItem('td_trd'); } catch (e) { return true; } }
+function trainReset() { try { if (TRAIN.hints && !TRAIN.on && localStorage.getItem('td_trd')) TRAIN.hints = false; } catch (e) {} TRAIN.step = 0; TRAIN.t = 0; TRAIN.L = 0; TRAIN.R = 0; TRAIN.d0 = 0; TRAIN.i0 = 0; }
+function trainText() { const mob = document.body.classList.contains('mob');
+  switch (TRAIN.step) {
+    case 0: return mob ? 'Газ — сам. ' + (TILT.mode === 'tilt' ? 'Наклоняй телефон влево и вправо: это руль' : TILT.mode === 'wheel' ? 'Крути руль слева' : 'Веди пальцем по полосе слева: это руль') : '↑ — газ, ← и → — руль';
+    case 1: return (mob ? 'В повороте коротко нажми ТОРМОЗ' : 'В повороте коротко нажми ↓') + ' — машина пойдёт в занос';
+    case 2: return 'Держи занос подольше: на выходе сработает турбо';
+    case 3: return 'Проедь через светящийся значок на дороге — это бонус';
+    case 4: return mob ? 'Нажми круглую кнопку справа — бонус сработает' : 'Пробел — применить бонус';
+    case 5: return 'Это всё! Катайся и учи трассу, выход — через паузу'; }
+  return ''; }
+function trainShow() { const el = document.getElementById('trainhint'); if (!el) return; const t = TRAIN.hints && (state === 'countdown' || state === 'race') ? trainText() : ''; if (t) el.textContent = t; el.classList.toggle('show', !!t); }
+function trainNext() { TRAIN.step++; TRAIN.t = 0; TRAIN.d0 = RSTAT.drift; TRAIN.i0 = RSTAT.items; beep(880, 0.12, 'triangle', 0.05, 1320); if (TRAIN.step === 5) { try { localStorage.setItem('td_trd', '1'); } catch (e) {} } trainShow(); }
+function trainTick(dt) { if (!TRAIN.hints || TRAIN.step > 5) return; TRAIN.t += dt; const p = player;
+  if (TRAIN.step === 0) { if (p.st > 0.25) TRAIN.R += dt; else if (p.st < -0.25) TRAIN.L += dt; if ((TRAIN.L > 0.3 && TRAIN.R > 0.3) || TRAIN.t > 25) trainNext(); }
+  else if (TRAIN.step === 1) { if (p.drifting) trainNext(); }
+  else if (TRAIN.step === 2) { if (RSTAT.drift - TRAIN.d0 > 1.2 || TRAIN.t > 30) trainNext(); }
+  else if (TRAIN.step === 3) { if (p.items.length) trainNext(); }
+  else if (TRAIN.step === 4) { if (RSTAT.items > TRAIN.i0) trainNext(); else if (!p.items.length) { TRAIN.step = 3; trainShow(); } }
+  else if (TRAIN.t > 6) { TRAIN.step = 6; trainShow(); } }
 function rstatReset() { RSTAT.hits = 0; RSTAT.taken = 0; RSTAT.items = 0; RSTAT.drift = 0; RSTAT.over = 0; RSTAT.pos = 0; }
 // ---- Three tasks a day, the same for everybody, and a streak of days on which at least one race was finished.
 const DAILY_POOL = [
@@ -3586,18 +3644,18 @@ function buildDaily() {
     tx.textContent = dailyText(q); pr.textContent = q.done ? 'готово · +' + D.r : Math.floor(q.p) + '/' + D.n + ' · +' + D.r; u.style.width = Math.round(Math.min(1, q.p/D.n)*100) + '%'; bar.appendChild(u); d.appendChild(tx); d.appendChild(pr); d.appendChild(bar); list.appendChild(d); }
   document.getElementById('dnote').textContent = DAILY.all ? 'Все три выполнены: +' + DAILY_ALL + ' получено. Новые задания завтра.' : 'За все три задания — ещё +' + DAILY_ALL + ' монет. Награды начисляются сами на финише.';
 }
-function dailyBadge() { const b = document.getElementById('dailyopen'); if (b) b.textContent = 'Задания ' + dailyDone() + '/3'; }
+function dailyBadge() { const b = document.getElementById('dailysub'), n = dailyDone(); if (b) b.textContent = n >= 3 ? 'на сегодня всё сделано' : 'сделано ' + n + ' из 3'; }
 function finishRace(koPlace) {
-  const ko = KO.on, mp = NET.racing;
-  state = 'finished'; finishMs = Math.round(raceT*1000); player.done = true; haptic('win'); if (!ko || koPlace === 1) beep(660, 0.5, 'triangle', 0.08, 1320);
+  const ko = KO.on, mp = NET.racing, tr = TRAIN.on && !mp;
+  state = 'finished'; finishMs = Math.round(raceT*1000); player.done = true; trainShow(); haptic('win'); if (!ko || koPlace === 1) beep(660, 0.5, 'triangle', 0.08, 1320);
   const ahead = cars.filter(function (b) { return b !== player && b.done; }).length; place = ko ? koPlace : ahead + 1;
   if (!ko) netFinished(player.nid, finishMs);
-  const key = T.key, std = ko || LAPS === stdLaps(), isBest = !ko && std && (!bestTimes[key] || finishMs < bestTimes[key]);
+  const key = T.key, std = ko || LAPS === stdLaps(), isBest = !ko && !tr && std && (!bestTimes[key] || finishMs < bestTimes[key]);
   if (isBest) { bestTimes[key] = finishMs; saveBest(); if (!mp && !rivalBot) ghostSave(key); }
   document.getElementById('fworldrow').style.display = 'none';
-  if (!ko && std && key === trackKey(T.id, false, false) && lbOn() && lbInit()) { const tid = T.id, stamp = finishMs;
+  if (!ko && !tr && std && key === trackKey(T.id, false, false) && lbOn() && lbInit()) { const tid = T.id, stamp = finishMs;
     lbSend(tid, bestTimes[key], player.type | 0, function (r) { if (r && r.me && state === 'finished' && T.id === tid && finishMs === stamp) { document.getElementById('fworld').textContent = r.me.rank + ' место из ' + r.total; document.getElementById('fworldrow').style.display = ''; } }); }
-  if (place === 1 && !mp && !ko) { wins[key] = wins[key] || [0,0,0,0]; wins[key][level] = 1; try { localStorage.setItem('td_wins', JSON.stringify(wins)); } catch (e) {} }
+  if (place === 1 && !mp && !ko && !tr) { wins[key] = wins[key] || [0,0,0,0]; wins[key][level] = 1; try { localStorage.setItem('td_wins', JSON.stringify(wins)); } catch (e) {} }
   // coins: for taking part, for the place, more against stronger rivals
   const total = cars.length + KO.outs.length, share = [50,30,18,10,6,4][Math.min(5, place - 1)];
   let coins = mp ? 25 + share*0.8 : (15 + share)*[1, 1.25, 1.6, 2][level]*(ko ? 1.2 : 1); if (isBest && !mp) coins += 20; if (total < 2) coins = 10; if (!std) coins *= Math.max(0.34, Math.min(2.7, LAPS/stdLaps()));          // a shorter race pays less, a longer one more
@@ -3607,24 +3665,25 @@ function finishRace(koPlace) {
     if (CHAMP.i >= CHAMP.list.length - 1) { const tb = champTable(), my = tb.findIndex(function (r) { return r.c === player; }) + 1; coins += [150, 80, 40][my - 1] || 0; v = my === 1 ? 'Чемпион!' : 'Чемпионат окончен: ' + my + ' место'; }
     else v = 'Чемпионат · этап ' + (CHAMP.i + 1) + ' из ' + CHAMP.list.length;
   }
-  const dq = dailyRace({ place: place, total: total, mp: !!mp, track: T.id }); coins += dq.coins;
-  if (!ko && std && key === trackKey(T.id, false, false) && T.id === weekTrack() && lbOn() && lbInit()) { const stamp = finishMs; weekSend(finishMs, player.type | 0, function (r) { if (r && r.me && state === 'finished' && finishMs === stamp) { const fd = document.getElementById('fdaily'), d = document.createElement('div'); d.textContent = 'Турнир недели: ' + r.me.rank + ' место из ' + r.total; fd.appendChild(d); fd.style.display = ''; } }); }
+  const dq = tr ? { coins: 0, lines: [] } : dailyRace({ place: place, total: total, mp: !!mp, track: T.id }); coins += dq.coins;
+  if (!ko && !tr && std && key === trackKey(T.id, false, false) && T.id === weekTrack() && lbOn() && lbInit()) { const stamp = finishMs; weekSend(finishMs, player.type | 0, function (r) { if (r && r.me && state === 'finished' && finishMs === stamp) { const fd = document.getElementById('fdaily'), d = document.createElement('div'); d.textContent = 'Турнир недели: ' + r.me.rank + ' место из ' + r.total; fd.appendChild(d); fd.style.display = ''; } }); }
   if (CAREER.ev && !mp) { const cq = careerFinish(place); coins += cq.coins; dq.lines = cq.lines.concat(dq.lines); }
-  coins = earn(coins);
+  coins = tr ? 0 : earn(coins);
   { const fd = document.getElementById('fdaily'); fd.innerHTML = ''; for (const l of dq.lines) { const d = document.createElement('div'); d.textContent = l; fd.appendChild(d); } fd.style.display = dq.lines.length ? '' : 'none'; }
-  document.getElementById('fplace').textContent = place + ' место';
+  document.getElementById('fplace').textContent = tr ? 'Тренировка' : place + ' место';
   document.getElementById('ftime').textContent = fmt(finishMs);
   document.getElementById('flap').textContent = bestLap ? fmt(bestLap) : '—';
-  document.getElementById('fbest').textContent = ko ? '—' : fmt(bestTimes[key]) + (isBest ? ' — новый!' : '');
-  document.getElementById('fcoins').textContent = '+' + coins + ' · всего ' + WALLET.coins;
+  document.getElementById('fbest').textContent = ko || !bestTimes[key] ? '—' : fmt(bestTimes[key]) + (isBest ? ' — новый!' : '');
+  document.getElementById('fcoins').textContent = tr ? 'в тренировке не идут' : '+' + coins + ' · всего ' + WALLET.coins;
   if (rivalBot) { const d = finishMs - challenge.ms; v = d < 0 ? 'Ты быстрее, чем ' + challenge.name + ', на ' + fmt(-d) : challenge.name + ' быстрее на ' + fmt(d) + '. Реванш?'; }
   else if (ko) v = place === 1 ? 'Последний на трассе — победа!' : 'Выбыл';
   else if (mp || CHAMP.on) { if (mp && NET.pub) v = 'Следующий заезд начнётся сам, когда все финишируют'; }
+  else if (tr) v = 'Трасса изучена — теперь в гонку. Рекорды в тренировке не считаются';
   else if (place === 1) v = 'Победа! Отправь время друзьям';
   document.getElementById('verdict').textContent = v;
   const champMid = CHAMP.on && !mp && CHAMP.i < CHAMP.list.length - 1, champEnd = CHAMP.on && !mp && !champMid;
-  for (const pr of [['share', !mp && !ko && !CHAMP.on], ['again', !mp && !CHAMP.on], ['champnext', champMid], ['tomenu', !mp], ['tolobby', mp && NET.host && !NET.pub], ['rematch', mp && NET.host && !NET.pub], ['mpleave', mp], ['fresults', true], ['femo', mp]]) document.getElementById(pr[0]).style.display = pr[1] ? '' : 'none';
-  document.getElementById('tomenu').textContent = champMid ? 'Выйти из чемпионата' : (champEnd ? 'В меню' : (CAREER.ev ? 'К карьере' : 'Выбрать трассу'));
+  for (const pr of [['share', !mp && !ko && !CHAMP.on && !tr], ['again', !mp && !CHAMP.on], ['champnext', champMid], ['tomenu', !mp], ['tolobby', mp && NET.host && !NET.pub], ['rematch', mp && NET.host && !NET.pub], ['mpleave', mp], ['fresults', true], ['femo', mp]]) document.getElementById(pr[0]).style.display = pr[1] ? '' : 'none';
+  document.getElementById('tomenu').textContent = champMid ? 'Выйти из чемпионата' : (champEnd ? 'В меню' : (CAREER.ev ? 'К карьере' : (BACKTO ? 'Выбрать трассу' : 'В меню')));
   netResults();
   setTimeout(function () { if (state === 'finished' && !spec) { document.getElementById('finish').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; if (!mp) buildMenu(); } }, ko && place > 1 ? 1100 : 1600);
 }
@@ -3897,7 +3956,7 @@ function key(e, down) {
     else if (down && e.key === 'Enter') netJoin(e.target.value); return; }
   const k = (e.key || '').toLowerCase();
   if (down && !e.repeat && k === 'enter' && state === 'menu' && !NET.on) { const vis = function (id) { return !document.getElementById(id).classList.contains('hidden'); };
-    if (vis('welcome')) { document.getElementById('wgo').click(); return; } if (vis('menu') && !vis('help') && !vis('mp') && !vis('prefs') && !vis('top')) { document.getElementById('play').click(); return; } }
+    if (vis('welcome')) { document.getElementById('wgo').click(); return; } if (vis('menu') && !['help','mp','prefs','top','daily','career','week','garage'].some(vis)) { document.getElementById(vis('setup') ? 'setupgo' : vis('playscr') ? 'botsopen' : 'play').click(); return; } }
   if (down && !e.repeat && NET.on && !chatDriving() && (k === 't' || k === 'е') && document.getElementById('chatbox').classList.contains('hidden')) { chatOpen(false); e.preventDefault(); return; }
   if (spec) { if (down && !e.repeat) { if (k === 'arrowleft' || k === 'a' || k === 'ф') specStep(-1); else if (k === 'arrowright' || k === 'd' || k === 'в') specStep(1); else if (k === 'escape' || k === 'enter' || k === ' ') specStop(true); } if (k.indexOf('arrow') === 0 || k === ' ') e.preventDefault(); return; }
   if (down && !kbdSeen && (k.indexOf('arrow') === 0 || 'wasdцфыв'.indexOf(k) >= 0)) { kbdSeen = true; buildUISwitch(); }
@@ -3951,7 +4010,7 @@ function update(dt) {
     launchWatch(countT - 0.2);
     if (countT <= 0.2) { state = 'race'; raceT = 0; raceClock = 0; lapStart = 0; launchGo(); }
   } else if (state === 'race' || state === 'finished') {
-    if (state === 'race') { raceT += dt; if (player.drifting) RSTAT.drift += dt; if (raceT < 0.26) launchWatch(0); else LAUNCH.open = false; }
+    if (state === 'race') { raceT += dt; if (player.drifting) RSTAT.drift += dt; trainTick(dt); if (raceT < 0.26) launchWatch(0); else LAUNCH.open = false; }
     raceClock += dt;
     const inp = state === 'race' ? readInput() : { steer: 0, brake: player.vf > 0.5, gas: false };
     const lapBefore = player.lap; player.gotBoost = false;
@@ -4083,7 +4142,7 @@ function mpMsg(t) { document.getElementById('mpmsg').textContent = t || ''; }
 function netError(e) { return ({ 'peer-unavailable': 'Комната с таким кодом не найдена', 'unavailable-id': 'Такой код уже занят, попробуй ещё раз', load: 'Не удалось загрузить модуль связи. Игра должна быть открыта с хостинга или из Telegram, нужен интернет', network: 'Нет связи с сервером, который сводит игроков', blocked: 'Нет связи с сервером, который сводит игроков. Если игра открыта в Claude — открой сам артефакт Turbo Drift, а не предпросмотр файла', denied: 'Нет прав на игру вместе в этом артефакте: владелец должен дать тебе доступ на участие', room: 'Не удалось открыть комнату, попробуй ещё раз', timeout: 'Не удалось соединиться: сеть одного из игроков не пропускает прямое соединение', browser: 'Этот браузер не поддерживает прямое соединение', connect: 'Не удалось соединиться с комнатой' })[e] || ('Ошибка соединения: ' + e); }
 function mpSeek(on) { document.getElementById('mp').classList.toggle('seeking', !!on); document.getElementById('mph1').textContent = on ? 'Онлайн-гонка' : 'Играть вместе'; document.getElementById('mpback').textContent = on ? 'Отмена' : 'Назад'; }
 function netOpen() {
-  for (const id of ['menu','finish','paused','setup','prefs','top','daily','career','week','garage']) document.getElementById(id).classList.add('hidden');
+  for (const id of ['menu','playscr','finish','paused','setup','prefs','top','daily','career','week','garage']) document.getElementById(id).classList.add('hidden'); TRAIN.on = false; TRAIN.hints = false;
   document.getElementById('mp').classList.remove('hidden'); document.getElementById('mp').classList.toggle('inroom', NET.on); mpSeek(false); stageTick = 0; document.getElementById('mpstart').style.display = NET.on ? 'none' : ''; document.getElementById('mplobby').style.display = NET.on ? '' : 'none'; mpMsg('');
 }
 function netHost(fixed, fail) {           // `fixed`: the code a room called from a group chat was promised under; otherwise a fresh one is drawn
@@ -4164,7 +4223,6 @@ function pubStat(w) {
   if (NET.host) w = pubWait(); NET.wait = w; const n = NET.roster.length, me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0], late = !!(me && me.late), o = NET.opt || {}, tr = TRACKS[NET.track | 0];
   document.getElementById('pubstat').textContent = late ? 'Идёт заезд — ты в следующем' : (!n ? 'Захожу в комнату…' : n < 2 ? 'Ищем соперников…' : (w && w.s >= 0 ? 'Старт через ' + w.s + ' с' : 'Собираемся…'));
   document.getElementById('pubsub').textContent = late ? 'Подожди финиша: комната соберётся, и поедете вместе' : (!n ? '' : n < 2 ? 'Ты первый в комнате. Зайдёт второй игрок — начнётся отсчёт' : 'Игроков: ' + n + ' из ' + PUB.max + ' · трасса «' + (tr ? tr.name : '') + '»' + (o.rev ? ', обратно' : '') + (o.rain ? ', дождь' : ''));
-  document.getElementById('pubbots').style.display = NET.host && n < 2 ? '' : 'none';
   const rb = document.getElementById('pubrdy'), k = NET.roster.filter(function (p) { return p.rdy; }).length; rb.style.display = n >= 2 && !late ? '' : 'none'; rb.textContent = me && me.rdy ? 'Готов ✓' : 'Готов'; rb.className = me && me.rdy ? 'ghost' : 'main';
   if (n >= 2 && !late) document.getElementById('pubsub').textContent += ' · готовы ' + k + ' из ' + n + (k < n ? '. Все нажмут «Готов» — старт сразу' : '');
 }
@@ -4219,7 +4277,7 @@ function netLobby() {
   voiceUI();
   { const me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0], guests = NET.roster.filter(function (p) { return p.nid !== 0; }), k = guests.filter(function (p) { return p.rdy; }).length;
     document.getElementById('mprdybox').style.display = !NET.host && !NET.pub ? '' : 'none'; const rb = document.getElementById('mprdy'); rb.textContent = me && me.rdy ? 'Готов ✓' : 'Готов'; rb.className = me && me.rdy ? 'ghost' : 'main';
-    const go = document.getElementById('mpgo'), all = k === guests.length; go.textContent = !guests.length ? 'Старт' : all ? 'Старт · все готовы' : 'Ждём готовности · ' + k + '/' + guests.length; go.classList.toggle('waitrdy', !all); }          // with friends the host gives the start, and only once every guest has said he is ready
+    const go = document.getElementById('mpgo'), all = k === guests.length; go.textContent = !guests.length ? 'Ждём друзей' : all ? 'Старт · все готовы' : 'Ждём готовности · ' + k + '/' + guests.length; go.classList.toggle('waitrdy', !all || !guests.length); }          // with friends the host gives the start, and only once every guest has said he is ready
   { const me = NET.roster.filter(function (p) { return p.nid === NET.me; })[0]; if (me) { garage.type = me.type; garage.color = me.color; }
     document.getElementById('mpcarname').textContent = CAR_TYPES[garage.type].name; document.getElementById('mpcareng').textContent = CAR_TYPES[garage.type].eng.label; statBars(document.getElementById('mpcarstats'), garage.type, true);
     { const o = NET.opt || {}, names = []; if (o.rev) names.push('обратно'); if (o.rain) names.push('дождь'); if (o.ko) names.push('выбывание'); else if (o.laps > 0) names.push(lapsWord(o.laps | 0)); document.getElementById('mpoptline').textContent = names.length ? ' Заезд: ' + names.join(', ') + '.' : ''; }
@@ -4360,8 +4418,9 @@ function netKick(nid) { if (!NET.host || NET.pub || NET.racing) return; const p 
   KICK.nid = -1; for (const id of Object.keys(NET.conn)) if (NET.conn[id] === nid) { try { NET.tr.send(+id, { t: 'kick', why: 'host' }); } catch (e) {} netClosed(+id); } }
 function netStart() {
   if (!NET.host || NET.racing) return;
+  if (NET.roster.length < 2) { note(NET.pub ? 'Ждём второго игрока' : 'В комнате пока только ты — позови друзей', 2400); haptic('light'); return; }          // rooms are for people: no bots are added, so one player has nobody to race
   if (!NET.pub) { const lag = NET.roster.filter(function (p) { return p.nid !== 0 && !p.rdy; }); if (lag.length) { note('Ещё не готовы: ' + lag.map(function (p) { return p.name; }).join(', '), 2400); haptic('light'); return; } }
-  const np = NET.roster.length, nb = np > 1 ? (NET.pub ? Math.max(0, PUB.cars - np) : 0) : 5, L = LEVELS[level]; NET.auto = 0; NET.back = 0; NET.regroup = 0; NET.began = performance.now(); for (const p of NET.roster) { delete p.late; delete p.rdy; }
+  const np = NET.roster.length, nb = 0, L = LEVELS[level]; NET.auto = 0; NET.back = 0; NET.regroup = 0; NET.began = performance.now(); for (const p of NET.roster) { delete p.late; delete p.rdy; }
   const usedC = NET.roster.map(function (p) { return p.color; }), cols = [0,1,2,3,4,5,6,7].filter(function (c) { return usedC.indexOf(c) < 0; }), bl = [];
   for (let k = 0; k < nb; k++) bl.push({ nid: 100 + k, type: (k + 1 + NET.track*2) % CAR_TYPES.length, color: cols.length ? cols[k % cols.length] : k, skill: NET.pub && np > 1 ? PUB.skills[k % 3] : L.skills[4 - k] });
   const pl = NET.roster.map(function (p) { return p.nid; }); for (let i = pl.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i + 1)), t = pl[i]; pl[i] = pl[j]; pl[j] = t; }
@@ -4409,7 +4468,7 @@ function netResults() {
   else ranking().forEach(function (c, i) { const ms = NET.results[c.nid]; add(c, ms ? i + 1 : 0, (ms ? fmt(ms) : 'едет…') + (CHAMP.on && !NET.racing ? ' · ' + (CHAMP.pts[c.nid] || 0) + ' очк.' : '')); });
   rows.forEach(function (r) { const d = document.createElement('div'); if (r.c === player) d.className = 'me'; const sp = document.createElement('span'); sp.textContent = (r.rank ? r.rank + '. ' : '— ') + (r.c.name || 'Игрок'); const b = document.createElement('b'); b.textContent = r.val; d.appendChild(sp); d.appendChild(b); el.appendChild(d); });
   document.getElementById('watch').style.display = cars.some(function (c) { return c !== player && !c.done; }) ? '' : 'none';
-  const my = rows.findIndex(function (r) { return r.c === player; }); if (!KO.on && !(CHAMP.on && !NET.racing) && NET.results[NET.me]) document.getElementById('fplace').textContent = (my + 1) + ' место';
+  const my = rows.findIndex(function (r) { return r.c === player; }); if (!KO.on && !(CHAMP.on && !NET.racing) && !(TRAIN.on && !NET.racing) && NET.results[NET.me]) document.getElementById('fplace').textContent = (my + 1) + ' место';
 }
 function netMsg(from, m) {
   if (!m || typeof m !== 'object' || !NET.on) return;
@@ -4644,10 +4703,10 @@ let UPD = null;
     setTimeout(function () { if (UPD) UPD(); }, 600); }, function () {});
 } catch (e) {} })();
 function toMenu() {
-  GAR.open = false; GAR.pv = null; document.getElementById('garage').classList.add('hidden'); const cback = CAREER.back && !!CAREER.ev; careerEnd(); CAREER.back = false; if (cback) setTimeout(function () { if (state === 'menu') { buildCareer(); document.getElementById('career').classList.remove('hidden'); } }, 0);
+  GAR.open = false; GAR.pv = null; document.getElementById('garage').classList.add('hidden'); const cback = CAREER.back && !!CAREER.ev; careerEnd(); CAREER.back = false; if (cback) setTimeout(function () { if (state === 'menu') { playOpen(); buildCareer(); document.getElementById('career').classList.remove('hidden'); } }, 0);
   specStop(false); CHAMP.on = false; koSetup(false); document.body.classList.remove('rain'); if (NET.qon) { NET.qon = false; NET.busy = false; NET.qtok = (NET.qtok || 0) + 1; } if (NET.on) netLeave();
   state = 'menu'; demo = null; particles = []; skids = []; engine(0, false); if (UPD) setTimeout(function () { if (UPD) UPD(); }, 400);
-  for (const id of ['finish','paused','mp','setup','prefs','top','daily','career','week']) document.getElementById(id).classList.add('hidden');
+  for (const id of ['finish','paused','mp','setup','prefs','top','daily','career','week','playscr','help']) document.getElementById(id).classList.add('hidden'); TRAIN.on = false; TRAIN.hints = false; BACKTO = ''; trainShow();
   document.getElementById('menu').classList.remove('hidden'); document.getElementById('hud').style.display = 'none'; buildMenu();
 }
 function homeColor(set) { try { if (set !== undefined) localStorage.setItem('td_home', String(set)); const h = parseInt(localStorage.getItem('td_home') || '', 10); if (h >= 0 && h < PAINTS.length && paintOwned(h)) return h; } catch (e) {} return paintOwned(garage.color) ? garage.color : 0; }
@@ -4661,7 +4720,6 @@ function statColor(v) { const t = Math.max(0, Math.min(1, (v - 0.13)/0.78)), A =
   return 'rgb(' + A.map(function (a, i) { return Math.round(a + (B[i] - a)*k); }).join(',') + ')'; }
 function buildGarage() {
   if (garage.view === undefined || !(garage.view >= 0 && garage.view < CAR_TYPES.length)) garage.view = garage.type;
-  document.getElementById('tuneopen').style.display = owns(garage.view) ? '' : 'none';
   { const at = CAR_ORDER.indexOf(garage.view); document.getElementById('carprev').classList.toggle('end', at <= 0); document.getElementById('carnext').classList.toggle('end', at >= CAR_ORDER.length - 1); }
   const vt = garage.view, mine = owns(vt), C = CAR_TYPES[vt];
   document.getElementById('carname').textContent = C.name; document.getElementById('careng').textContent = C.eng.label; statBars(document.getElementById('carstats'), vt);
@@ -4763,10 +4821,12 @@ function buyCar() { const t = garage.view, C = CAR_TYPES[t]; if (owns(t)) return
   WALLET.coins -= C.price; WALLET.owned.push(t); saveWallet(); garage.type = t; saveGarage(); buildGarage(); beep(660, 0.25, 'triangle', 0.07, 1320); haptic('win'); }
 function buildOpts() {
   const el = document.getElementById('opts'); el.innerHTML = '';
-  [['rev', 'Обратно'], ['rain', 'Дождь'], ['ko', 'Выбывание']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (opt[o[0]] ? ' on' : ''); b.textContent = o[1];
+  [['rev', 'Обратно'], ['rain', 'Дождь'], ['ko', 'Выбывание']].forEach(function (o) { const b = document.createElement('button'); b.className = 'lv' + (opt[o[0]] ? ' on' : '') + (o[0] === 'ko' ? ' botonly' : ''); b.textContent = o[1];
     b.addEventListener('click', function () { opt[o[0]] = !opt[o[0]]; saveOpt(); buildMenu(); }); el.appendChild(b); });
   { const b = document.createElement('button'); b.className = 'lv' + (opt.laps > 0 ? ' on' : ''); b.textContent = 'Круги: ' + (opt.laps > 0 ? opt.laps : 'авто'); b.title = 'Сколько кругов ехать. Рекорды идут только при обычном числе кругов';
     b.addEventListener('click', function () { lapsNext(opt); saveOpt(); buildMenu(); if (opt.laps > 0) toast(lapsWord(opt.laps) + '. Рекорды и турнир считаются только при обычном числе кругов'); }); el.appendChild(b); }
+  { const on = trainHintsOn(), b = document.createElement('button'); b.className = 'lv trainonly' + (on ? ' on' : ''); b.textContent = 'Подсказки'; b.title = 'Показывать по шагам, что нажимать';
+    b.addEventListener('click', function () { try { localStorage.setItem('td_trh', on ? '0' : '1'); } catch (e) {} buildMenu(); }); el.appendChild(b); }
 }
 function buildLevels() {
   const el = document.getElementById('levels'); el.innerHTML = '';
@@ -4810,7 +4870,7 @@ function buildFpsSwitch() {
 function buildMenu() {
   { const fv = document.querySelector('.fver'), mv = document.getElementById('mver'), n = fv ? (fv.textContent.match(/\d+/) || [''])[0] : ''; if (mv && n) mv.textContent = 'версия ' + n; }          // the version is read off the one place it is written, so the two cannot disagree
   dailyBadge(); careerBadge(); if (!NET.on) { const hc = homeColor(); if (garage.color !== hc) { garage.color = hc; saveGarage(); } } buildGarage(); buildLevels(); buildUISwitch(); buildCtlSwitch(); buildFpsSwitch(); buildOpts();
-  { const names = []; if (opt.rev) names.push('обратно'); if (opt.rain) names.push('дождь'); if (opt.ko) names.push('выбывание'); else if (opt.laps > 0 && !champPick) names.push(lapsWord(opt.laps)); document.getElementById('playsub').textContent = (champPick ? 'Чемпионат' : TRACKS[lastTrack].name) + ' · ' + LEVELS[level].name + (names.length ? ' · ' + names.join(', ') : ''); }
+  { const names = []; if (opt.rev) names.push('обратно'); if (opt.rain) names.push('дождь'); if (opt.ko) names.push('выбывание'); else if (opt.laps > 0 && !champPick) names.push(lapsWord(opt.laps)); document.getElementById('botssub').textContent = (champPick ? 'Чемпионат' : TRACKS[lastTrack].name) + ' · ' + LEVELS[level].name + (names.length ? ' · ' + names.join(', ') : ''); playSubs(); }
   const el = document.getElementById('tracks'); el.innerHTML = ''; el.classList.toggle('many', TRACKS.length > 5); document.getElementById('tdesc').textContent = champPick ? 'Пять случайных трасс подряд, очки за места' : TRACKS[lastTrack].desc;
   TRACKS.forEach(function (tr, i) {
     const b = document.createElement('button'); b.className = 'track' + (tr.name.length > 9 ? ' long' : '');
@@ -4880,8 +4940,15 @@ function topDraw() {
   if (r.me) me.textContent = 'Твоё место: ' + r.me.rank + ' из ' + r.total + ' · ' + fmt(r.me.ms);
   else me.textContent = lbInit() ? 'Тебя здесь пока нет: проедь трассу в обычных условиях — без «обратно», дождя и выбывания' : 'Чтобы попасть в таблицу, открой игру в Telegram';
 }
-let champPick = false;                                  // the championship is picked like a track; «Играть» starts whatever is picked
-function playGo() { for (const id of ['setup', 'prefs']) document.getElementById(id).classList.add('hidden'); if (champPick) champStart(); else { CHAMP.on = false; startRace(lastTrack, false); } }
+let champPick = false;                                  // the championship is picked like a track; «Старт» starts whatever is picked
+function playGo() { for (const id of ['setup', 'prefs']) document.getElementById(id).classList.add('hidden'); TRAIN.on = false; TRAIN.hints = false; if (champPick) { BACKTO = ''; champStart(); } else { BACKTO = 'bots'; CHAMP.on = false; startRace(lastTrack, false); } }
+// «Играть» opens the list of ways to race; the two solo ones then ask for a track on the same screen, told apart by SETUP.mode
+function playSubs() { const n = dailyDone(), w = TRACKS[weekTrack()]; document.getElementById('playsub').textContent = n < 3 ? 'Задания на сегодня: ' + n + ' из 3' : 'Гонки · онлайн · карьера'; document.getElementById('weeksub').textContent = (w ? w.name : '') + ' · приз до 3000'; dailyBadge(); careerBadge(); }
+function playOpen() { playSubs(); document.getElementById('playscr').classList.remove('hidden'); }
+function playClose() { document.getElementById('playscr').classList.add('hidden'); }
+function setupOpen(mode) { SETUP.mode = mode === 'train' ? 'train' : 'bots'; const el = document.getElementById('setup'), tr = SETUP.mode === 'train'; el.classList.toggle('train', tr); document.getElementById('setuph1').textContent = tr ? 'Тренировка' : 'Гонка с ботами'; if (tr) champPick = false; buildMenu(); el.classList.remove('hidden'); el.scrollTop = 0; }
+function setupGo() { if (SETUP.mode === 'train') trainGo(); else playGo(); }
+function trainGo() { for (const id of ['setup', 'prefs']) document.getElementById(id).classList.add('hidden'); champPick = false; CHAMP.on = false; BACKTO = 'train'; TRAIN.on = true; TRAIN.hints = trainHintsOn(); startRace(lastTrack, false); }
 function showChallenge() {
   const el = document.getElementById('challenge'); if (!challenge) { el.style.display = 'none'; return; }
   el.style.display = 'block'; el.innerHTML = '';
@@ -4903,8 +4970,8 @@ const CAR_ORDER = CAR_TYPES.map(function (c, i) { return i; }).sort(function (a,
 function carShift(from, d, ownedOnly) { let k = CAR_ORDER.indexOf(from) + d; while (k >= 0 && k < CAR_ORDER.length) { if (!ownedOnly || owns(CAR_ORDER[k])) return CAR_ORDER[k]; k += d; } return from; }
 for (const d of [-1, 1]) document.getElementById(d < 0 ? 'carprev' : 'carnext').addEventListener('click', function () { const cur = garage.view === undefined ? garage.type : garage.view, nx = carShift(cur, d, false); if (nx === cur) return; garage.view = nx; if (owns(garage.view)) { garage.type = garage.view; saveGarage(); } buildGarage(); });
 document.getElementById('buycar').addEventListener('click', buyCar); document.getElementById('champ').addEventListener('click', function () { champPick = true; buildMenu(); });
-document.getElementById('setupopen').addEventListener('click', function () { document.getElementById('setup').classList.remove('hidden'); }); document.getElementById('setupclose').addEventListener('click', function () { document.getElementById('setup').classList.add('hidden'); });
-document.getElementById('setupgo').addEventListener('click', playGo);
+document.getElementById('botsopen').addEventListener('click', function () { audio(); setupOpen('bots'); }); document.getElementById('trainopen').addEventListener('click', function () { audio(); setupOpen('train'); }); document.getElementById('playclose').addEventListener('click', playClose); document.getElementById('setupclose').addEventListener('click', function () { document.getElementById('setup').classList.add('hidden'); });
+document.getElementById('setupgo').addEventListener('click', setupGo);
 document.getElementById('topopen').addEventListener('click', topOpen); document.getElementById('topclose').addEventListener('click', function () { document.getElementById('top').classList.add('hidden'); }); document.getElementById('topopen').style.display = lbOn() ? '' : 'none';
 document.getElementById('prefsopen').addEventListener('click', function () { document.getElementById('prefs').classList.remove('hidden'); }); document.getElementById('prefsclose').addEventListener('click', function () { document.getElementById('prefs').classList.add('hidden'); });
 for (let k = 0; k < 3; k++) { const el = document.getElementById('it' + k);
@@ -4918,7 +4985,7 @@ document.getElementById('fire').addEventListener('click', function () { if (stat
 document.getElementById('share').addEventListener('click', share); document.getElementById('psnd').addEventListener('click', function () { sndSet(!sndOff); buildFpsSwitch(); });
 document.getElementById('again').addEventListener('click', function () { startRace(T.id, !!rivalBot); });
 document.getElementById('champnext').addEventListener('click', champNext);
-document.getElementById('tomenu').addEventListener('click', toMenu);
+document.getElementById('tomenu').addEventListener('click', function () { const b = BACKTO; toMenu(); if (b) { playOpen(); setupOpen(b); } });
 document.getElementById('watch').addEventListener('click', specStart); document.getElementById('specback').addEventListener('click', function () { specStop(true); });
 document.getElementById('specprev').addEventListener('click', function () { specStep(-1); }); document.getElementById('specnext').addEventListener('click', function () { specStep(1); });
 tapMob(document.getElementById('pause'), function () { pause(true); });
@@ -4927,26 +4994,26 @@ function tapMob(el, fn) { let t = 0; el.addEventListener('pointerup', function (
 document.getElementById('resume').addEventListener('click', function () { pause(false); });
 document.getElementById('quit').addEventListener('click', toMenu);
 document.getElementById('mpopen').addEventListener('click', function () { audio(); netOpen(); });
-document.getElementById('play').addEventListener('click', playGo);
-document.getElementById('wgo').addEventListener('click', function () { FRESH = false; CHAMP.on = false; opt = { rev: false, rain: false, ko: false }; startRace(0, false); });
+document.getElementById('play').addEventListener('click', function () { audio(); playOpen(); });
+document.getElementById('wgo').addEventListener('click', function () { FRESH = false; CHAMP.on = false; opt = { rev: false, rain: false, ko: false }; TRAIN.on = false; TRAIN.hints = true; startRace(0, false); });
 document.getElementById('wmenu').addEventListener('click', welcomeClose);
 document.getElementById('mphost').addEventListener('click', netHost);
 document.getElementById('mpquick').addEventListener('click', function () { audio(); netQuick(); }); document.getElementById('mpfind').addEventListener('click', function () { netQuick(); });
-document.getElementById('pubbots').addEventListener('click', function () { if (NET.on && NET.host && NET.pub && !NET.racing && NET.roster.length < 2) netStart(); });
+
 document.getElementById('helpopen').addEventListener('click', function () { document.getElementById('help').classList.remove('hidden'); });
 document.getElementById('helpclose').addEventListener('click', function () { document.getElementById('help').classList.add('hidden'); });
 for (const d of [-1, 1]) document.getElementById(d < 0 ? 'mpcarprev' : 'mpcarnext').addEventListener('click', function () { if (!NET.on) return; const t = carShift(garage.type, d, true); if (t !== garage.type) netSetCar(t, garage.color); });      // in a room only the cars the player owns
 document.getElementById('mpjoin').addEventListener('click', function () { netJoin(document.getElementById('mpcode').value); });
 document.getElementById('mpgo').addEventListener('click', netStart); document.getElementById('mprdy').addEventListener('click', function () { netReady(); }); document.getElementById('pubrdy').addEventListener('click', function () { netReady(); });
 document.getElementById('mpshare').addEventListener('click', netShare);
-document.getElementById('mpback').addEventListener('click', toMenu);
-document.getElementById('tuneopen').addEventListener('click', function () { audio(); garOpen(); }); document.getElementById('gback').addEventListener('click', garClose); document.getElementById('gbuy').addEventListener('click', garAct);
+document.getElementById('mpback').addEventListener('click', function () { toMenu(); playOpen(); });
+document.getElementById('tuneopen').addEventListener('click', function () { audio(); if (!owns(garCar())) { garage.view = garage.type; buildGarage(); } garOpen(); }); document.getElementById('gback').addEventListener('click', garClose); document.getElementById('gbuy').addEventListener('click', garAct);
 document.getElementById('careeropen').addEventListener('click', function () { audio(); buildCareer(); document.getElementById('career').classList.remove('hidden'); }); document.getElementById('careerclose').addEventListener('click', function () { document.getElementById('career').classList.add('hidden'); }); document.getElementById('careergo').addEventListener('click', function () { careerGo(CAREER.sel); });
 document.getElementById('weekopen').addEventListener('click', function () { audio(); weekOpen(); }); document.getElementById('weekclose').addEventListener('click', function () { document.getElementById('week').classList.add('hidden'); }); document.getElementById('weekgo').addEventListener('click', weekGo);
 document.getElementById('dailyopen').addEventListener('click', function () { audio(); buildDaily(); document.getElementById('daily').classList.remove('hidden'); }); document.getElementById('dailyclose').addEventListener('click', function () { document.getElementById('daily').classList.add('hidden'); });
 document.getElementById('mpleave').addEventListener('click', toMenu);
 document.getElementById('tolobby').addEventListener('click', function () { if (!NET.host) return; netAward(); for (const p of NET.roster) delete p.rdy; NET.tr.all({ t: 'roster', list: NET.roster, track: NET.track, opt: NET.opt }, -1); NET.tr.all({ t: 'lobby' }, -1); document.getElementById('finish').classList.add('hidden'); netLobby(); });
-document.getElementById('rematch').addEventListener('click', function () { if (!NET.host) return; netAward(); specStop(false); NET.racing = false; netStart(); });
+document.getElementById('rematch').addEventListener('click', function () { if (!NET.host) return; if (NET.roster.length < 2) { document.getElementById('tolobby').click(); return; } netAward(); specStop(false); NET.racing = false; netStart(); });
  emoRow(document.getElementById('femo')); emoRow(document.getElementById('mpemo'));
 
 try {
