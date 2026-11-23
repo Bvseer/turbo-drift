@@ -639,7 +639,7 @@
     <div><b>Тренировка</b> — трасса без соперников, с подсказками по шагам: руль, занос, бонусы. Монеты и рекорды в ней не идут</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 102</div>
+    <div style="opacity:.5;margin-top:8px">версия 103</div>
   </div>
 </div>
 
@@ -722,7 +722,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 102</div>
+  <div class="fver">Turbo Drift · версия 103</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1086,13 +1086,14 @@ function initGL() {
       return texture2D(ntex, (mod(i, 256.0) + f + 0.5)*0.00390625).r; }
     float fbm(vec2 q){ float a = 0.5, t = 0.0; for (int i = 0; i < 4; i++) { t += a*noise(q); q = q*2.03 + vec2(17.1,3.7); a *= 0.5; } return t; }
     // clear sky: gradient, haze toward a low sun, the sun's disc and halo
+    float HK = 1.0;          // how much of the halo round the sun or the moon is drawn: all of it in the sky, little of it in a reflection after dark
     vec3 air(vec3 d){
       float y = max(d.y, 0.0); vec3 col = mix(HOR, ZEN, pow(y, 0.42));
       if (d.y < 0.0) col = mix(HOR, gnd, clamp(-d.y*6.0, 0.0, 1.0));
       float side = max(dot(normalize(d.xz + vec2(1e-4)), normalize(sun.xz)), 0.0);
       col += disc*glow*pow(side, 3.0)*pow(1.0 - y, 5.0);
       float sd = max(dot(d, sun), 0.0);
-      return col + disc*(pow(sd, 900.0)*40.0 + pow(sd, 28.0)*(0.35 + glow*0.5)); }
+      return col + disc*(pow(sd, 900.0)*40.0*HK + pow(sd, 28.0)*(0.35 + glow*0.5)*HK); }
     // the same for distance haze: the disc term is left out, it is zero for a level line of sight
     vec3 fogAir(vec3 d){
       float y = max(d.y, 0.0); vec3 col = mix(HOR, ZEN, pow(y, 0.42));
@@ -1112,6 +1113,7 @@ function initGL() {
         if (night > 0.6 && fine > 0.5) { vec2 p = d.xz/(d.y + 0.35)*70.0; float st = step(0.975, hash(floor(p)))*smoothstep(0.30, 0.0, length(fract(p) - 0.5)); col += vec3(0.9,0.95,1.0)*st*min(1.0, d.y*6.0)*(1.0 - cov)*0.6; }
       }
       return col; }
+    vec3 skyR(vec3 d){ HK = 1.0 - 0.88*night; vec3 c = sky(d, 0.0); HK = 1.0; return c; }          // the sky as paint and glass mirror it: at night the moon's glow would otherwise lie on a bonnet as a white blot
     vec3 film(vec3 x){ x *= expo; x = (x*(2.51*x + 0.03))/(x*(2.43*x + 0.59) + 0.14); return pow(clamp(x, 0.0, 1.0), vec3(0.4545)); }
 `;
   const fsOpaque = fsHead + fsLib + `    void main(){
@@ -1139,14 +1141,14 @@ function initGL() {
         col = alb*light + sky(R, 0.0)*(0.015 + 0.30*fr + wk*(0.06 + 0.60*fr)) + sunc*pow(nh, 90.0)*0.10*(0.6 + g)*(1.0 + 3.0*wet); }
       else if (vm < 3.5) {                                                 // car paint: colour coat with metal flake under a clear coat
         vec3 alb = tint*tint*base; float ao = mix(0.45, 1.0, smoothstep(0.04, 0.50, vw.y));
-        col = alb*light*ao + alb*sunc*pow(nh, 22.0)*0.30 + sunc*pow(nh, 520.0)*2.2*step(0.001, nl) + sky(R, 0.0)*(0.14 + 0.86*fr)*ao; }
-      else if (vm < 4.5) col = vec3(0.004,0.006,0.008)*light + sky(R, 0.0)*(0.09 + 0.91*fr) + sunc*pow(nh, 700.0)*3.0;
+        col = alb*light*ao + alb*sunc*pow(nh, 22.0)*0.30 + sunc*pow(nh, 520.0)*2.2*step(0.001, nl) + skyR(R)*(0.14 + 0.86*fr)*ao; }
+      else if (vm < 4.5) col = vec3(0.004,0.006,0.008)*light + skyR(R)*(0.09 + 0.91*fr) + sunc*pow(nh, 700.0)*3.0;
       else if (vm < 5.5) col = base*5.0;
       else if (vm > 11.5) col = base*(light*(1.0 - night) + vec3(7.0)*night);                           // lit only after dark: lamps, windows
-      else if (vm < 6.5) col = base*(0.22*light + 0.85*sky(R, 0.0)) + sunc*pow(nh, 200.0)*0.8;
+      else if (vm < 6.5) col = base*(0.22*light + 0.85*skyR(R)) + sunc*pow(nh, 200.0)*0.8;
       else if (vm < 8.5) col = base*light;
       else if (vm < 9.5) col = base*(0.55 + 1.3*night + 7.0*brake);
-      else col = base*light + sky(R, 0.0)*(0.04 + 0.55*fr) + sunc*pow(nh, 260.0)*0.9;
+      else col = base*light + skyR(R)*(0.04 + 0.55*fr) + sunc*pow(nh, 260.0)*0.9;
       gl_FragColor = vec4(film(mix(col, vfog.rgb, vfog.a)), 1.0); }`;
   // Building fronts and water have programs of their own: they fill much of a city's picture, and no other surface has to carry their code
   const fsFront = fsHead + fsLib + `    void main(){
@@ -1300,15 +1302,25 @@ function setSky(kind) {
 }
 
 // ---- mesh building ---------------------------------------------------------
-function MB() { this.v = []; }
+// The vertices go straight into a typed array that doubles when it fills: building a track writes six million numbers, and a plain array
+// that is converted at the end costs several times more. `v` reads as the filled part, for the few places that look at it.
+function MB(cap) { this.a = new Float32Array(cap > 3000 ? Math.ceil(cap) : 3000); this.n = 0; }
+const MBH = { mb: 0, sc: 0, sh: 0 };          // how much the last track took: the next one is given that much room at once and never has to grow
+Object.defineProperty(MB.prototype, 'v', { get: function () { return this.a.subarray(0, this.n); }, set: function (x) { if (!x) { this.a = new Float32Array(0); this.n = 0; } } });
+MB.prototype.need = function (k) { if (this.n + k <= this.a.length) return; let c = Math.max(3000, this.a.length*2); while (c < this.n + k) c *= 2; const b = new Float32Array(c); b.set(this.a.subarray(0, this.n)); this.a = b; };
+MB.prototype.flat = function (x, y, z) { this.need(10); const A = this.a, n = this.n; A[n] = x; A[n+1] = y; A[n+2] = z; A[n+3] = 0; A[n+4] = 1; A[n+5] = 0; A[n+6] = 0; A[n+7] = 0; A[n+8] = 0; A[n+9] = 0; this.n = n + 10; };          // a vertex of a shadow: lies flat, no colour
+MB.prototype.add = function (o) { this.need(o.n); this.a.set(o.a.subarray(0, o.n), this.n); this.n += o.n; };
 MB.prototype.tri = function (a, b, c, col, mat, ref) {      // flat triangle; normal points away from `ref`
   let nx=(b[1]-a[1])*(c[2]-a[2])-(b[2]-a[2])*(c[1]-a[1]), ny=(b[2]-a[2])*(c[0]-a[0])-(b[0]-a[0])*(c[2]-a[2]), nz=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
-  const l = Math.hypot(nx,ny,nz) || 1; nx/=l; ny/=l; nz/=l;
+  const l = Math.sqrt(nx*nx + ny*ny + nz*nz) || 1; nx/=l; ny/=l; nz/=l;
   if (ref && nx*(a[0]-ref[0]) + ny*(a[1]-ref[1]) + nz*(a[2]-ref[2]) < 0) { nx=-nx; ny=-ny; nz=-nz; }
-  this.v.push(a[0],a[1],a[2],nx,ny,nz,col[0],col[1],col[2],mat, b[0],b[1],b[2],nx,ny,nz,col[0],col[1],col[2],mat, c[0],c[1],c[2],nx,ny,nz,col[0],col[1],col[2],mat);
+  if (this.n + 30 > this.a.length) this.need(30); const A = this.a, c0 = col[0], c1 = col[1], c2 = col[2]; let n = this.n;
+  A[n] = a[0]; A[n+1] = a[1]; A[n+2] = a[2]; A[n+3] = nx; A[n+4] = ny; A[n+5] = nz; A[n+6] = c0; A[n+7] = c1; A[n+8] = c2; A[n+9] = mat; n += 10;
+  A[n] = b[0]; A[n+1] = b[1]; A[n+2] = b[2]; A[n+3] = nx; A[n+4] = ny; A[n+5] = nz; A[n+6] = c0; A[n+7] = c1; A[n+8] = c2; A[n+9] = mat; n += 10;
+  A[n] = c[0]; A[n+1] = c[1]; A[n+2] = c[2]; A[n+3] = nx; A[n+4] = ny; A[n+5] = nz; A[n+6] = c0; A[n+7] = c1; A[n+8] = c2; A[n+9] = mat; this.n = n + 10;
 };
 MB.prototype.quad = function (a, b, c, d, col, mat, ref) { this.tri(a,b,c,col,mat,ref); this.tri(a,c,d,col,mat,ref); };
-MB.prototype.sv = function (p, n, col, mat) { this.v.push(p[0],p[1],p[2],n[0],n[1],n[2],col[0],col[1],col[2],mat); };   // smooth vertex
+MB.prototype.sv = function (p, nr, col, mat) { if (this.n + 10 > this.a.length) this.need(10); const A = this.a, n = this.n; A[n] = p[0]; A[n+1] = p[1]; A[n+2] = p[2]; A[n+3] = nr[0]; A[n+4] = nr[1]; A[n+5] = nr[2]; A[n+6] = col[0]; A[n+7] = col[1]; A[n+8] = col[2]; A[n+9] = mat; this.n = n + 10; };   // smooth vertex
 MB.prototype.box = function (cx, cy, cz, sx, sy, sz, col, mat, ry) {
   const c = Math.cos(ry||0), s = Math.sin(ry||0), P = [], ref = [cx,cy,cz];
   for (let i = 0; i < 8; i++) { const lx = (i&1 ? 0.5 : -0.5)*sx, ly = (i&2 ? 0.5 : -0.5)*sy, lz = (i&4 ? 0.5 : -0.5)*sz; P.push([cx + c*lx + s*lz, cy + ly, cz - s*lx + c*lz]); }
@@ -1328,20 +1340,26 @@ MB.prototype.blob = function (cx, cy, cz, sx, sy, sz, col, mat, rnd, jitter, var
   const P = ICO.v.map(function (p) { const k = 1 + (rnd() - 0.5)*jitter; return [cx + p[0]*sx*k, cy + p[1]*sy*k, cz + p[2]*sz*k]; }), ref = [cx,cy,cz];
   for (const f of ICO.f) { const k = 1 + (rnd() - 0.5)*vary; this.tri(P[f[0]],P[f[1]],P[f[2]],[col[0]*k,col[1]*k,col[2]*k],mat,ref); }
 };
-function upload(mb) { const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.v), gl.STATIC_DRAW); return { buf: buf, n: mb.v.length/10 }; }
+function upload(mb) { const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, mb.a.subarray(0, mb.n), gl.STATIC_DRAW); return { buf: buf, n: mb.n/10 }; }
 // The static world is cut into square cells. Each frame only the cells inside the view are drawn,
 // nearest first, so that what is hidden behind them is rejected before it is shaded.
-function chunkify(src, cell, pred) {
-  const nt = src.length/30, key = new Int32Array(nt), ids = new Map(), cnt = []; let nbig = 0;
-  for (let t = 0; t < nt; t++) { const o = t*30; if (pred && !pred(src[o+9])) { key[t] = -2; continue; }
+function chunkify(src, cell, cls, want) {          // cls: the kind of every triangle, worked out once for the whole world; want: the kind to keep (cls null — keep all)
+  const nt = src.length/30, key = new Int32Array(nt), ids = new Map(), cnt = []; let nbig = 0, lastK = -1, lastId = -1; const big = cell*1.5;
+  for (let t = 0; t < nt; t++) { if (cls && cls[t] !== want) { key[t] = -2; continue; } const o = t*30;
     const x0 = src[o], x1 = src[o+10], x2 = src[o+20], z0 = src[o+2], z1 = src[o+12], z2 = src[o+22];
-    if (Math.max(Math.max(x0,x1,x2) - Math.min(x0,x1,x2), Math.max(z0,z1,z2) - Math.min(z0,z1,z2)) > cell*1.5) { key[t] = -1; nbig++; continue; }      // too large for a cell: always drawn, last
-    const k = (Math.floor((x0+x1+x2)/3/cell) + 2048)*4096 + Math.floor((z0+z1+z2)/3/cell) + 2048; let id = ids.get(k); if (id === undefined) { id = cnt.length; ids.set(k, id); cnt.push(0); } key[t] = id; cnt[id]++; }
+    const xa = x0 > x1 ? (x0 > x2 ? x0 : x2) : (x1 > x2 ? x1 : x2), xi = x0 < x1 ? (x0 < x2 ? x0 : x2) : (x1 < x2 ? x1 : x2), za = z0 > z1 ? (z0 > z2 ? z0 : z2) : (z1 > z2 ? z1 : z2), zi = z0 < z1 ? (z0 < z2 ? z0 : z2) : (z1 < z2 ? z1 : z2);
+    if (xa - xi > big || za - zi > big) { key[t] = -1; nbig++; continue; }      // too large for a cell: always drawn, last
+    const k = (Math.floor((x0+x1+x2)/3/cell) + 2048)*4096 + Math.floor((z0+z1+z2)/3/cell) + 2048; let id;
+    if (k === lastK) id = lastId; else { id = ids.get(k); if (id === undefined) { id = cnt.length; ids.set(k, id); cnt.push(0); } lastK = k; lastId = id; }          // neighbours in the list are neighbours on the ground
+    key[t] = id; cnt[id]++; }
   const first = [], ranges = []; let total = 0; for (let i = 0; i < cnt.length; i++) { first.push(total); total += cnt[i]; ranges.push({ first: total*3 - cnt[i]*3, count: cnt[i]*3, lo: [1e9,1e9,1e9], hi: [-1e9,-1e9,-1e9], d: 0 }); }
   const out = new Float32Array((total + nbig)*30), fill = first.slice(); let bigAt = total;
-  for (let t = 0; t < nt; t++) { const id = key[t]; if (id === -2) continue; const o = t*30, dst = (id === -1 ? bigAt++ : fill[id]++)*30;
-    for (let q = 0; q < 30; q++) out[dst+q] = src[o+q];
-    if (id >= 0) { const r = ranges[id]; for (let v = 0; v < 3; v++) for (let a = 0; a < 3; a++) { const val = src[o + v*10 + a]; if (val < r.lo[a]) r.lo[a] = val; if (val > r.hi[a]) r.hi[a] = val; } } }
+  for (let t = 0; t < nt;) { const id = key[t]; if (id === -2) { t++; continue; } let e = t + 1; while (e < nt && key[e] === id) e++;          // a run of triangles for one cell is moved in one piece
+    const run = e - t; out.set(src.subarray(t*30, e*30), (id === -1 ? bigAt : fill[id])*30);
+    if (id === -1) bigAt += run; else { fill[id] += run; const r = ranges[id]; let l0 = r.lo[0], l1 = r.lo[1], l2 = r.lo[2], h0 = r.hi[0], h1 = r.hi[1], h2 = r.hi[2];
+      for (let o = t*30, oe = e*30; o < oe; o += 10) { const a = src[o], b = src[o+1], c = src[o+2]; if (a < l0) l0 = a; if (a > h0) h0 = a; if (b < l1) l1 = b; if (b > h1) h1 = b; if (c < l2) l2 = c; if (c > h2) h2 = c; }
+      r.lo[0] = l0; r.lo[1] = l1; r.lo[2] = l2; r.hi[0] = h0; r.hi[1] = h1; r.hi[2] = h2; }
+    t = e; }
   for (const r of ranges) { r.cx = (r.lo[0]+r.hi[0])/2; r.cy = (r.lo[1]+r.hi[1])/2; r.cz = (r.lo[2]+r.hi[2])/2; r.rad = Math.hypot(r.hi[0]-r.lo[0], r.hi[1]-r.lo[1], r.hi[2]-r.lo[2])/2; }
   const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, out, gl.STATIC_DRAW);
   return { buf: buf, n: out.length/10, ranges: ranges, bigFirst: total*3, bigCount: nbig*3, vis: [] };
@@ -1598,7 +1616,7 @@ function buildCar(S, noExtra) {
   { const t0 = S.cab[1] + 0.035, t1 = S.cab[2] - 0.03, n = 5, hw2 = (S.cab[2] - S.cab[1])/2 + 0.2; if (t1 - t0 > 0.12) for (let k = 0; k < n; k++) { const ta = t0 + (t1 - t0)*k/n, tb = t0 + (t1 - t0)*(k + 1)/n, ya = S.hgt - 0.05*Math.min(1, Math.pow((ta - MID0)/hw2, 2)) + 0.014, yb2 = S.hgt - 0.05*Math.min(1, Math.pow((tb - MID0)/hw2, 2)) + 0.014, xa = S.wid/2*plan(ta)*S.tum*0.60, xb = S.wid/2*plan(tb)*S.tum*0.60;          // a glass roof from screen to screen
       mb.quad([-xa, ya, ta*half], [xa, ya, ta*half], [xb, yb2, tb*half], [-xb, yb2, tb*half], DARK, 4, [0, 0, 0]); } }
   if (L.fin) { const z0 = (S.cab[1] + 0.03)*half, yf = S.hgt - 0.012, A = [0, yf, z0 + 0.26], B = [0.035, yf, z0], C = [-0.035, yf, z0], D = [0, yf + 0.085, z0 + 0.02]; mb.tri(A, B, D, DARK, 0, [0, yf, z0 + 0.1]); mb.tri(A, C, D, DARK, 0, [0, yf, z0 + 0.1]); mb.tri(B, C, D, DARK, 0, [0, yf, z0 + 0.1]); }
-  for (let k = 0; k < mb.v.length; k += 10) { mb.v[k] *= U; mb.v[k+1] *= U; mb.v[k+2] *= U; }
+  { const A = mb.a, n = mb.n; for (let k = 0; k < n; k += 10) { A[k] *= U; A[k+1] *= U; A[k+2] *= U; } }
   // wheel: axle along X, outer face at +X. A tyre with a rounded shoulder, a rim with spokes of the model's own count, a brake disc seen through the gaps.
   const RIM = L.rimD ? [0.16,0.16,0.18] : [0.80,0.81,0.84], wm = wheelMB(S, { n: L.sp === undefined ? 5 : L.sp }, RIM, 6), r = S.r*U;
   return { spec: S, body: upload(mb), wheel: upload(wm), rimCol: RIM, r: r, wx: WX*U, zF: S.zF*U, zR: S.zR*U, len: S.len*U, half: S.len*U/2 };
@@ -1734,7 +1752,7 @@ function tuneMesh(t, sp, kit, neon) {        // the bolted-on parts of one car a
   if (neon && NEON_COL[neon]) { const c = NEON_COL[neon], tube = [c[0]*0.5, c[1]*0.5, c[2]*0.5], y = S.clr - 0.005;          // the tubes themselves: lit strips along the sills and across both ends
     for (const sd of [-1, 1]) mb.box(sd*(S.wid/2 - 0.09), y, (S.zF + S.zR)/2, 0.04, 0.035, (S.zF - S.zR) - S.r*2.5, tube, 5);
     mb.box(0, y, half - 0.22, S.wid*0.62, 0.035, 0.04, tube, 5); mb.box(0, y, -half + 0.22, S.wid*0.62, 0.035, 0.04, tube, 5); }
-  for (let k = 0; k < mb.v.length; k += 10) { mb.v[k] *= U; mb.v[k+1] *= U; mb.v[k+2] *= U; }
+  { const A = mb.a, n = mb.n; for (let k = 0; k < n; k += 10) { A[k] *= U; A[k+1] *= U; A[k+2] *= U; } }
   return TMESH[key] = upload(mb);
 }
 function wheelVar(t, rim, whl) {             // the car's wheel in another design, another colour, or both
@@ -2684,7 +2702,7 @@ const CITY_GEN = {
 function buildWorld() {
   setSky(TRACKS[T.id].sky);
   if (W) { gl.deleteBuffer(W.opaque.buf); gl.deleteBuffer(W.fronts.buf); gl.deleteBuffer(W.water.buf); gl.deleteBuffer(W.trees.buf); gl.deleteBuffer(W.shadow.buf); gl.deleteBuffer(W.sky.buf); }
-  const mb = new MB(), sc = new MB(), N = T.N, x = T.x, z = T.z, h = T.h, curv = T.curv, UP = [0,-50,0];
+  const mb = new MB(MBH.mb*1.05), sc = new MB(MBH.sc*1.05), N = T.N, x = T.x, z = T.z, h = T.h, curv = T.curv, UP = [0,-50,0];
   let seed = 4321 + T.id*97; const rnd = function () { seed = (seed*1664525 + 1013904223) >>> 0; return seed/4294967296; };
   const cx = (T.minX + T.maxX)/2, cz = (T.minZ + T.maxZ)/2;
   const at = function (i, off, y) { i = ((i % N) + N) % N; return [x[i] + Math.cos(h[i])*off, y, z[i] - Math.sin(h[i])*off]; };
@@ -2700,7 +2718,8 @@ function buildWorld() {
   const GS = 12, MARG = 520, gx0 = T.minX - MARG, gz0 = T.minZ - MARG, gw = Math.ceil((T.maxX - T.minX + 2*MARG)/GS) + 1, gh = Math.ceil((T.maxZ - T.minZ + 2*MARG)/GS) + 1;
   const gd = new Float32Array(gw*gh), gy = new Float32Array(gw*gh), tseed = 11 + T.id*7;
   if (!CITY) for (let a = 0; a < gh; a++) for (let b = 0; b < gw; b++) { const px = gx0 + b*GS, pz = gz0 + a*GS; let best = 1e12;
-    for (let i = 0; i < N; i += 3) { const dx = x[i]-px, dz = z[i]-pz, q = dx*dx + dz*dz; if (q < best) best = q; }
+    let bi = 0; for (let i = 0; i < N; i += 12) { const dx = x[i]-px, dz = z[i]-pz, q = dx*dx + dz*dz; if (q < best) { best = q; bi = i; } }          // every twelfth point finds the stretch of road, the points around it give the distance
+    for (let i = Math.max(0, bi - 11), i1 = Math.min(N - 1, bi + 11); i <= i1; i += 2) { const dx = x[i]-px, dz = z[i]-pz, q = dx*dx + dz*dz; if (q < best) best = q; }
     const d = Math.sqrt(best), e = sstep(44, 135, d); gd[a*gw + b] = d;
     gy[a*gw + b] = e*((3 + 19*sstep(60, 320, d))*(0.15 + 1.3*fbm2(px/95, pz/95, tseed)) + 46*sstep(250, 520, d)*fbm2(px/170 + 9, pz/170, tseed + 50)); }
   const grid = function (arr, px, pz) { let fx = (px - gx0)/GS, fz = (pz - gz0)/GS; fx = Math.max(0, Math.min(gw - 1.001, fx)); fz = Math.max(0, Math.min(gh - 1.001, fz)); const b = Math.floor(fx), a = Math.floor(fz), u = fx - b, w = fz - a, k = a*gw + b;
@@ -2736,7 +2755,7 @@ function buildWorld() {
 
   // ---- scenery (also collected into `sc` so its shadow can be flattened) ----
   const near = function (px, pz, r) { for (let i = 0; i < N; i += 2) { const dx = x[i]-px, dz = z[i]-pz; if (dx*dx + dz*dz < r*r) return true; } return false; };
-  const start = sc.v.length;
+  const start = sc.n;
   // gantry over the start line
   for (const sd of [-1, 1]) { const p = at(0, sd*(HW+1.3), 0); sc.cyl(p[0], 0, p[2], 0.28, 0.24, 6.6, 8, [0.80,0.81,0.84], 6); }
   { const p = at(0, 0, 0); sc.box(p[0], 6.9, p[2], ROAD_W + 3.6, 1.3, 0.5, [0.10,0.10,0.12], 11, h[0]);
@@ -2775,14 +2794,14 @@ function buildWorld() {
       for (let k = 0; k < 5; k++) { const o = -L/2 + 3 + k*(L - 6)/4; sc.cyl(c0[0] + rx*5.4 + fx*o, 0, c0[2] + rz*5.4 + fz*o, 0.9, 0.0, 1.5, 4, [[0.95,0.3,0.25],[0.95,0.95,0.95],[0.25,0.5,0.9]][k % 3], 0, null, hh + 0.785);
         sc.cyl(c0[0] + rx*5.4 + fx*o, 0, c0[2] + rz*5.4 + fz*o, 0.05, 0.05, 1.0, 4, [0.5,0.5,0.52], 0); } } }
   // trees: two crossed panels with a painted tree on them; a soft oval for the shadow where the ground is flat
-  const sh = new MB(), kx = SUN[0]/SUN[1], kz = SUN[2]/SUN[1], kl = Math.hypot(kx, kz) || 1;
+  const sh = new MB(MBH.sh*1.05), kx = SUN[0]/SUN[1], kz = SUN[2]/SUN[1], kl = Math.hypot(kx, kz) || 1;
   const tree = function (px, pz, kind, hh, shade) {
     const y = Hgt(px, pz) - 0.08, u0 = (kind % 4)*0.25 + 0.003, u1 = u0 + 0.244, v0 = Math.floor(kind/4)*0.5 + 0.004, v1 = v0 + 0.492, rot = rnd()*3.14, w = hh*0.5;
     for (let q = 0; q < 2; q++) { const dx = Math.cos(rot + q*1.571)*w, dz = Math.sin(rot + q*1.571)*w, A = [px-dx, y, pz-dz], B = [px+dx, y, pz+dz], Cc = [px+dx, y+hh, pz+dz], D = [px-dx, y+hh, pz-dz], n = [0,1,0];
       mb.sv(A, n, [u0,v1,shade], 13); mb.sv(B, n, [u1,v1,shade], 13); mb.sv(Cc, n, [u1,v0,shade], 13); mb.sv(A, n, [u0,v1,shade], 13); mb.sv(Cc, n, [u1,v0,shade], 13); mb.sv(D, n, [u0,v0,shade], 13); }
     if (y < 0.4 && Dist(px, pz) < 60) { const low = kind === 5 || kind === 7, top = low ? hh*0.35 : hh*0.62, rad = (kind === 2 ? 0.14 : (kind === 3 || kind === 4 ? 0.2 : 0.3))*hh, ccx = px - kx*top, ccz = pz - kz*top, ax = kx/kl, az = kz/kl, la = rad + top*kl*0.42;
       for (let i = 0; i < 10; i++) { const a0 = i/10*6.2832, a1 = (i+1)/10*6.2832, P = function (a) { const c = Math.cos(a)*la, s2 = Math.sin(a)*rad; return [ccx + ax*c - az*s2, SHADOW_Y, ccz + az*c + ax*s2]; }, p0 = P(a0), p1 = P(a1);
-        sh.v.push(ccx,SHADOW_Y,ccz,0,1,0,0,0,0,0, p0[0],p0[1],p0[2],0,1,0,0,0,0,0, p1[0],p1[1],p1[2],0,1,0,0,0,0,0); } } };
+        sh.flat(ccx, SHADOW_Y, ccz); sh.flat(p0[0], p0[1], p0[2]); sh.flat(p1[0], p1[1], p1[2]); } } };
   const pick = function () { const k = rnd(); return k < 0.30 ? 0 : (k < 0.55 ? 1 : (k < 0.63 ? 2 : (k < 0.78 ? 3 : (k < 0.90 ? 4 : 6)))); };
   if (!CITY) for (let i = 0; i < N; i += 5) for (const side of [-1, 1]) for (let rep = 0; rep < 2; rep++) {
     if (rnd() < 0.35) continue;
@@ -2803,12 +2822,12 @@ function buildWorld() {
     // the shadow of a house: its roof slid along the sun's rays, joined to its foot; none where it would fall on water
     const shade = function (px, pz, deep, wide, top, ry, K) { const cs = Math.cos(ry || 0), sn = Math.sin(ry || 0), B = [], Tp = [];
       for (const a of [[-1,-1],[1,-1],[1,1],[-1,1]]) { const lx = a[0]*deep/2, lz = a[1]*wide/2, X = px + cs*lx + sn*lz, Z = pz - sn*lx + cs*lz, X2 = X - kx*(top - SHADOW_Y), Z2 = Z - kz*(top - SHADOW_Y); if (K.wet(X2, Z2, 1) || K.wet(X, Z, 1)) return; B.push([X, SHADOW_Y, Z]); Tp.push([X2, SHADOW_Y, Z2]); }
-      const tri = function (a, b, c2) { sh.v.push(a[0],a[1],a[2],0,1,0,0,0,0,0, b[0],b[1],b[2],0,1,0,0,0,0,0, c2[0],c2[1],c2[2],0,1,0,0,0,0,0); };
+      const tri = function (a, b, c2) { sh.flat(a[0], a[1], a[2]); sh.flat(b[0], b[1], b[2]); sh.flat(c2[0], c2[1], c2[2]); };
       tri(Tp[0], Tp[1], Tp[2]); tri(Tp[0], Tp[2], Tp[3]); for (let k = 0; k < 4; k++) { const j = (k+1) % 4; tri(B[k], B[j], Tp[j]); tri(B[k], Tp[j], Tp[k]); } };
     const ctx = { mb: mb, at: at, N: N, x: x, z: z, h: h, rnd: rnd, lamps: lamps, tree: tree, nearI: nearI, inTun: inTun, inBr: inBr, TUN: TUN, BR: BR, S: SPAN, span: span, shade: shade, wp: T.wp, wn: T.wn, curv: curv }; CITY_GEN[CITY.kind](ctx); ctx.K.finish(); }
-  const scEnd = sc.v.length;
+  const scEnd = sc.n;
   // shadow = the scenery flattened along the sun's rays (the trees' ovals are in there already)
-  for (let k = start; k < scEnd; k += 10) { const y = sc.v[k+1]; sh.v.push(sc.v[k] - kx*(y - SHADOW_Y), SHADOW_Y, sc.v[k+2] - kz*(y - SHADOW_Y), 0,1,0, 0,0,0, 0); }
+  { sh.need(scEnd - start); const A = sc.a; for (let k = start; k < scEnd; k += 10) { const y = A[k+1]; sh.flat(A[k] - kx*(y - SHADOW_Y), SHADOW_Y, A[k+2] - kz*(y - SHADOW_Y)); } }
   // low growth by the barriers
   if (!CITY) for (let i = 0; i < N; i += 3) for (const sd of [-1, 1]) { if (rnd() < 0.55) continue; const w = (sd > 0 ? T.wp : T.wn)[i], p = at(i, sd*(w + 1.8 + rnd()*7), 0); if (near(p[0], p[2], HW + 3.6)) continue;
     tree(p[0], p[2], rnd() < 0.6 ? 5 : 7, 0.9 + rnd()*1.1, 0.85 + rnd()*0.3); }
@@ -2826,11 +2845,12 @@ function buildWorld() {
       let c = [0.13,0.22,0.13]; c = [c[0] + (0.30-c[0])*rock, c[1] + (0.285-c[1])*rock, c[2] + (0.28-c[2])*rock]; c = [c[0] + (0.97-c[0])*snow, c[1] + (0.97-c[1])*snow, c[2] + (1.0-c[2])*snow];
       const sh2 = 0.88 + n1*0.24; mb.sv([pp[k][0], y, pp[k][1]], [nx/l, ny/l, nz/l], [c[0]*sh2, c[1]*sh2, c[2]*sh2], 8); };
     for (let j = 0; j < ROWS-1; j++) for (let a = 0; a < SEG; a++) { mv(j, a); mv(j+1, a); mv(j+1, a+1); mv(j, a); mv(j+1, a+1); mv(j, a+1); } }
-  for (let k = 0; k < sc.v.length; k++) mb.v.push(sc.v[k]);
+  mb.add(sc); MBH.mb = Math.max(MBH.mb, mb.n); MBH.sc = Math.max(MBH.sc, sc.n); MBH.sh = Math.max(MBH.sh, sh.n);
   const sky = new MB(); sky.box(0, 0, 0, 2, 2, 2, [0,0,0], 10);
-  const all = new Float32Array(mb.v); mb.v = null;
+  const all = mb.a.subarray(0, mb.n);
   T.tun = CITY ? inTun : null;
-  W = { opaque: chunkify(all, 96, function (mat) { return mat < 12.5 && !(mat > 6.5 && mat < 7.5) && !(mat > 4.2 && mat < 4.4); }), fronts: chunkify(all, 144, function (mat) { return mat > 6.5 && mat < 7.5; }), water: chunkify(all, 192, function (mat) { return mat > 4.2 && mat < 4.4; }), trees: chunkify(all, 96, function (mat) { return mat > 12.5; }), shadow: chunkify(new Float32Array(sh.v), 96, null), sky: upload(sky), lamps: lamps, night: NIGHT };
+  const cls = new Uint8Array(all.length/30); for (let t = 0, nt = cls.length; t < nt; t++) { const mat = all[t*30 + 9]; cls[t] = mat > 12.5 ? 3 : mat === 12.5 ? 9 : (mat > 6.5 && mat < 7.5) ? 1 : (mat > 4.2 && mat < 4.4) ? 2 : 0; }          // 0 solid, 1 building fronts, 2 water, 3 trees
+  W = { opaque: chunkify(all, 96, cls, 0), fronts: chunkify(all, 144, cls, 1), water: chunkify(all, 192, cls, 2), trees: chunkify(all, 96, cls, 3), shadow: chunkify(sh.a.subarray(0, sh.n), 96, null, 0), sky: upload(sky), lamps: lamps, night: NIGHT };
 }
 
 // ---------------------------------------------------------------------------
@@ -2859,7 +2879,7 @@ function drawParticles(vp, eye) {
       quad(add, [L[0]-r,y,L[2]-r], [L[0]+r,y,L[2]-r], [L[0]+r,y,L[2]+r], [L[0]-r,y,L[2]+r], [1,0.80,0.50], 0.34, 0.34, true); }
     for (const c of cars) { const k = CARS[c.type || 0], s = Math.sin(c.h), co = Math.cos(c.h), z0 = k.half*0.9, z1 = z0 + 13, y = 0.075;
       quad(add, [c.x - co*0.75 + s*z0, y, c.z + s*0.75 + co*z0], [c.x + co*0.75 + s*z0, y, c.z - s*0.75 + co*z0], [c.x + co*3.0 + s*z1, y, c.z - s*3.0 + co*z1], [c.x - co*3.0 + s*z1, y, c.z + s*3.0 + co*z1], [1,0.95,0.80], 0.42, 0, false);
-      if ((eye[0]-c.x)*s + (eye[2]-c.z)*co > 0) for (const sd of [-1, 1]) sprite(add, c.x + co*sd*k.wx*0.8 + s*z0, 0.62, c.z - s*sd*k.wx*0.8 + co*z0, 0.34, [1,0.97,0.86], 0.9); }
+      if ((eye[0]-c.x)*s + (eye[2]-c.z)*co > 0) { const dcam = Math.hypot(eye[0]-c.x, eye[2]-c.z), near = state === 'menu', hs = Math.min(0.34, 0.05 + dcam*0.013); for (const sd of [-1, 1]) sprite(add, c.x + co*sd*k.wx*0.8 + s*z0, near ? 0.52 : 0.62, c.z - s*sd*k.wx*0.8 + co*z0, hs, [1,0.97,0.86], near ? 0.55 : 0.9); } }
   }
   if (state !== 'menu') {
     for (const g of glowSprites()) sprite(add, g.x, g.y, g.z, g.size, g.c, g.a);
@@ -3021,6 +3041,7 @@ const TRACKS = [
 let T = null, DRY = false;          // the built track; DRY: the player is under a roof, the rain is not drawn
 function trackKey(id, rev, rain) { return 'u' + (TRACKS[id].kid || id) + (rev ? 'r' : '') + (rain ? 'w' : ''); }
 function lbId(i) { const t = TRACKS[i]; return t.lb === undefined ? i : t.lb; }                 // the number a track goes by on the records server      // records are kept apart for each direction and weather
+function useTrack(id, rev) { if (T && W && T.id === id && T.rev === !!rev && T.key === trackKey(id, rev, RAIN)) { LAPS = TRACKS[id].laps || 3; return; } buildTrack(id, rev); }          // the same road in the same weather is already built
 function buildTrack(id, rev) {
   const P0 = TRACKS[id].pts, P = rev ? [P0[0]].concat(P0.slice(1).reverse()) : P0, n = P.length, fine = []; LAPS = TRACKS[id].laps || 3;
   const put = function (px, pz) { const q = fine.length ? fine[fine.length-1] : null;                    // straight runs are filled in every half unit
@@ -3472,7 +3493,7 @@ function setupRace(trackId, useChallenge) {
   rstatReset();
   if (NET.on && !NET.racing) netLeave();
   const ch = useChallenge && challenge && challenge.track === trackId; garage.view = garage.type;
-  RAIN = ch ? !!challenge.rain : opt.rain; buildTrack(trackId, ch ? !!challenge.rev : opt.rev);
+  RAIN = ch ? !!challenge.rain : opt.rain; clearTimeout(MTR.tm); MTR.want = -1; useTrack(trackId, ch ? !!challenge.rev : opt.rev);
   player = newCar(PAINTS[garage.color], garage.type); player.name = playerName; dressPlayer(player);
   // rivals drive the other body styles, in colours the player is not using
   const types = CAR_TYPES.map(function (q, i) { return i; }).filter(function (t) { return t !== garage.type; }), cols = [0,1,2,3,4,5,6,7].filter(function (c) { return c !== garage.color; });
@@ -4030,7 +4051,9 @@ let hudTick = 0;
 // In a room everybody's car stands on the grid behind the player's own, two abreast, in its colour and with its parts: who has come is seen, not only read in the list.
 const LOBBY = { sig: '' };
 // the showroom stands on the track that is chosen: picking another one in a room or before a race changes the scenery behind the car
-function menuTrack(id) { id = id | 0; if (state !== 'menu' || !TRACKS[id] || (T && T.id === id && !T.rev)) return; try { RAIN = false; buildTrack(id, false); pickups = []; shots = []; particles = []; skids = []; demo = null; cars = []; LOBBY.sig = ''; stageTick = 0; update(0); } catch (e) {} }
+function menuTrack(id) { id = id | 0; clearTimeout(MTR.tm); MTR.want = -1; if (state !== 'menu' || !TRACKS[id] || (T && T.id === id)) return; MTR.want = id; MTR.tm = setTimeout(menuTrackNow, 260); }          // building takes a fraction of a second: wait until the finger has stopped picking
+function menuTrackNow() { clearTimeout(MTR.tm); const id = MTR.want; MTR.want = -1; if (id < 0 || state !== 'menu' || !TRACKS[id] || (T && T.id === id)) return; try { RAIN = false; buildTrack(id, false); pickups = []; shots = []; particles = []; skids = []; demo = null; cars = []; LOBBY.sig = ''; stageTick = 0; update(0); } catch (e) {} }
+const MTR = { tm: 0, want: -1 };
 function lobbyCars() {
   const others = NET.roster.filter(function (p) { return p.nid !== NET.me; }).slice(0, 7), sig = others.map(function (p) { return p.nid + ':' + p.type + ':' + p.color + ':' + (p.tn || []).join(''); }).join('|');
   if (sig === LOBBY.sig && cars[0] === demo && cars.length === others.length + 1) return; LOBBY.sig = sig;
@@ -4488,7 +4511,7 @@ function netStart() {
 function netBegin(m) {
   rstatReset(); NET.paid = 0; NET.potSum = 0; NET.potDone = false; NET.potTxt = '';
   if (m.stake > 0 && m.list.some(function (p) { return p.nid === NET.me; })) { const st = Math.min(m.stake | 0, WALLET.coins); WALLET.coins -= st; saveWallet(); NET.paid = st; NET.potSum = (m.stake | 0)*m.list.length; }
-  audio(); NET.racing = true; NET.seen = performance.now(); NET.last = {}; for (const id in NET.conn) NET.last[id] = NET.seen; NET.sendT = 0; NET.roster = m.list; NET.awarded = false; CHAMP.on = false; RAIN = !!m.rain; buildTrack(m.track, !!m.rev); if (m.laps > 0 && m.laps <= 12) LAPS = m.laps | 0; rivalBot = null; document.getElementById('rival').style.display = 'none';
+  audio(); NET.racing = true; NET.seen = performance.now(); NET.last = {}; for (const id in NET.conn) NET.last[id] = NET.seen; NET.sendT = 0; NET.roster = m.list; NET.awarded = false; CHAMP.on = false; RAIN = !!m.rain; clearTimeout(MTR.tm); MTR.want = -1; useTrack(m.track, !!m.rev); if (m.laps > 0 && m.laps <= 12) LAPS = m.laps | 0; rivalBot = null; document.getElementById('rival').style.display = 'none';
   { const me = m.list.filter(function (p) { return p.nid === NET.me; })[0]; if (me) { garage.type = me.type; garage.color = me.color; } }
   player = newCar(PAINTS[garage.color], garage.type); player.name = playerName; player.nid = NET.me; dressPlayer(player); player.K = netK(player.K); bots = []; cars = [];
   for (const b of m.bots) { if (NET.host) { const c = newBot(PAINTS[b.color] || PAINTS[0], b.skill, 0, 'Бот', b.type); c.nid = b.nid; bots.push(c); cars.push(c); }
