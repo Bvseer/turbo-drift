@@ -574,7 +574,7 @@
     <div><b>Онлайн-гонка</b> — комната с другими игроками собирается сама: старт, как только все нажали «Готов», или через 30 секунд после второго игрока; свободные места занимают боты. Зашёл во время заезда — поедешь в следующем</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 90</div>
+    <div style="opacity:.5;margin-top:8px">версия 91</div>
   </div>
   <div class="btns"><button class="main" id="helpclose">Понятно</button></div>
 </div>
@@ -651,7 +651,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 90</div>
+  <div class="fver">Turbo Drift · версия 91</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -689,6 +689,8 @@ function initTelegram() {
     setTimeout(lbSync, 3500);
     const sp = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
     if (sp && !challenge) { challenge = parseChallenge(sp); showChallenge(); }
+    const gm = /^g_([A-Za-z0-9]{4,6})_(\d{1,16})$/.exec(String(sp || ''));
+    if (gm) { challenge = null; setTimeout(function () { netGroup(gm[1].toUpperCase(), gm[2]); }, 0); } else
     { const rc = roomFromLink(sp); if (rc) { document.getElementById('welcome').classList.add('hidden'); netOpen(); document.getElementById('mpcode').value = rc; netJoin(rc); } else if (sp === 'online') netQuick(); else if (challenge) document.getElementById('welcome').classList.add('hidden'); }
     loadCloud(); walletSoon();
   } catch (e) {}
@@ -4066,19 +4068,37 @@ function netOpen() {
   for (const id of ['menu','finish','paused','setup','prefs','top','daily','career','week','garage']) document.getElementById(id).classList.add('hidden');
   document.getElementById('mp').classList.remove('hidden'); document.getElementById('mp').classList.toggle('inroom', NET.on); mpSeek(false); stageTick = 0; document.getElementById('mpstart').style.display = NET.on ? 'none' : ''; document.getElementById('mplobby').style.display = NET.on ? '' : 'none'; mpMsg('');
 }
-function netHost() {
-  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for (let k = 0; k < 5; k++) code += A[Math.floor(Math.random()*A.length)];
+function netHost(fixed, fail) {           // `fixed`: the code a room called from a group chat was promised under; otherwise a fresh one is drawn
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; if (typeof fixed === 'string' && /^[A-Z0-9]{4,6}$/.test(fixed)) code = fixed; else for (let k = 0; k < 5; k++) code += A[Math.floor(Math.random()*A.length)];
   if (NET.busy) return; NET.busy = true; mpMsg('Создаю комнату…'); netTransport(function (tr) {
-  tr.host(code, function (err) { NET.busy = false; if (err) { mpMsg(netError(err)); tr.close(); return; }
+  tr.host(code, function (err) { NET.busy = false; if (err) { tr.close(); if (typeof fail === 'function') fail(err); else mpMsg(netError(err)); return; }
     NET.on = true; NET.host = true; NET.pub = false; NET.racing = false; NET.code = code; NET.me = 0; NET.tr = tr; NET.nextId = 1; NET.conn = {}; NET.track = T.id;
     NET.roster = [{ nid: 0, name: playerName, type: garage.type, color: garage.color, tn: tuneSel(garage.type), pid: tr.pid ? tr.pid() : null }]; voiceBind(tr); netLobby(); }); });
 }
 function netJoin(code) {
   code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (code.length < 4) { mpMsg('Введи код комнаты'); return; }
   if (NET.busy) return; NET.busy = true; mpMsg('Подключаюсь…'); netTransport(function (tr) {
-  tr.join(code, function (err) { NET.busy = false; if (err) { mpMsg(netError(err)); tr.close(); return; }
-    NET.on = true; NET.host = false; NET.pub = false; NET.racing = false; NET.code = code; NET.tr = tr; NET.me = -1; NET.roster = []; voiceBind(tr);
-    tr.send(0, { t: 'hello', name: playerName, type: garage.type, color: garage.color, tn: tuneSel(garage.type) }); netLobby(); }); });
+  tr.join(code, function (err) { NET.busy = false; if (err) { mpMsg(netError(err)); tr.close(); return; } netJoined(tr, code); }); });
+}
+function netJoined(tr, code) { NET.on = true; NET.host = false; NET.pub = false; NET.racing = false; NET.code = code; NET.tr = tr; NET.me = -1; NET.roster = []; voiceBind(tr);
+  tr.send(0, { t: 'hello', name: playerName, type: garage.type, color: garage.color, tn: tuneSel(garage.type) }); netLobby(); }
+// A room called from a group chat (the bot's /race): the link carries the room's code and who called it. The caller opens the room under that code;
+// everybody else walks in, and whoever is early waits for him on a plain screen instead of being told the room does not exist.
+// With no caller in the link (an anonymous admin called it) the first to come opens the room.
+function netGroup(code, uid) {
+  if (NET.on || NET.busy) return; const me = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? String(tg.initDataUnsafe.user.id) : '', tok = NET.qtok = (NET.qtok || 0) + 1; let n = 0;
+  document.getElementById('welcome').classList.add('hidden'); netOpen(); document.getElementById('mpcode').value = code;
+  const wait = function (t) { NET.qon = true; mpSeek(true); document.querySelector('#mpseek b').textContent = t; document.querySelector('#mpseek span').textContent = 'Комната ' + code; };
+  const stop = function (t) { if (NET.qtok !== tok) return; NET.qon = false; NET.busy = false; mpSeek(false); mpMsg(t); };
+  const open = function () { if (NET.qtok !== tok) return; NET.qon = false; NET.busy = false; mpSeek(false); mpMsg('Создаю комнату…'); netHost(code, function (err) { if (NET.qtok !== tok) return; if (err === 'unavailable-id') { wait('Подключаюсь…'); setTimeout(knock, 1500); } else mpMsg(netError(err)); }); };          // the code is taken: somebody has just opened it, so walk in
+  const knock = function () { if (NET.qtok !== tok || NET.on) return; NET.busy = true; netTransport(function (tr) { if (NET.qtok !== tok) { NET.busy = false; tr.close(); return; }
+    tr.join(code, function (err) { NET.busy = false; if (NET.qtok !== tok) { tr.close(); return; }
+      if (!err) { NET.qon = false; netJoined(tr, code); return; } tr.close();
+      if (err !== 'peer-unavailable' && err !== 'timeout') return stop(netError(err));
+      if (uid === '0' && n === 0) { n++; return open(); }                                                                       // nobody is the appointed host and nobody is here: the room is mine to open
+      if (++n > 60) return stop('Хозяин комнаты так и не зашёл. Попроси его нажать кнопку в чате и попробуй ещё раз');
+      wait('Жду хозяина комнаты…'); setTimeout(knock, 3000); }, 6000); }); };
+  if (uid !== '0' && me && me === uid) open(); else { wait('Подключаюсь…'); knock(); }
 }
 function netLeave() {
   if (!NET.on) return; try { netSend({ t: 'bye', nid: NET.me }); } catch (e) {}

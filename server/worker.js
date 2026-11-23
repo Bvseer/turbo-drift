@@ -42,7 +42,8 @@ async function setup(env, origin) {
   const r = await fetch('https://api.telegram.org/bot' + env.BOT_TOKEN + '/setWebhook', { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url: origin + '/tg', secret_token: env.HOOK_SECRET, allowed_updates: ['message'], drop_pending_updates: true }) });
   let hook = null; try { hook = await r.json(); } catch (e) {}
-  return { tables: 'ok', webhook: hook };
+  let cmds = null; try { for (const scope of [{ type: 'default' }, { type: 'all_group_chats' }]) cmds = await (await fetch('https://api.telegram.org/bot' + env.BOT_TOKEN + '/setMyCommands', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ commands: BOT_COMMANDS, scope: scope }) })).json(); } catch (e) {}
+  return { tables: 'ok', webhook: hook, commands: cmds };
 }
 
 // The country column came later than the table: a database made before it gets the column the first time it is needed.
@@ -135,16 +136,39 @@ async function week(env, q) {
   return json(out);
 }
 
+// What the bot says. In a private chat it answers anything with the invitation to play. In a group it keeps silent until it is called by a command
+// (/play, /race, /top, /help — with or without @name), and its buttons there are plain links: Telegram allows the button that opens a Mini App directly only in private chats.
+const TRACK_NAMES = ['Кольцо', 'Змейка', 'Шпильки', 'Токио', 'Осака', 'Ташкент', 'Париж', 'Мадрид', 'Лондон', 'Лос-Анджелес', 'Сан-Франциско', 'Майами', 'Дубай', 'Монако', 'Чикаго'];
+const BOT_COMMANDS = [{ command: 'play', description: 'Открыть игру' }, { command: 'race', description: 'Создать комнату и позвать всех' }, { command: 'top', description: 'Турнир недели: лучшие времена' }, { command: 'help', description: 'Что умеет бот' }];
+const fmtMs = (ms) => { const m = Math.floor(ms/60000), s = Math.floor(ms % 60000/1000), c = Math.floor(ms % 1000/10); return m + ':' + String(s).padStart(2, '0') + '.' + String(c).padStart(2, '0'); };
+async function weekText(env) {
+  const wk = weekNow(), ti = weekTrack(wk); let rows = [];
+  try { rows = (await withWeek(env, () => env.DB.prepare('SELECT name, ms FROM week WHERE wk = ? ORDER BY ms ASC, at ASC LIMIT 10').bind(wk).all())).results || []; } catch (e) {}
+  const left = Math.max(0, wk*WEEK_S - 3*86400 + WEEK_S - Date.now()/1000), d = Math.floor(left/86400), h = Math.floor(left % 86400/3600);
+  return '🏆 Турнир недели — трасса «' + TRACK_NAMES[ti] + '»\n' + (rows.length ? rows.map((r, i) => (i + 1) + '. ' + r.name + ' — ' + fmtMs(r.ms)).join('\n') : 'Пока никто не проехал. Будь первым!') + '\n\nДо конца: ' + (d ? d + ' д ' : '') + h + ' ч. Призы: до 3000 монет.';
+}
 async function telegram(env, request) {
   if (!env.HOOK_SECRET || request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== env.HOOK_SECRET) return new Response('no', { status: 403 });
   let up = null; try { up = await request.json(); } catch (e) {}
-  const m = up && up.message; if (!m || !m.chat || m.chat.type !== 'private') return new Response('ok');
-  const text = String(m.text || ''), game = env.GAME_URL || 'https://bvseer.github.io/turbo-drift/', bot = env.BOT_NAME || 'TurboDriftBot', app = env.APP_NAME || 'play';
-  if (text.indexOf('/start') === 0) { const k = (text.split(/\s+/)[1] || 'direct').replace(/[^\w-]/g, '').slice(0, 32) || 'direct';      // t.me/<bot>?start=<label>: which advert brought the player
+  const m = up && up.message; if (!m || !m.chat) return new Response('ok');
+  const priv = m.chat.type === 'private', text = String(m.text || ''), game = env.GAME_URL || 'https://bvseer.github.io/turbo-drift/', bot = env.BOT_NAME || 'TurboDriftBot', app = env.APP_NAME || 'play', link = 'https://t.me/' + bot + '/' + app;
+  const send = (body) => fetch('https://api.telegram.org/bot' + env.BOT_TOKEN + '/sendMessage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ chat_id: m.chat.id }, m.message_thread_id ? { message_thread_id: m.message_thread_id } : {}, body)) });
+  const cm = /^\/([a-z_]+)(?:@(\w+))?(?:\s|$)/i.exec(text), cmd = cm && (!cm[2] || cm[2].toLowerCase() === bot.toLowerCase()) ? cm[1].toLowerCase() : '';
+  const playBtn = priv ? { text: '🏁 Играть', web_app: { url: game } } : { text: '🏁 Играть', url: link }, raceBtn = { text: '🌍 Онлайн-гонка', url: link + '?startapp=online' };
+  const intro = '🏁 Turbo Drift — гонки с бонусами прямо в Telegram.\n\nОбгоняй, стреляй ракетами, уходи на турбо. Гоняй с ботами, с друзьями или с игроками со всего мира — и попади в таблицу рекордов.';
+  if (!priv && !cmd) return new Response('ok');                       // in a group: only when called
+  if (cmd === 'top') { await send({ text: await weekText(env), reply_markup: { inline_keyboard: [[playBtn]] } }); return new Response('ok'); }
+  if (cmd === 'race' || cmd === 'room') {          // a room of the caller's own: the link carries a fresh code and who called. The game opens the room when he comes in by it; whoever is early waits for him there
+    const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', rnd = crypto.getRandomValues(new Uint8Array(5)); let code = ''; for (const b of rnd) code += A[b % A.length];
+    const anon = !m.from || m.from.is_bot || !!m.sender_chat || !Number.isSafeInteger(m.from.id), who = anon ? '' : String(m.from.first_name || m.from.username || 'Игрок').replace(/[\u0000-\u001f<>]/g, ' ').slice(0, 24);
+    const roomBtn = { text: '🚗 В комнату ' + code, url: link + '?startapp=g_' + code + '_' + (anon ? 0 : m.from.id) }, gameBtn = { text: '🏁 Просто играть', url: link };
+    await send({ text: anon ? '🏁 Гонка! Комната ' + code + '.\n\nЖмите «В комнату». Откроет её тот, кто зайдёт первым, — он и даст старт.'
+      : '🏁 ' + who + ' собирает гонку — комната ' + code + '.\n\nЖмите «В комнату». Она откроется, когда ' + who + ' сам зайдёт по этой кнопке: он хозяин и даёт старт. Кто пришёл раньше — подождёт его прямо в игре.', reply_markup: { inline_keyboard: [[roomBtn], [gameBtn]] } }); return new Response('ok'); }
+  if (cmd === 'help') { await send({ text: 'Команды:\n/play — открыть игру\n/race — создать свою комнату и позвать всех в неё\n/top — турнир недели, лучшие времена\n\nВ группе команду надёжнее писать с именем бота: /play@' + bot, reply_markup: { inline_keyboard: [[playBtn]] } }); return new Response('ok'); }
+  if (!priv && cmd !== 'play' && cmd !== 'start') return new Response('ok');          // some other bot's command
+  if (priv && text.indexOf('/start') === 0) { const k = (text.split(/\s+/)[1] || 'direct').replace(/[^\w-]/g, '').slice(0, 32) || 'direct';      // t.me/<bot>?start=<label>: which advert brought the player
     try { await env.DB.prepare('INSERT INTO src (k, n) VALUES (?, 1) ON CONFLICT (k) DO UPDATE SET n = n + 1').bind(k).run(); } catch (e) {} }
-  const body = { chat_id: m.chat.id, text: '🏁 Turbo Drift — гонки с бонусами прямо в Telegram.\n\nОбгоняй, стреляй ракетами, уходи на турбо. Гоняй с ботами, с друзьями или с игроками со всего мира — и попади в таблицу рекордов.',
-    reply_markup: { inline_keyboard: [[{ text: '🏁 Играть', web_app: { url: game } }], [{ text: '🌍 Онлайн-гонка', url: 'https://t.me/' + bot + '/' + app + '?startapp=online' }]] } };
-  await fetch('https://api.telegram.org/bot' + env.BOT_TOKEN + '/sendMessage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  await send({ text: intro, reply_markup: { inline_keyboard: [[playBtn], [raceBtn]] } });
   return new Response('ok');
 }
 
