@@ -279,6 +279,25 @@ async function pot(env, q) {
   return json({ ok: false, err: 'op' }, 400);
 }
 
+// A challenge sent into a chat: the player picks the chat in Telegram's own window and the message goes there from him, as a card with a picture and a button.
+// The bot only prepares the card (savePreparedInlineMessage); it is the player who sends it, and only to the chat he chose. The text is built here from the
+// challenge code, in the sender's language, so nothing but a time on a track can be put into it.
+async function share(env, q) {
+  const me = await whoIs(q.init, env); if (!me) return json({ ok: false, err: 'auth' }, 401);
+  const m = /^e_(\d{1,3})_([0-9a-z]{2,8})_([A-Za-z0-9]{0,24})$/.exec(String(q.code || '')); if (!m) return json({ ok: false, err: 'range' }, 400);
+  const bits = +m[1], tr = bits & 31, ms = parseInt(m[2], 36); if (bits > 127 || !(tr < TRACK_NAMES.length) || !(ms > 5000 && ms < 3600000)) return json({ ok: false, err: 'range' }, 400);
+  const uz = q.lang === 'uz', bot = env.BOT_NAME || 'TurboDriftBot', app = env.APP_NAME || 'play', link = 'https://t.me/' + bot + '/' + app + '?startapp=' + m[0], img = (env.GAME_URL || 'https://bvseer.github.io/turbo-drift/') + 'share.jpg';
+  const track = '«' + TRACK_NAMES[tr] + ((bits & 32) ? (uz ? ', teskari' : ', обратно') : '') + ((bits & 64) ? (uz ? ', yomg‘irda' : ', дождь') : '') + '»';
+  const text = uz ? '🏁 ' + me.name + ' — ' + track + ', ' + fmtMs(ms) + '\nTezroq o‘ta olasizmi? Turbo Drift — Telegram ichidagi poyga.' : '🏁 ' + me.name + ' — ' + track + ' за ' + fmtMs(ms) + '\nСможешь быстрее? Turbo Drift — гонки прямо в Telegram.';
+  const kb = { inline_keyboard: [[{ text: uz ? '🏎 Poygani boshlash' : '🏎 Обогнать', url: link }]] }, id = 'c' + Date.now().toString(36); let why = '';
+  for (const result of [{ type: 'photo', id: id, photo_url: img, thumbnail_url: img, photo_width: 800, photo_height: 800, caption: text, reply_markup: kb },          // the picture first; a plain card if Telegram will not take it
+    { type: 'article', id: id, title: 'Turbo Drift', description: track + ' · ' + fmtMs(ms), input_message_content: { message_text: text }, reply_markup: kb }]) {
+    try { const r = await (await fetch('https://api.telegram.org/bot' + env.BOT_TOKEN + '/savePreparedInlineMessage', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: me.id, result: result, allow_user_chats: true, allow_group_chats: true, allow_channel_chats: true }) })).json();
+      if (r && r.ok && r.result && r.result.id) return json({ ok: true, id: String(r.result.id), kind: result.type }); why = String(r && r.description || ''); } catch (e) { why = 'net'; } }
+  return json({ ok: false, err: 'tg', why: why.slice(0, 120) });
+}
+
 // The tournament of the week: one track, Monday to Sunday (UTC), everybody's best time on it in the usual conditions. When the week is over,
 // each player who took part is paid by his place the next time he looks at the table: the coins go straight into what the server keeps for him.
 const WEEK_S = 7*86400, WEEK_IDS = [0, 1, 2, 3, 4, 15, 6, 7, 8, 9, 10, 11, 12, 13, 14];          // the game's track list in the numbers the records go by
@@ -376,13 +395,14 @@ export default {
     try {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
       if (path === '/tg' && request.method === 'POST') return await telegram(env, request);
-      if (path === '/top' || path === '/score' || path === '/save' || path === '/week' || path === '/pot') {
+      if (path === '/top' || path === '/score' || path === '/save' || path === '/week' || path === '/pot' || path === '/share') {
         let q = {}; if (request.method === 'POST') { const t = await request.text(); if (t.length > (path === '/save' ? 20000 : 6000)) return json({ ok: false, err: 'big' }, 413); try { q = JSON.parse(t) || {}; } catch (e) { return json({ ok: false, err: 'json' }, 400); } }
         else q = { track: url.searchParams.get('track') };
         if (path === '/score') return request.method === 'POST' ? await score(env, q, request) : json({ ok: false, err: 'method' }, 405);
         if (path === '/save') return request.method === 'POST' ? await save(env, q) : json({ ok: false, err: 'method' }, 405);
         if (path === '/week') return request.method === 'POST' ? await week(env, q) : json({ ok: false, err: 'method' }, 405);
         if (path === '/pot') return request.method === 'POST' ? await pot(env, q) : json({ ok: false, err: 'method' }, 405);
+        if (path === '/share') return request.method === 'POST' ? await share(env, q) : json({ ok: false, err: 'method' }, 405);
         const track = q.track | 0; if (!(track >= 0 && track < TRACKS)) return json({ ok: false, err: 'range' }, 400);
         return json(await board(env, track, await whoIs(q.init, env)));
       }

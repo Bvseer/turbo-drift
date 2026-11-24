@@ -642,7 +642,7 @@
     <div><b>Тренировка</b> — трасса без соперников, с подсказками по шагам: руль, занос, бонусы. Монеты и рекорды в ней не идут</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 109</div>
+    <div style="opacity:.5;margin-top:8px">версия 110</div>
   </div>
 </div>
 
@@ -715,7 +715,7 @@
   <div class="plist" id="fresults" style="display:none"></div>
   <div class="verdict" id="verdict"></div>
   <div class="btns">
-    <button class="main" id="share">Бросить вызов друзьям</button>
+    <button class="main" id="share">Бросить вызов в чат</button>
     <button class="main" id="champnext" style="display:none">Следующая трасса</button>
     <button class="main" id="rematch" style="display:none">Реванш</button>
     <button class="ghost" id="tolobby" style="display:none">В комнату</button>
@@ -725,7 +725,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 109</div>
+  <div class="fver">Turbo Drift · версия 110</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -5142,8 +5142,16 @@ function invite() {
   if (tg.openTelegramLink) { try { tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text)); return; } catch (e) {} }
   try { navigator.clipboard.writeText(text + ' ' + link).then(function () { note('Ссылка-приглашение скопирована'); }, function () {}); } catch (e) {}
 }
-function share() {
+function share() {          // a challenge: in Telegram a card from the bot with a picture and a button, sent by the player into the chat he picks; elsewhere, or if that fails, a line of text with a link
   if (LAPS !== stdLaps() && !KO.on) { note('Вызов можно бросить только с заезда на обычное число кругов', 2600); return; }
+  let rich = false; try { rich = !!(tg && tg.shareMessage && tg.isVersionAtLeast && tg.isVersionAtLeast('8.0') && lbOn() && lbInit() && APP_LINK); } catch (e) {}
+  if (!rich) { shareLink(); return; } if (share.busy) return; share.busy = true;
+  const u = tg.initDataUnsafe && tg.initDataUnsafe.user, lang = u && String(u.language_code || '').toLowerCase().indexOf('uz') === 0 ? 'uz' : 'ru';
+  lbCall('/share', { init: lbInit(), code: makeCode(T.id, finishMs, '_'), lang: lang }, function (r) { share.busy = false;
+    if (r && r.id) { try { tg.shareMessage(r.id, function (sent) { if (sent) note('Вызов отправлен', 2200); }); return; } catch (e) {} }
+    shareLink(); });
+}
+function shareLink() {
   const text = 'Я проехал трассу «' + TRACKS[T.id].name + (T.rev ? ', обратно' : '') + (RAIN ? ', дождь' : '') + '» за ' + fmt(finishMs) + ' в Turbo Drift. Попробуй обогнать!';
   const link = APP_LINK ? APP_LINK + '?startapp=' + makeCode(T.id, finishMs, '_') : location.href.split('#')[0] + '#' + makeCode(T.id, finishMs, '-');
   if (tg && tg.openTelegramLink && APP_LINK) { try { tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text)); return; } catch (e) {} }
