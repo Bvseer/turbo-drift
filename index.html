@@ -642,7 +642,7 @@
     <div><b>Тренировка</b> — трасса без соперников, с подсказками по шагам: руль, занос, бонусы. Монеты и рекорды в ней не идут</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 108</div>
+    <div style="opacity:.5;margin-top:8px">версия 109</div>
   </div>
 </div>
 
@@ -725,7 +725,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 108</div>
+  <div class="fver">Turbo Drift · версия 109</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -2222,6 +2222,11 @@ function cityKit(c, o) { o = o || {};
   // a slope of land: heights from g(x, z); it starts a little below the ground so that its foot is a clean line
   K.hill = function (x0, z0, x1, z1, g, mat, col) { const S = 32, nx = Math.ceil((x1-x0)/S), nz = Math.ceil((z1-z0)/S), Y = [], P = function (a, b) { return [x0 + (x1-x0)*a/nx, z0 + (z1-z0)*b/nz]; };
     for (let a = 0; a <= nx; a++) { Y.push([]); for (let b = 0; b <= nz; b++) { const p = P(a, b); Y[a].push(g(p[0], p[1]) - 0.6); } }
+    // The mesh is coarse, a cell is 32 m: a slope that begins beside the road can come down across it and stand there as a green wall. Wherever the mesh as drawn rises over a stretch of road where the hill's own height is nought, the corners of that cell go down to the ground; lowering one cell can tip its neighbour into the road, so it is done until nothing changes.
+    { const cw = (x1-x0)/nx, cd = (z1-z0)/nz, R = HW + 3.5;
+      for (let pass = 0, ch = true; ch && pass < 8; pass++) { ch = false; for (let i = 0; i < N; i++) for (let lat = -R; lat <= R + 0.01; lat += R/3) { const q = at(i, lat, 0), fa = (q[0]-x0)/cw, fb = (q[2]-z0)/cd, ca = Math.floor(fa), cb = Math.floor(fb); if (ca < 0 || cb < 0 || ca >= nx || cb >= nz) continue;
+          const u = fa - ca, v = fb - cb, y00 = Y[ca][cb], y10 = Y[ca+1][cb], y11 = Y[ca+1][cb+1], y01 = Y[ca][cb+1], yy = u >= v ? y00 + (y10-y00)*u + (y11-y10)*v : y00 + (y11-y01)*u + (y01-y00)*v;          // the two triangles of the cell, as they are drawn below
+          if (yy > 0.05 && g(q[0], q[2]) < 0.05) { ch = true; for (const d of [[0,0],[1,0],[1,1],[0,1]]) Y[ca+d[0]][cb+d[1]] = Math.min(Y[ca+d[0]][cb+d[1]], -0.6); } } } }          // only where the hill itself is meant to be absent: a hill that covers a tunnel stays
     const V = function (a, b) { const p = P(a, b), a0 = Math.max(0, a-1), a1 = Math.min(nx, a+1), b0 = Math.max(0, b-1), b1 = Math.min(nz, b+1), dx = (Y[a1][b] - Y[a0][b])/((a1-a0)*(x1-x0)/nx), dz = (Y[a][b1] - Y[a][b0])/((b1-b0)*(z1-z0)/nz), l = Math.hypot(dx, 1, dz); mb.sv([p[0], Y[a][b], p[1]], [-dx/l, 1/l, -dz/l], col || [1,1,1], mat === undefined ? 1 : mat); };
     for (let a = 0; a < nx; a++) for (let b = 0; b < nz; b++) { if (Math.max(Y[a][b], Y[a+1][b], Y[a][b+1], Y[a+1][b+1]) < -0.1) continue; V(a, b); V(a+1, b); V(a+1, b+1); V(a, b); V(a+1, b+1); V(a, b+1); } };
   K.onHill = function (tries, x0, z0, x1, z1, smin, smax, hmin, hmax, g, ok) { for (let k = 0; k < tries; k++) { const px = x0 + rnd()*(x1-x0), pz = z0 + rnd()*(z1-z0), wide = smin + rnd()*(smax-smin), deep = smin + rnd()*(smax-smin), r = 0.5*Math.max(wide, deep), y = g(px, pz);
