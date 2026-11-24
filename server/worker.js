@@ -89,7 +89,7 @@ function progJoin(into, from) { if (!from || typeof from !== 'object') return in
 // The server is the cashier. The game says what the player has earned since last time and what he has bought; the server lets the earnings in only
 // as fast as racing can bring them (it cannot see a race, so it counts the time), takes the price of every new thing from its own list, and refuses
 // the lot when the purse does not cover it. What the game holds afterwards is what the server answers.
-const CAR_PRICE = [0, 25000, 5000, 0, 3000, 2000, 16000, 8000, 12000], STAGE_BASE = [0, 1500, 4000, 10000], PAINT_PRICE = 1500;
+const CAR_PRICE = [1500, 25000, 5000, 0, 3000, 2000, 16000, 8000, 12000], STAGE_BASE = [0, 1500, 4000, 10000], PAINT_PRICE = 1500;
 const PART_PRICE = { s: [0, 800, 2500, 1500, 4500, 7000], k: [0, 3000, 1500, 6000, 9000], r: [0, 1000, 1500, 1000, 1000], n: [0, 2000, 2000, 2000, 2500, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000], w: [0, 1500, 2500, 4000, 6000, 8000] };
 const stagePrice = (t, n) => STAGE_BASE[n] + Math.round((CAR_PRICE[t] || 0)*0.1/100)*100;
 const RATE = 5, BUD_MAX = 6000, BUD_NEW = 2000;          // coins a second that racing can bring at the very most; how much may pile up while the game is not heard from; what a newcomer starts with
@@ -155,7 +155,7 @@ async function stats(env) {
 }
 // The page of figures: a row of headline numbers, three small charts of the last two weeks (one measure each, on its own scale),
 // then the same and the rest as tables. Drawn here as plain HTML and SVG, nothing is loaded from outside.
-const CAR_INFO = [['Вектор GT', 0], ['Аурум V10', 25000], ['Гром 427', 5000], ['Спарк RS', 0], ['Атлас', 3000], ['Зефир', 2000], ['Фантом V12', 16000], ['Ион', 8000], ['Легат V8', 12000]];          // the game's cars by number: name and price
+const CAR_INFO = [['Вектор GT', 1500], ['Аурум V10', 25000], ['Гром 427', 5000], ['Спарк RS', 0], ['Атлас', 3000], ['Зефир', 2000], ['Фантом V12', 16000], ['Ион', 8000], ['Легат V8', 12000]];          // the game's cars by number: name and price
 function statsPage(st, starts, recs) {
   const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const date = (d) => { const t = new Date(d*DAY_S*1000); return String(t.getUTCDate()).padStart(2, '0') + '.' + String(t.getUTCMonth() + 1).padStart(2, '0'); };
@@ -214,7 +214,7 @@ async function save(env, q) {
   const cars = (a) => { const r = []; if (Array.isArray(a)) for (const t of a.slice(0, 64)) if (Number.isInteger(t) && t >= 0 && t < CARS && r.indexOf(t) < 0) r.push(t); return r; };
   const num = (v) => Math.max(-COINS_MAX, Math.min(COINS_MAX, Math.round(+v) || 0)), clamp = (v) => Math.max(0, Math.min(COINS_MAX, v));
   const row = await withSave(env, () => env.DB.prepare('SELECT coins, owned, best, prog, look, tx, bud, at FROM save WHERE uid = ?').bind(me.id).first());
-  let coins = 0, owned = [0, 3], best = {}, prog = {}, look = null, fresh = !row, txs = [];
+  let coins = 0, owned = [3], best = {}, prog = {}, look = null, fresh = !row, txs = [];
   // A batch of changes carries a label. The game sends the same batch again when it got no answer; the label tells that it has been counted already.
   if (row && row.tx) { try { txs = JSON.parse(row.tx).filter((x) => typeof x === 'string').slice(-12); } catch (e) { txs = []; } }
   const tx = typeof q.tx === 'string' && /^[a-z0-9]{6,24}$/.test(q.tx) ? q.tx : '', seen = !!tx && txs.indexOf(tx) >= 0, before = row ? row.coins | 0 : 0; if (tx && !seen) txs.push(tx);
@@ -227,14 +227,15 @@ async function save(env, q) {
   // free cars; for a player the server already knows, the server's own record stands and the device takes it over. What was not accepted is written down.
   let refused = '', denied = false; const nowS = Math.floor(Date.now()/1000);
   let bud = Math.min(BUD_MAX, (row ? (old ? BUD_MAX : Math.max(0, row.bud | 0)) : BUD_NEW) + (row ? Math.max(0, nowS - (row.at | 0))*RATE : 0));
-  if (q.first && typeof q.first === 'object') { const fc = clamp(num(q.first.coins)), fo = cars(q.first.owned), extra = fo.filter((t) => owned.indexOf(t) < 0);
+  if (q.first && typeof q.first === 'object') { const fc = clamp(num(q.first.coins)), fo = cars(q.first.owned), extra = fo.filter((t) => t !== 0 && owned.indexOf(t) < 0);          // the coupe in the list of an old game is no claim: it used to be free
     if (fresh) { coins = Math.min(fc, FIRST_MAX); bud = BUD_NEW; }
     if (fc - coins >= JUMP || extra.length) refused = (fresh ? 'не принято у новичка: ' : 'не принято с нового устройства: ') + fc + ' монет' + (extra.length ? ', машины № ' + extra.join(', ') : ''); }
-  else if (!seen) { const sh = shop(prog, q.prog, owned, cars(q.buy)), claim = num(q.d) + sh.cost, inc = Math.max(old ? -coins : 0, Math.min(claim, bud));          // claim: what the game says was earned; the spending is taken off below by the server's own prices
+  else if (!seen) { const sh = shop(prog, q.prog, owned, cars(q.buy).filter((t) => t !== 0 || (q.v | 0) >= 108)),          // a game from before the coupe had a price puts it in every list of its own accord: that is not a purchase
+       claim = num(q.d) + sh.cost, inc = Math.max(old ? -coins : 0, Math.min(claim, bud));          // claim: what the game says was earned; the spending is taken off below by the server's own prices
     bud -= Math.max(0, inc); coins = clamp(coins + inc); if (claim - inc >= 300) refused = 'срезано: заявлен доход ' + claim + ', принято ' + inc;
     { if (coins >= sh.cost) { coins -= sh.cost; Object.assign(prog, sh.prog); for (const t of sh.cars) owned.push(t); } else { denied = true; refused = (refused ? refused + '; ' : '') + 'покупка на ' + sh.cost + ' не прошла: монет ' + coins; } } }
   if (st.bonus > 0) coins = clamp(coins + st.bonus);          // came by a friend's link: the newcomer's share
-  for (const t of [0, 3]) if (owned.indexOf(t) < 0) owned.push(t);
+  for (const t of [3]) if (owned.indexOf(t) < 0) owned.push(t);          // the hatchback is everybody's; the coupe (0) was free once and stays with those who had it then
   if (q.best && typeof q.best === 'object') { let n = 0; for (const k in q.best) { if (++n > 300) break; const ms = Math.round(+q.best[k]); if (!/^[a-z0-9]{1,8}$/.test(k) || !(ms >= 20000 && ms <= MAX_MS)) continue; if (!best[k] || ms < best[k]) best[k] = ms; } }
   const keys = Object.keys(best); if (keys.length > 400) best = Object.fromEntries(keys.slice(0, 400).map((k) => [k, best[k]]));
   await env.DB.prepare('INSERT INTO save (uid, coins, owned, best, at, prog, look, tx, bud) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9) ON CONFLICT (uid) DO UPDATE SET coins = MAX(0, MIN(' + COINS_MAX + ', save.coins + ?10)), owned = excluded.owned, best = excluded.best, at = excluded.at, prog = excluded.prog, look = excluded.look, tx = excluded.tx, bud = excluded.bud')          // the purse moves by the difference: a stake paid meanwhile is not written over

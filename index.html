@@ -642,7 +642,7 @@
     <div><b>Тренировка</b> — трасса без соперников, с подсказками по шагам: руль, занос, бонусы. Монеты и рекорды в ней не идут</div>
     <div><b>Рекорды</b> — мировая таблица лучших времён по каждой трассе, с именем и флагом страны игрока. В неё идут заезды в обычных условиях (без «обратно», дождя и выбывания), сыгранные в Telegram</div>
     <div><b>Монеты</b> дают за каждый заезд, на них открываются машины — у каждой свои скорость, разгон, управляемость и прочность</div>
-    <div style="opacity:.5;margin-top:8px">версия 107</div>
+    <div style="opacity:.5;margin-top:8px">версия 108</div>
   </div>
 </div>
 
@@ -725,7 +725,7 @@
     <button class="ghost" id="mpleave" style="display:none">Выйти из комнаты</button>
   </div>
   <div class="emorow" id="femo" style="display:none"></div>
-  <div class="fver">Turbo Drift · версия 107</div>
+  <div class="fver">Turbo Drift · версия 108</div>
   <div class="linkbox" id="linkbox"></div>
 </div>
 
@@ -1431,8 +1431,9 @@ const CAR_TYPES = [
 ];
 // What each model is like to drive: top speed, pull, cornering grip, armour (1 = the standard car), and what it costs in coins.
 // [top speed, acceleration, grip, armour, price]. On these circuits a lap is decided by top speed almost alone, so top speed climbs with the price in even steps: no car that is paid for laps slower than a free one.
-// The two free cars are a match for each other; the heavy one keeps the free cars' pace and sells armour.
-const CAR_STATS = [[1.000,1.00,1.00,1.00,0], [1.200,1.10,1.04,0.85,25000], [1.060,1.07,0.96,1.15,5000], [0.996,1.05,1.07,0.90,0], [1.020,0.96,0.98,1.45,3000], [1.030,1.02,1.09,0.90,2000], [1.150,1.06,1.01,1.00,16000], [1.090,1.10,1.02,0.95,8000], [1.120,1.05,1.00,1.20,12000]];
+// One car is free, the hatchback (3). The coupe (0) is the first step up: a little faster, pulls a little harder, corners as well and takes a knock better, for the price of a couple of days' racing.
+// The heavy one keeps the free car's pace and sells armour.
+const CAR_STATS = [[1.015,1.06,1.07,1.00,1500], [1.200,1.10,1.04,0.85,25000], [1.060,1.07,0.96,1.15,5000], [0.996,1.05,1.07,0.90,0], [1.020,0.96,0.98,1.45,3000], [1.030,1.02,1.09,0.90,2000], [1.150,1.06,1.01,1.00,16000], [1.090,1.10,1.02,0.95,8000], [1.120,1.05,1.00,1.20,12000]];
 // The dearer the car, the faster in a straight line, and plainly so: from the free cars to the dearest the top speed grows by a fifth.
 // The prices are set against what a regular player earns, about 800-1000 coins a day: the cheapest car in two or three days, a good one in a couple of weeks, the whole garage in about three months.
 CAR_TYPES.forEach(function (c, i) { const q = CAR_STATS[i]; c.st = { top: q[0], acc: q[1], grip: q[2], arm: q[3] }; c.price = q[4]; c.eng.gears = c.eng.gears.map(function (g) { return Math.round(g*1.15); }); });          // the gears are stretched with the top speed (SPD)
@@ -3410,7 +3411,7 @@ let FRESH = false; try { FRESH = !['td_seen','td_hint','td_best','td_wins','td_c
 let lastTrack = 0; try { const lt = parseInt(localStorage.getItem('td_last') || '0', 10); if (lt >= 0 && lt < TRACKS.length) lastTrack = lt; } catch (e) {}
 let level = 1, wins = {};
 try { const l = parseInt(localStorage.getItem('td_level') || (FRESH ? '0' : '1'), 10); if (l >= 0 && l < 4) level = l; wins = JSON.parse(localStorage.getItem('td_wins') || '{}') || {}; } catch (e) {}
-let menuT = 0, garage = { type: 0, color: 0 };
+let menuT = 0, garage = { type: 3, color: 0 };
 try { const g = JSON.parse(localStorage.getItem('td_car') || 'null'); if (g && g.type >= 0 && g.type < CAR_TYPES.length && g.color >= 0 && g.color < PAINTS.length && paintOwned(g.color | 0)) garage = { type: g.type | 0, color: g.color | 0 }; } catch (e) {}
 // What the next solo race is: direction, weather, and whether the last car is knocked out every few seconds.
 // How many laps: 0 leaves the track its own number. A race of another length is a race like any other, but its time is not a record:
@@ -3423,11 +3424,12 @@ let opt = { rev: false, rain: false, ko: false };
 try { const o = JSON.parse(localStorage.getItem('td_opt') || 'null'); if (o) opt = { rev: !!o.rev, rain: !!o.rain, ko: !!o.ko, laps: LAP_CHOICES.indexOf(o.laps | 0) > 0 ? o.laps | 0 : 0 }; } catch (e) {}
 function saveOpt() { try { localStorage.setItem('td_opt', JSON.stringify(opt)); } catch (e) {} }
 // Coins are won in races and spent on cars. Two cars are free; a car chosen before coins existed stays with its driver.
-let WALLET = { coins: 0, owned: [0, 3] };
+let WALLET = { coins: 0, owned: [3] };          // a newcomer starts with the hatchback; whoever had the coupe from the days it was free keeps it
 try { const w = JSON.parse(localStorage.getItem('td_wallet') || 'null');
   if (w && Array.isArray(w.owned)) WALLET = { coins: Math.max(0, w.coins | 0), owned: w.owned.filter(function (t) { return t >= 0 && t < CAR_TYPES.length; }) };
   else { const g = JSON.parse(localStorage.getItem('td_car') || 'null'); if (g && g.type > 0 && g.type < CAR_TYPES.length && WALLET.owned.indexOf(g.type | 0) < 0) WALLET.owned.push(g.type | 0); }
-  for (const t of [0, 3]) if (WALLET.owned.indexOf(t) < 0) WALLET.owned.push(t); } catch (e) {}
+  for (const t of [3]) if (WALLET.owned.indexOf(t) < 0) WALLET.owned.push(t); } catch (e) {}
+if (WALLET.owned.indexOf(garage.type) < 0) garage.type = 3;
 function saveWallet(quiet) { try { localStorage.setItem('td_wallet', JSON.stringify(WALLET)); } catch (e) {} try { if (tg && tg.CloudStorage) tg.CloudStorage.setItem('wallet', JSON.stringify(WALLET)); } catch (e) {} if (!quiet) walletSoon(); }
 // The wallet and the best times are kept on the game's server under the player's Telegram id, so they do not depend on one device or on its cache.
 // The device sends only what changed since the server's last answer (coins earned or spent, cars bought) and takes the whole state back; a device that
@@ -3439,7 +3441,7 @@ try { const q = JSON.parse(localStorage.getItem('td_wpend') || 'null'); if (WSRV
 function walletSoon() { clearTimeout(walletSoon.t); walletSoon.t = setTimeout(walletSync, 1500); }
 function walletSync() {
   if (!lbOn() || !lbInit()) return; if (WSRV.busy) { WSRV.again = true; return; }
-  const sent = { coins: WALLET.coins, owned: WALLET.owned.slice() }, body = { init: lbInit(), best: bestTimes, prog: {} }; if (LOOK.t > 0) body.look = lookGet(); let snap;
+  const sent = { coins: WALLET.coins, owned: WALLET.owned.slice() }, body = { init: lbInit(), best: bestTimes, prog: {}, v: 108 }; if (LOOK.t > 0) body.look = lookGet(); let snap;
   try { const s0 = localStorage.getItem('td_src'), r0 = localStorage.getItem('td_ref'); if (s0) body.src = s0; if (r0) body.ref = +r0; } catch (e) {} const rcSent = RC.n; if (rcSent > 0) body.rc = rcSent;
   if (!WSRV.srv) { body.first = sent; WSRV.pend = null; snap = progPaid(); }
   else { if (!WSRV.pend) { let id = ''; for (let k = 0; k < 12; k++) id += 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random()*36)];
@@ -3451,8 +3453,8 @@ function walletSync() {
     if (r && Array.isArray(r.owned)) { WSRV.pend = null; try { localStorage.removeItem('td_wpend'); } catch (e) {} const dc = WALLET.coins - sent.coins, nb = WALLET.owned.filter(function (t) { return sent.owned.indexOf(t) < 0; }), was = JSON.stringify(WALLET);       // dc, nb: what happened here while the request was on its way
       WSRV.srv = { coins: Math.max(0, r.coins | 0), owned: r.owned.filter(function (t) { return t >= 0 && t < CAR_TYPES.length; }) }; try { localStorage.setItem('td_wsrv', JSON.stringify(WSRV.srv)); } catch (e) {}
       const tk = progTake(r.prog, snap);
-      WALLET = { coins: Math.max(0, WSRV.srv.coins + dc + tk.back), owned: WSRV.srv.owned.slice() }; for (const t of nb) if (!owns(t)) WALLET.owned.push(t); for (const t of [0, 3]) if (!owns(t)) WALLET.owned.push(t); saveWallet(true);
-      try { let g = false; if (!owns(garage.type)) { garage.type = WALLET.owned[0] || 0; g = true; } if (!paintOwned(garage.color)) { garage.color = 0; g = true; } if (g) saveGarage(); } catch (e) {}
+      WALLET = { coins: Math.max(0, WSRV.srv.coins + dc + tk.back), owned: WSRV.srv.owned.slice() }; for (const t of nb) if (!owns(t)) WALLET.owned.push(t); for (const t of [3]) if (!owns(t)) WALLET.owned.push(t); saveWallet(true);
+      try { let g = false; if (!owns(garage.type)) { garage.type = 3; garage.view = 3; g = true; } if (!paintOwned(garage.color)) { garage.color = 0; g = true; } if (g) saveGarage(); } catch (e) {}
       let nbest = false; if (r.best) for (const k in r.best) { const ms = r.best[k] | 0; if (ms > 0 && (!bestTimes[k] || ms < bestTimes[k])) { bestTimes[k] = ms; nbest = true; } } if (nbest) { try { localStorage.setItem('td_best', JSON.stringify(bestTimes)); } catch (e) {} }
       const nprog = tk.ch, nlook = lookTake(r.look);
       if (r.denied) note('Покупка не прошла: на сервере не хватило монет. Гараж и баланс — как на сервере', 4600);
